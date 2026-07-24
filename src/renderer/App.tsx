@@ -336,13 +336,9 @@ export default function App() {
               <span />
               <span />
             </div>
-            <p className="intake-hero__eyebrow">
-              Tu especialista de configuración OBS
-            </p>
-            <h1>¿Qué quieres conseguir<br />con tu contenido?</h1>
+            <h1>Match para OBS</h1>
             <p className="intake-hero__subtitle">
-              Cuéntale a Obsee tu objetivo. Detectará el contexto, preparará el
-              mejor match para tu equipo y te explicará cada decisión.
+            Cuéntale a Obsee que consola o harware tienes, las plataformas en las que piensas subir tu contenido y crea la mejor configuración para tu OBS listo para importar.
             </p>
           </section>
 

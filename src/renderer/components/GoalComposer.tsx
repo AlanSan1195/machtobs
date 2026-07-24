@@ -39,7 +39,7 @@ export function GoalComposer({
         }}
         rows={compact ? 2 : 4}
         maxLength={2000}
-        placeholder="Describe qué quieres transmitir o grabar, dónde lo publicarás y la calidad que buscas…"
+        placeholder="..."
         aria-label="Describe tu objetivo para OBS"
         className="goal-composer__input"
       />
