@@ -228,47 +228,120 @@ type SectionProps = {
 };
 
 export function Section({ title, icon, subtitle, action, accent = false, children }: SectionProps) {
+  const titleId = React.useId();
+  const railColumns = 'grid-cols-[2rem_minmax(0,1fr)] sm:grid-cols-[2.5rem_minmax(0,1fr)]';
+
   return (
     <section
-      className={`terminal-panel transition-colors ${
-        accent
-          ? 'border-primary/40 '
-          : ''
+      aria-labelledby={titleId}
+      className={`group/section relative border bg-background/45 transition-colors ${
+        accent ? 'border-primary/45 bg-primary/[0.025]' : 'border-paper/15'
       }`}
     >
-      {/* terminal title bar */}
+      <span
+        className={`pointer-events-none absolute -top-px left-8 z-10 h-px w-12 sm:left-10 ${
+          accent ? 'bg-primary' : 'bg-paper/55'
+        }`}
+        aria-hidden="true"
+      />
+      <span
+        className={`pointer-events-none absolute -bottom-[3px] -right-[3px] z-10 h-[5px] w-[5px] ${
+          accent ? 'bg-primary' : 'bg-paper/35'
+        }`}
+        aria-hidden="true"
+      />
+
       <header
-        className={`flex flex-col gap-2 border-b px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between ${
-          accent ? 'border-primary/25 bg-primary/[0.04]' : 'border-border bg-surface/45'
+        className={`grid border-b ${
+          action ? 'sm:grid-cols-[minmax(0,1fr)_auto]' : ''
+        } ${
+          accent ? 'border-primary/25 bg-primary/[0.045]' : 'border-paper/10 bg-paper/[0.018]'
         }`}
       >
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className={`grid min-w-0 ${railColumns}`}>
           <span
-            className={`h-2.5 w-2.5 shrink-0 ${accent ? 'bg-primary text-glow' : 'bg-secondary/70 glow-secondary'}`}
-            aria-hidden="true"
-          />
-          {icon && (
-            <span className={`shrink-0 ${accent ? 'text-primary' : 'text-secondary/80'}`}>
-              {icon}
-            </span>
-          )}
-          <h3
-            className={`truncate text-sm font-medium lowercase tracking-terminal ${
-              accent ? 'text-primary text-glow' : 'text-text'
+            className={`flex items-center justify-center border-r ${
+              accent ? 'border-primary/25' : 'border-paper/10'
             }`}
           >
-            {title}
-          </h3>
+            <span
+              className={`h-1.5 w-1.5 transition-colors ${
+                accent
+                  ? 'bg-primary'
+                  : 'bg-paper/35 group-hover/section:bg-paper/60'
+              }`}
+              aria-hidden="true"
+            />
+          </span>
+          <div className="flex min-w-0 items-center gap-3 px-3.5 py-3 sm:px-4">
+            {icon && (
+              <span className={`shrink-0 ${accent ? 'text-primary' : 'text-paper/45'}`}>
+                {icon}
+              </span>
+            )}
+            <h3
+              id={titleId}
+              className={`truncate font-mono text-[0.68rem] font-medium uppercase tracking-[0.18em] ${
+                accent ? 'text-primary' : 'text-paper'
+              }`}
+            >
+              {title}
+            </h3>
+            <span
+              className={`hidden h-px min-w-5 flex-1 sm:block ${
+                accent ? 'bg-primary/20' : 'bg-paper/10'
+              }`}
+              aria-hidden="true"
+            />
+
+          </div>
         </div>
-        {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
+        {action && (
+          <div
+            className={`flex flex-wrap items-center gap-2 border-t px-3.5 py-2.5 sm:border-l sm:border-t-0 sm:px-4 ${
+              accent ? 'border-primary/25' : 'border-paper/10'
+            }`}
+          >
+            {action}
+          </div>
+        )}
       </header>
+
       {subtitle && (
-        <div className="border-b border-border/60 bg-surface/30 px-4 py-2 text-xs lowercase text-text-muted">
-          <span className="text-text-faint">$ </span>
-          {subtitle}
+        <div
+          className={`grid border-b ${
+            accent ? 'border-primary/20' : 'border-paper/10'
+          } ${railColumns}`}
+        >
+          <span
+            className={`flex justify-center border-r pt-2.5 font-mono text-[0.65rem] ${
+              accent ? 'border-primary/20 text-primary/70' : 'border-paper/10 text-paper/25'
+            }`}
+            aria-hidden="true"
+          >
+            ↳
+          </span>
+          <div className="px-3.5 py-2.5 font-mono text-[0.625rem] leading-relaxed tracking-[0.045em] text-paper/48 sm:px-4">
+            {subtitle}
+          </div>
         </div>
       )}
-      <div className="p-4 sm:p-5">{children}</div>
+
+      <div className={`grid ${railColumns}`}>
+        <span
+          className={`relative border-r ${
+            accent ? 'border-primary/20' : 'border-paper/10'
+          }`}
+          aria-hidden="true"
+        >
+          <span
+            className={`absolute left-1/2 top-5 h-px w-2 -translate-x-1/2 ${
+              accent ? 'bg-primary/50' : 'bg-paper/20'
+            }`}
+          />
+        </span>
+        <div className="min-w-0 p-4 sm:p-5">{children}</div>
+      </div>
     </section>
   );
 }

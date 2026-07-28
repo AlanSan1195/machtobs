@@ -357,3 +357,205 @@ describe('OBSManager con salida avanzada', () => {
     expect(result.message).toBe('Configuracion aplicada en OBS');
   });
 });
+
+describe('OBSManager con marcos de camara', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    obsMock.connect.mockResolvedValue({});
+  });
+
+  it('crea una fuente de color, la ajusta alrededor de la camara y la coloca debajo', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
+      if (request === 'GetSceneItemTransform') {
+        return {
+          sceneItemTransform: {
+            positionX: 1500,
+            positionY: 700,
+            boundsWidth: 324,
+            boundsHeight: 324,
+          },
+        };
+      }
+      if (request === 'GetSceneItemList') {
+        return { sceneItems: [{ sceneItemId: 8, sourceName: 'Camara web' }] };
+      }
+      if (request === 'GetInputKindList') {
+        return { inputKinds: ['color_source_v3'] };
+      }
+      if (request === 'GetInputList') {
+        return { inputs: [{ inputName: 'Camara web' }] };
+      }
+      if (request === 'CreateInput') {
+        return { sceneItemId: 12 };
+      }
+      if (request === 'GetSceneItemIndex') {
+        return { sceneItemIndex: data?.sceneItemId === 12 ? 3 : 2 };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.setCameraFrame({
+      sceneName: 'Gameplay',
+      cameraSceneItemId: 8,
+      cameraInputName: 'Camara web',
+      config: { color: '#3A9BDC', thickness: 12, rounded: false },
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      frameInputName: 'Marco · Camara web',
+      frameSceneItemId: 12,
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
+      sceneName: 'Gameplay',
+      inputName: 'Marco · Camara web',
+      inputKind: 'color_source_v3',
+      inputSettings: {
+        color: 4_292_647_738,
+        width: 348,
+        height: 348,
+      },
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('SetSceneItemTransform', {
+      sceneName: 'Gameplay',
+      sceneItemId: 12,
+      sceneItemTransform: expect.objectContaining({
+        positionX: 1488,
+        positionY: 688,
+        boundsWidth: 348,
+        boundsHeight: 348,
+      }),
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('SetSceneItemIndex', {
+      sceneName: 'Gameplay',
+      sceneItemId: 12,
+      sceneItemIndex: 2,
+    });
+  });
+
+  it('actualiza el marco existente sin crear una fuente duplicada', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
+      if (request === 'GetSceneItemTransform') {
+        return {
+          sceneItemTransform: {
+            positionX: 1500,
+            positionY: 700,
+            boundsWidth: 324,
+            boundsHeight: 324,
+          },
+        };
+      }
+      if (request === 'GetSceneItemList') {
+        return {
+          sceneItems: [
+            { sceneItemId: 8, sourceName: 'Camara web' },
+            { sceneItemId: 12, sourceName: 'Marco · Camara web', inputKind: 'color_source_v3' },
+          ],
+        };
+      }
+      if (request === 'GetInputKindList') {
+        return { inputKinds: ['color_source_v3', 'browser_source'] };
+      }
+      if (request === 'GetSceneItemIndex') {
+        return { sceneItemIndex: data?.sceneItemId === 12 ? 1 : 2 };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.setCameraFrame({
+      sceneName: 'Gameplay',
+      cameraSceneItemId: 8,
+      cameraInputName: 'Camara web',
+      config: { color: '#FFFFFF', thickness: 20, rounded: false },
+    });
+
+    expect(result.success).toBe(true);
+    expect(obsMock.call).not.toHaveBeenCalledWith('CreateInput', expect.anything());
+    expect(obsMock.call).toHaveBeenCalledWith('SetInputSettings', {
+      inputName: 'Marco · Camara web',
+      inputSettings: {
+        color: 4_294_967_295,
+        width: 364,
+        height: 364,
+      },
+      overlay: true,
+    });
+  });
+
+  it('reemplaza una Browser Source transparente por un marco sólido nativo', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
+      if (request === 'GetSceneItemTransform') {
+        return {
+          sceneItemTransform: {
+            positionX: 1500,
+            positionY: 700,
+            boundsWidth: 324,
+            boundsHeight: 324,
+          },
+        };
+      }
+      if (request === 'GetSceneItemList') {
+        return {
+          sceneItems: [
+            { sceneItemId: 8, sourceName: 'Camara web' },
+            { sceneItemId: 12, sourceName: 'Marco · Camara web', inputKind: 'browser_source' },
+          ],
+        };
+      }
+      if (request === 'GetInputKindList') {
+        return { inputKinds: ['color_source_v3', 'browser_source'] };
+      }
+      if (request === 'GetInputList') {
+        return { inputs: [{ inputName: 'Camara web' }] };
+      }
+      if (request === 'CreateInput') {
+        return { sceneItemId: 13 };
+      }
+      if (request === 'GetSceneItemIndex') {
+        return { sceneItemIndex: data?.sceneItemId === 13 ? 3 : 2 };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.setCameraFrame({
+      sceneName: 'Gameplay',
+      cameraSceneItemId: 8,
+      cameraInputName: 'Camara web',
+      config: { color: '#B58CFF', thickness: 16, rounded: true },
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      frameInputName: 'Marco · Camara web',
+      frameSceneItemId: 13,
+      warnings: ['OBS aplicó el marco sólido como recto porque Browser Source no está generando textura.'],
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('RemoveInput', { inputName: 'Marco · Camara web' });
+    expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
+      sceneName: 'Gameplay',
+      inputName: 'Marco · Camara web',
+      inputKind: 'color_source_v3',
+      inputSettings: {
+        color: 4_294_937_781,
+        width: 356,
+        height: 356,
+      },
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('SetSceneItemTransform', {
+      sceneName: 'Gameplay',
+      sceneItemId: 13,
+      sceneItemTransform: expect.objectContaining({
+        positionX: 1484,
+        positionY: 684,
+        boundsWidth: 356,
+        boundsHeight: 356,
+      }),
+    });
+  });
+});

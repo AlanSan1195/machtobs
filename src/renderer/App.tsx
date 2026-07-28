@@ -1,422 +1,328 @@
-import { useEffect, useMemo, useState } from 'react';
-import { parseGoal, type ParsedGoal, type ParsedHardware } from '../shared/goalParser';
-import { getLocalRecommendationExplanation } from '../shared/localRecommendation';
-import type {
-  AIRecommendationField,
-  AIRecommendationSettings,
-  OBSMode,
-  OBSPlatform,
-} from '../shared/types';
-import { ConnectionDock } from './components/ConnectionDock';
-import { GoalComposer } from './components/GoalComposer';
-import { HardwareConfirmation } from './components/HardwareConfirmation';
-import { RecommendationReview } from './components/RecommendationReview';
-import { IconAlert, IconCheck, IconCpu, IconX, Spinner } from './components/ui';
-import { useAppAPI } from './hooks/useAppAPI';
-import { appAPI } from './lib/app-api';
-import {
-  detectHardwareHints,
-  loadHardwareOverrides,
-  saveHardwareOverrides,
-} from './lib/system-info';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from './store';
+import { ModeSelector } from './components/ModeSelector';
+import { PlatformSelector } from './components/PlatformSelector';
+import { AnalyzeButton } from './components/AnalyzeButton';
+import { SourceTargetSelector } from './components/SourceTargetSelector';
+import { ConsoleSelector } from './components/ConsoleSelector';
+import { ConsoleDetection } from './components/ConsoleDetection';
+import { ConsoleReport } from './components/ConsoleReport';
+import { HardwareForm } from './components/HardwareForm';
+import { Recommendations } from './components/Recommendations';
+import { OBSComparison } from './components/OBSComparison';
+import { AudioConfiguration } from './components/AudioConfiguration';
+import { ScenesPanel } from './components/ScenesPanel';
+import { ConnectPanel } from './components/ConnectPanel';
+import { ImportButton } from './components/ImportButton';
+import { StatusBar } from './components/StatusBar';
+import { appAPI } from './lib/app-api';
+import { IconAlert, IconX } from './components/ui';
 
-type IntakeState = 'writing' | 'clarifying' | 'hardware' | 'analyzing';
+type TabIndex = 0 | 1 | 2 | 3;
 
-function mergeHardware(parsed: ParsedHardware): ParsedHardware {
-  const stored = loadHardwareOverrides();
-  return {
-    cpuModel: parsed.cpuModel ?? stored.cpuModel,
-    cpuCores: parsed.cpuCores ?? stored.cpuCores,
-    ramGb: parsed.ramGb ?? stored.ramGb,
-  };
-}
+const modeLabels: Record<string, string> = {
+  stream_record: 'stream + rec',
+  stream_only: 'stream',
+  record_only: 'rec',
+};
 
-function hasCompleteHardware(hardware: ParsedHardware): hardware is Required<ParsedHardware> {
-  return Boolean(
-    hardware.cpuModel
-    && hardware.cpuCores
-    && hardware.cpuCores > 0
-    && hardware.ramGb
-    && hardware.ramGb > 0,
+function MetaItem({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="flex items-baseline gap-2 whitespace-nowrap">
+      <span className="text-paper/40">{label} /</span>
+      <span className="text-paper">{value}</span>
+    </span>
   );
 }
 
-function clarificationFor(mode: OBSMode | null, platform: OBSPlatform | null): string | null {
-  if (!mode) {
-    return '¿Quieres transmitir, grabar o hacer ambas cosas? Escríbelo como lo dirías normalmente.';
-  }
-  if (mode !== 'record_only' && !platform) {
-    return '¿Dónde quieres transmitir: YouTube o Twitch?';
-  }
-  return null;
+function SignalArrow({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 120 24"
+      fill="none"
+      className={className}
+    >
+      <path d="M0 12h96" stroke="currentColor" strokeWidth="3" />
+      <path d="M88 2l20 10-20 10V2z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function StepHeader({ index, word, hint, outline = false }: { index: string; word: string; hint: string; outline?: boolean }) {
+  return (
+    <div className="border-b border-paper/10 pb-5">
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="micro-label">{index} / {word}</span>
+        <span className="micro-label hidden sm:block">{hint}</span>
+      </div>
+      <h2 className={`display-xl mt-4 text-[clamp(2.6rem,7vw,5.5rem)] ${outline ? 'text-outline' : 'text-paper'}`}>
+        {word}
+      </h2>
+    </div>
+  );
 }
 
 export default function App() {
-  const hints = useMemo(() => detectHardwareHints(), []);
-  const [input, setInput] = useState('');
-  const [conversationText, setConversationText] = useState('');
-  const [intakeState, setIntakeState] = useState<IntakeState>('writing');
-  const [assistantQuestion, setAssistantQuestion] = useState<string | null>(null);
-  const [pendingGoal, setPendingGoal] = useState<ParsedGoal | null>(null);
-  const [activeGoal, setActiveGoal] = useState<ParsedGoal | null>(null);
+  const [activeTab, setActiveTab] = useState<TabIndex>(0);
+
   const {
     error,
-    mode: storedMode,
-    platform: storedPlatform,
-    obsConnected,
-    recommendation,
-    setAnalysisTarget,
-    setConsoleModel,
-    setConsoleProfile,
     setError,
-    setIsAnalyzing,
-    setMode,
+    mode,
+    platform,
+    systemInfo,
+    obsConnected,
+    analysisTarget,
+    recommendation,
+    reset,
     setObsAudioSnapshot,
     setObsConnected,
     setObsMessage,
     setObsSettingsSnapshot,
-    setPlatform,
-    setRecommendation,
-    setSelectedCaptureCard,
-    setSelectedMonitor,
   } = useAppStore();
-  const {
-    getAIRecommendation,
-    getCaptureCapabilities,
-    getPeripherals,
-    getSystemInfo,
-    profileConsole,
-  } = useAppAPI();
 
-  useEffect(() => appAPI.obs.onConnectionChanged((status) => {
-    setObsConnected(status.connected);
-    setObsMessage(status.message);
-    if (!status.connected) {
-      setObsSettingsSnapshot(null);
-      setObsAudioSnapshot(null);
-    }
-  }), [setObsAudioSnapshot, setObsConnected, setObsMessage, setObsSettingsSnapshot]);
+  useEffect(() => {
+    return appAPI.obs.onConnectionChanged((status) => {
+      setObsConnected(status.connected);
+      setObsMessage(status.message);
 
-  const runAnalysis = async (goal: ParsedGoal) => {
-    const mode = goal.mode;
-    const platform = goal.platform ?? (mode === 'record_only' ? 'youtube' : null);
-    if (!mode || !platform) return false;
-
-    setIntakeState('analyzing');
-    setAssistantQuestion(null);
-    setError(null);
-    setMode(mode);
-    setPlatform(platform);
-    setRecommendation(null);
-    setConsoleProfile(null);
-    setAnalysisTarget(goal.consoleModel ? 'console' : 'pc');
-    setConsoleModel(goal.consoleModel);
-    setIsAnalyzing(true);
-
-    try {
-      const systemInfo = await getSystemInfo();
-      const obsSettingsSnapshot = useAppStore.getState().obsSettingsSnapshot;
-
-      if (goal.consoleModel) {
-        const peripherals = await getPeripherals();
-        const captureCard = goal.captureCard ?? peripherals?.captureDevices[0]?.name;
-        const monitor = goal.monitor ?? peripherals?.displays[0]?.model;
-        setSelectedCaptureCard(captureCard ?? '');
-        setSelectedMonitor(monitor ?? '');
-
-        const captureCapabilities = obsConnected && captureCard
-          ? await getCaptureCapabilities(captureCard)
-          : null;
-        const matchedDisplay = peripherals?.displays.find((display) => display.model === monitor);
-
-        const profile = await profileConsole({
-          console: goal.consoleModel,
-          captureCard,
-          monitor,
-          monitorRefreshRate: matchedDisplay?.refreshRate || undefined,
-          captureMaxResolution: captureCapabilities?.maxResolution,
-          captureMaxFps: captureCapabilities?.maxFps,
-          platform,
-          mode,
-          systemInfo,
-          goal: goal.preferences,
-        });
-        if (!profile) {
-          throw new Error('No se pudo completar el análisis de la consola.');
-        }
-      } else {
-        await getAIRecommendation({
-          systemInfo,
-          mode,
-          platform,
-          goal: goal.preferences,
-          currentSettings: obsSettingsSnapshot
-            ? {
-              resolution: obsSettingsSnapshot.streamResolution ?? obsSettingsSnapshot.outputResolution,
-              fps: obsSettingsSnapshot.fps,
-              encoder: obsSettingsSnapshot.encoder,
-              bitrate: obsSettingsSnapshot.bitrate,
-              recordingQuality: obsSettingsSnapshot.recordingQuality,
-              hasStreamService: obsSettingsSnapshot.streamServer.trim().length > 0,
-            }
-            : undefined,
-        });
+      if (!status.connected) {
+        setObsSettingsSnapshot(null);
+        setObsAudioSnapshot(null);
+      } else if (activeTab === 0) {
+        setActiveTab(1);
       }
-
-      setActiveGoal(goal);
-      return true;
-    } catch (analysisError) {
-      console.error('Goal analysis failed:', analysisError);
-      setIntakeState('clarifying');
-      return false;
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const refineGoal = async (
-    goal: ParsedGoal,
-    technicalOverrides: Partial<AIRecommendationSettings>,
-  ): Promise<boolean> => {
-    const completed = await runAnalysis(goal);
-    if (!completed) return false;
-
-    const state = useAppStore.getState();
-    const latest = state.recommendation;
-    if (!latest || !state.systemInfo || !state.mode || !state.platform) return true;
-
-    const changedFields = Object.keys(technicalOverrides) as AIRecommendationField[];
-    if (changedFields.length === 0) return true;
-
-    const currentRecommendations = {
-      ...latest.recommendations,
-      ...technicalOverrides,
-    };
-    const explanation = getLocalRecommendationExplanation({
-      systemInfo: state.systemInfo,
-      mode: state.mode,
-      platform: state.platform,
-      goal: goal.preferences,
-      originalRecommendations: latest.recommendations,
-      currentRecommendations,
-      changedFields,
     });
-    setRecommendation({
-      ...latest,
-      originalRecommendations: latest.recommendations,
-      originalReasoning: latest.reasoning,
-      recommendations: currentRecommendations,
-      reasoning: explanation.reasoning,
-    });
-    if (state.consoleProfile) {
-      setConsoleProfile({
-        ...state.consoleProfile,
-        recommendations: currentRecommendations,
-        reasoning: explanation.reasoning,
-      });
+  }, [setObsAudioSnapshot, setObsConnected, setObsMessage, setObsSettingsSnapshot, activeTab]);
+
+  useEffect(() => {
+    if (recommendation && activeTab === 1) {
+      setActiveTab(2);
     }
-    return true;
-  };
+  }, [recommendation, activeTab]);
 
-  const continueWithGoal = (parsed: ParsedGoal) => {
-    const mode = parsed.mode ?? storedMode;
-    const platform = parsed.platform ?? storedPlatform;
-    const resolved: ParsedGoal = {
-      ...parsed,
-      mode,
-      platform: mode === 'record_only' ? (platform ?? 'youtube') : platform,
-      hardware: mergeHardware(parsed.hardware),
-    };
-    const question = clarificationFor(resolved.mode, resolved.platform);
-
-    if (question) {
-      setPendingGoal(resolved);
-      setAssistantQuestion(question);
-      setIntakeState('clarifying');
-      return;
-    }
-
-    if (!hasCompleteHardware(resolved.hardware)) {
-      setPendingGoal(resolved);
-      setAssistantQuestion(null);
-      setIntakeState('hardware');
-      return;
-    }
-
-    saveHardwareOverrides(resolved.hardware);
-    setPendingGoal(null);
-    void runAnalysis(resolved);
-  };
-
-  const handleSubmit = () => {
-    const message = input.trim();
-    if (message.length < 8 || intakeState === 'analyzing') return;
-    const combined = conversationText ? `${conversationText}\n${message}` : message;
-    setConversationText(combined);
-    setInput('');
-
-    const next = parseGoal(combined);
-    if (pendingGoal) {
-      next.hardware = { ...pendingGoal.hardware, ...next.hardware };
-      next.preferences = {
-        ...pendingGoal.preferences,
-        ...next.preferences,
-        description: combined,
-      };
-      next.consoleModel = next.consoleModel ?? pendingGoal.consoleModel;
-      next.captureCard = next.captureCard ?? pendingGoal.captureCard;
-      next.monitor = next.monitor ?? pendingGoal.monitor;
-    }
-    continueWithGoal(next);
-  };
-
-  const confirmHardware = (hardware: Required<ParsedHardware>) => {
-    if (!pendingGoal) return;
-    saveHardwareOverrides(hardware);
-    const completed = { ...pendingGoal, hardware };
-    setPendingGoal(null);
-    void runAnalysis(completed);
-  };
-
-  const startOver = () => {
-    setRecommendation(null);
-    setConsoleProfile(null);
-    setActiveGoal(null);
-    setPendingGoal(null);
-    setConversationText('');
-    setAssistantQuestion(null);
-    setInput('');
-    setIntakeState('writing');
-    setError(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const tabs = [
+    { label: 'conectar', blocked: false, completed: obsConnected },
+    { label: 'ajustes', blocked: !obsConnected, completed: obsConnected && !!recommendation },
+    { label: 'deteccion', blocked: !obsConnected, completed: false },
+    { label: 'escenas', blocked: !obsConnected, completed: false },
+  ] as const;
 
   return (
-    <div className="obsee-app">
+    <div className="relative flex min-h-screen flex-col font-sans">
       <div className="app-backdrop" aria-hidden="true" />
-      <header className="quiet-header">
-        <button type="button" className="brand" onClick={startOver} aria-label="Ir al inicio de Obsee">
-          <span><b>obs</b>ee</span>
-          <small>config copilot</small>
-        </button>
-        <div className="quiet-header__status">
-          <span className={obsConnected ? 'is-online' : ''}>
-            <i aria-hidden="true" />
-            {obsConnected ? 'OBS conectado' : 'OBS sin conectar'}
-          </span>
-          <span className="quiet-header__hardware">
-            <IconCpu className="h-3.5 w-3.5" />
-            {hints.gpu.model}
-          </span>
+
+      {/* top bar */}
+      <header className="sticky top-0 z-30 border-b border-paper/10 bg-background/95">
+        <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center justify-between gap-4 px-5">
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="flex items-center gap-2.5"
+            aria-label="Match TO-OBS"
+          >
+            <span className="h-3 w-3 bg-primary" aria-hidden="true" />
+            <span className="font-display text-sm font-black uppercase tracking-tight text-paper" style={{ fontStretch: '125%' }}>
+              Match<span className="text-primary">→</span>OBS
+            </span>
+          </a>
+
+          {/* numbered step nav */}
+          <nav className="flex items-center gap-4 md:gap-6" aria-label="progreso">
+            {tabs.map((tab, idx) => {
+              const isActive = activeTab === idx;
+              const num = String(idx + 1).padStart(2, '0');
+              return (
+                <button
+                  key={idx}
+                  onClick={() => !tab.blocked && setActiveTab(idx as TabIndex)}
+                  disabled={tab.blocked}
+                  aria-current={isActive ? 'step' : undefined}
+                  className={`group relative pb-1 font-mono text-[0.65rem] uppercase tracking-[0.18em] transition-colors disabled:cursor-not-allowed ${
+                    isActive ? 'text-paper' : tab.blocked ? 'text-paper/25' : 'text-paper/50 hover:text-paper'
+                  }`}
+                >
+                  <span className={`md:mr-2 ${isActive ? 'text-primary' : tab.completed ? 'text-paper' : 'text-paper/30'}`}>
+                    {tab.completed && !isActive ? '✓' : num}
+                  </span>
+                  <span className="hidden md:inline">{tab.label}</span>
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-x-0 -bottom-[1px] h-[2px] transition-colors ${
+                      isActive ? 'bg-primary' : 'bg-transparent group-hover:bg-paper/25'
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-[0.18em]">
+            <span
+              aria-hidden="true"
+              className={`inline-block h-1.5 w-1.5 ${obsConnected ? 'animate-pulse-dot bg-primary' : 'bg-paper/30'}`}
+            />
+            <span className={`hidden sm:inline ${obsConnected ? 'text-paper' : 'text-paper/40'}`}>
+              {obsConnected ? 'OBS / conectado' : 'OBS / sin conexion'}
+            </span>
+          </div>
+        </div>
+
+        {/* meta strip */}
+        <div className="border-t border-paper/10">
+          <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-2 font-mono text-[0.6rem] uppercase tracking-[0.18em]">
+            <span className="text-paper/40">
+              00—{String(activeTab + 1).padStart(2, '0')} <span className="text-paper">/ {tabs[activeTab].label}</span>
+            </span>
+            <span className="flex items-center gap-5">
+              <MetaItem label="modo" value={mode ? modeLabels[mode] : '—'} />
+              <MetaItem label="destino" value={platform ?? '—'} />
+              <MetaItem label="so" value={systemInfo ? systemInfo.os.distro.toLowerCase() : '—'} />
+            </span>
+          </div>
         </div>
       </header>
 
       {error && (
-        <div className="floating-error" role="alert">
-          <IconAlert className="h-4 w-4" />
-          <span>{error}</span>
-          <button type="button" onClick={() => setError(null)} aria-label="Cerrar error">
-            <IconX className="h-4 w-4" />
-          </button>
+        <div className="border-b border-danger/45 bg-danger/[0.08]">
+          <div
+            role="alert"
+            className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-4 px-5 py-3"
+          >
+            <div className="flex items-center gap-3">
+              <IconAlert className="h-4 w-4 shrink-0 text-danger" />
+              <span className="font-mono text-xs text-danger">
+                <span className="text-danger/60">err / </span>
+                {error}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              aria-label="Cerrar mensaje de error"
+              className="p-1 text-danger transition-colors hover:bg-danger/15"
+            >
+              <IconX className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
 
-      {recommendation && activeGoal ? (
-        <RecommendationReview
-          goal={activeGoal}
-          onNewGoal={startOver}
-          onRefineGoal={refineGoal}
-        />
-      ) : (
-        <main className="intake-shell">
-          <section className="intake-hero">
-            <div className="intake-hero__signal" aria-hidden="true">
-              <span />
-              <span />
-              <span />
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-5">
+        {activeTab === 0 && (
+          <div className="pb-16">
+            {/* hero */}
+            <section className="relative border-b border-paper/10 py-14 sm:py-20">
+              <div className="mb-10 flex items-center justify-between font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/40">
+                <span>setup / entrada</span>
+                <span>{obsConnected ? 'status / conectado' : 'status / disponible'}</span>
+              </div>
+
+              <h1 className="display-xl select-none text-[clamp(3.4rem,13vw,11.5rem)]">
+                <span className="flex items-center gap-[0.08em] text-paper">
+                  match
+                  <SignalArrow className="h-[0.42em] w-auto shrink-0 text-primary" />
+                </span>
+                <span className="text-outline block">to—obs</span>
+              </h1>
+
+              <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,34rem)_1fr] lg:items-end">
+                <p className="max-w-xl text-base leading-relaxed text-paper/60">
+                  Analiza tu harware y hace el mejor match
+                  de configuración para tu OBS, lista para importar.
+                </p>
+                <div className="rule-ticks lg:pb-1" aria-hidden="true">
+                  <span>720p</span>
+                  <span>1080p</span>
+                  <span>1440p</span>
+                  <span>2160p</span>
+                </div>
+              </div>
+            </section>
+
+            {/* conexion — full-bleed dentro del lienzo editorial */}
+            <div className="-mx-5 mt-10">
+              <ConnectPanel />
             </div>
-            <h1>Match para OBS</h1>
-            <p className="intake-hero__subtitle">
-            Cuéntale a Obsee que consola o harware tienes, las plataformas en las que piensas subir tu contenido y crea la mejor configuración para tu OBS listo para importar.
-            </p>
-          </section>
-
-          <div className="conversation-stack">
-            {conversationText && (
-              <div className="user-message">
-                <span>Tú</span>
-                <p>{conversationText}</p>
-              </div>
-            )}
-
-            {assistantQuestion && (
-              <section className="conversation-card">
-                <div className="conversation-card__avatar">
-                  <span>o</span>
-                </div>
-                <div>
-                  <span className="conversation-card__eyebrow">Obsee necesita un dato</span>
-                  <h2>{assistantQuestion}</h2>
-                </div>
-              </section>
-            )}
-
-            {intakeState === 'hardware' && pendingGoal && (
-              <HardwareConfirmation
-                initial={pendingGoal.hardware}
-                onConfirm={confirmHardware}
-              />
-            )}
-
-            {intakeState === 'analyzing' && (
-              <section className="conversation-card conversation-card--analyzing" aria-live="polite">
-                <Spinner className="h-6 w-6" />
-                <div>
-                  <span className="conversation-card__eyebrow">Analizando en paralelo</span>
-                  <h2>Haciendo match entre tu objetivo, hardware y OBS…</h2>
-                  <div className="analysis-checks">
-                    <span><IconCheck className="h-3.5 w-3.5" /> Intención entendida</span>
-                    <span><span className="analysis-checks__pulse" /> Calculando salidas</span>
-                    <span>Preparando explicación</span>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {intakeState !== 'hardware' && (
-              <GoalComposer
-                value={input}
-                onChange={setInput}
-                onSubmit={handleSubmit}
-                busy={intakeState === 'analyzing'}
-                compact={Boolean(conversationText)}
-              />
-            )}
-
-            {intakeState === 'writing' && (
-              <div className="detected-context">
-                <span className="detected-context__icon"><IconCpu className="h-4 w-4" /></span>
-                <div>
-                  <strong>Contexto detectado</strong>
-                  <span>
-                    {hints.gpu.model} · {hints.os.distro}
-                    {hints.logicalProcessors ? ` · ${hints.logicalProcessors} procesadores lógicos` : ''}
-                  </span>
-                </div>
-                <IconCheck className="h-4 w-4" />
-              </div>
-            )}
-
-            <ConnectionDock />
-
-            <p className="privacy-note">
-              Tu solicitud y datos técnicos se usan únicamente para calcular la
-              recomendación. Obsee nunca recibe tus claves de transmisión.
-            </p>
           </div>
-        </main>
+        )}
+
+        {activeTab === 1 && (
+          <div className="space-y-8 py-10">
+            <StepHeader index="02" word="ajustes" hint="entrada / hardware / destino" />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <ModeSelector />
+              <PlatformSelector />
+            </div>
+            <HardwareForm />
+            <SourceTargetSelector />
+            {analysisTarget === 'console' && (
+              <>
+                <ConsoleSelector />
+                <ConsoleDetection />
+              </>
+            )}
+            <AnalyzeButton />
+          </div>
+        )}
+
+        {activeTab === 2 && (
+          <div className="space-y-8 py-10">
+            <StepHeader index="03" word="deteccion" hint="match / revision / aplicar" outline />
+            <ConsoleReport />
+            <Recommendations />
+            <OBSComparison />
+            <AudioConfiguration onApplySuccess={() => setActiveTab(3)} />
+          </div>
+        )}
+
+        {activeTab === 3 && (
+          <div className="space-y-8 py-10">
+            <StepHeader index="04" word="escenas" hint="fuentes / importar" />
+            <ScenesPanel />
+            <ImportButton />
+            <div className="border-t border-paper/10 pt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  reset();
+                  setActiveTab(0);
+                }}
+                className="w-full border border-paper/20 px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] text-paper/60 transition-colors hover:border-paper/50 hover:text-paper"
+              >
+                ↺ nueva configuracion
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* signal moment: OBS conectado en el hero */}
+      {obsConnected && activeTab === 0 && (
+        <section className="bg-primary text-ink">
+          <div className="mx-auto flex w-full max-w-[1440px] flex-col items-start justify-between gap-4 px-5 py-6 sm:flex-row sm:items-center">
+            <div>
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink/60">
+                señal establecida
+              </p>
+              <p className="font-display text-2xl font-black uppercase tracking-tight" style={{ fontStretch: '125%' }}>
+                OBS conectado ✓
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab(1)}
+              className="group flex items-center gap-3 border border-ink/70 px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] transition-colors hover:bg-ink hover:text-primary"
+            >
+              02 / ajustes
+              <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span>
+            </button>
+          </div>
+        </section>
       )}
+
+      <StatusBar />
     </div>
   );
 }

@@ -1,12 +1,12 @@
-# obsee
+# Match TO-OBS
 
-![obsee — configura OBS sin saber de OBS](docs/obsee-hero.png)
+![Match TO-OBS — configura OBS sin saber de OBS](docs/obsee-hero.png)
 
-**obsee** es una app web que configura OBS Studio por ti. Analiza tu computadora, pide a una IA la mejor configuración de stream/grabación para tu hardware, te muestra **qué va a cambiar y por qué**, y la aplica a OBS con un clic.
+**Match TO-OBS** es una app web que configura OBS Studio por ti. Analiza tu computadora, pide a una IA la mejor configuración de stream/grabación para tu hardware, te muestra **qué va a cambiar y por qué**, y la aplica a OBS con un clic.
 
 ## Propósito
 
-OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: prueba, decide y aplica sin explicar nada. obsee apunta a lo contrario — que entiendas tu configuración:
+OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: prueba, decide y aplica sin explicar nada. Match TO-OBS apunta a lo contrario — que entiendas tu configuración:
 
 - Explica **por qué** cada ajuste tiene sentido para tu equipo.
 - Muestra un **diff** entre tu configuración actual y la recomendada antes de tocar nada.
@@ -74,7 +74,7 @@ Decisiones vigentes:
 
 
 - **CSP vs `assetsInlineLimit` de Vite**: Vite incrusta assets < 4 KB como `data:` URIs, y una CSP con `default-src 'self'` sin `font-src` los bloquea — solo en producción, porque el dev server no incrusta. Fix: `assetsInlineLimit: 0`. → [apuntes](docs/apuntes.md#csp--vite-assetsinlinelimit-por-qué-las-fuentes-se-veían-en-local-pero-no-en-producción)
-- **`ws://localhost` desde HTTPS**: localhost es un "origen potencialmente confiable", exento de la regla de mixed content (excepto en Safari); IPs de LAN sí se bloquean — por eso obsee solo controla el OBS local. → [apuntes](docs/apuntes.md#websocket-a-wslocalhost-desde-una-página-https)
+- **`ws://localhost` desde HTTPS**: localhost es un "origen potencialmente confiable", exento de la regla de mixed content (excepto en Safari); IPs de LAN sí se bloquean — por eso Match TO-OBS solo controla el OBS local. → [apuntes](docs/apuntes.md#websocket-a-wslocalhost-desde-una-página-https)
 - **Detección de hardware en navegador**: la GPU llega envuelta en un string ANGLE que hay que parsear; `deviceMemory` satura en 8 GB por anti-fingerprinting; `enumerateDevices()` no da labels sin permiso de cámara previo. → [apuntes](docs/apuntes.md#detección-de-hardware-desde-el-navegador-qué-se-puede-y-qué-no)
 - **Patrón adapter en la migración**: `appAPI` conservó la forma exacta del viejo `window.electronAPI`, así que cambiar Electron por navegador tocó una sola costura, no toda la UI. → [apuntes](docs/apuntes.md#de-ipc-de-electron-a-un-módulo-del-navegador-la-costura-appapi)
 - **Proxy de Vite contra CORS**: en dev, `/api` se reenvía a producción para que el navegador vea same-origin y no dispare preflight por el header custom. → [apuntes](docs/apuntes.md#proxy-de-vite-en-dev-esquivar-cors-sin-tocar-el-backend)

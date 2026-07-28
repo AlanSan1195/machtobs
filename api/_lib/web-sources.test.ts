@@ -12,6 +12,9 @@ describe('trusted web source policy', () => {
     ['https://playstation.com/specifications', 'https://playstation.com/specifications'],
     ['https://support.playstation.com/hardware', 'https://support.playstation.com/hardware'],
     ['https://SUPPORT.PLAYSTATION.COM./hardware', 'https://support.playstation.com/hardware'],
+    ['https://service.shure.com/specifications', 'https://service.shure.com/specifications'],
+    ['https://help.rode.com/manual', 'https://help.rode.com/manual'],
+    ['https://support.logi.com/hc/es/specifications', 'https://support.logi.com/hc/es/specifications'],
   ])('accepts an exact reviewed root or subdomain: %s', (value, expected) => {
     expect(normalizeTrustedSourceUrl(value)).toBe(expected);
   });

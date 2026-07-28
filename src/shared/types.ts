@@ -19,6 +19,8 @@ export interface OBSConnectionSettings {
 
 export type MicType = 'condenser' | 'dynamic' | 'electret' | 'unknown';
 export type MicConnection = 'usb' | 'xlr' | 'analog' | 'wireless' | 'unknown';
+export type MicFormFactor = 'standalone' | 'headset' | 'lavalier' | 'built_in' | 'virtual' | 'unknown';
+export type MicPickupPattern = 'cardioid' | 'supercardioid' | 'omnidirectional' | 'bidirectional' | 'multi' | 'unknown';
 export type NoiseSuppressMethod = 'rnnoise' | 'speex' | 'nvafx';
 
 export interface OBSAudioNoiseGate {
@@ -56,7 +58,17 @@ export interface MicProfile {
   model: string;
   type: MicType;
   connection: MicConnection;
+  formFactor?: MicFormFactor;
+  pickupPattern?: MicPickupPattern;
   hasBuiltinDsp: boolean;
+  hasSoftwareProcessing?: boolean;
+  hasNoiseReduction?: boolean;
+  hasNoiseGate?: boolean;
+  hasCompressor?: boolean;
+  hasLimiter?: boolean;
+  hasHardwareGainControl?: boolean;
+  sensitivityDb?: number;
+  sampleRateKhz?: number;
   summary: string;
   sources?: string[];
 }
@@ -488,4 +500,19 @@ export interface SetCameraLayoutInput {
   sceneName: string;
   sceneItemId: number;
   layout: CameraLayout;
+}
+
+// Marco editable que se crea como una fuente independiente justo debajo de la
+// camara. El usuario puede elegir color, grosor y forma.
+export interface CameraFrameConfig {
+  color: string;
+  thickness: number;
+  rounded: boolean;
+}
+
+export interface SetCameraFrameInput {
+  sceneName: string;
+  cameraSceneItemId: number;
+  cameraInputName: string;
+  config: CameraFrameConfig;
 }

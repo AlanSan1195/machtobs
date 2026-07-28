@@ -4,6 +4,21 @@
 
 /* ---- self-hosted fonts (offline-safe for Electron) ---- */
 @font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url('./fonts/archivo-latin-variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Instrument Sans Variable';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./fonts/instrument-sans-latin-variable.woff2') format('woff2');
+}
+@font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400;
@@ -24,34 +39,6 @@
   font-display: swap;
   src: url('./fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');
 }
-@font-face {
-  font-family: 'Doto';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./fonts/doto-latin-400-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Doto';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('./fonts/doto-latin-500-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Doto';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('./fonts/doto-latin-700-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Doto';
-  font-style: normal;
-  font-weight: 900;
-  font-display: swap;
-  src: url('./fonts/doto-latin-900-normal.woff2') format('woff2');
-}
 
 * {
   margin: 0;
@@ -60,60 +47,64 @@
 }
 
 :root {
-  /* color knobs — typography stays exactly as configured below */
-  --background-rgb: 4 6 12;        /* #04060c */
-  --surface-rgb: 7 17 28;          /* #07111c */
-  --surface-hover-rgb: 13 34 49;   /* #0d2231 */
-  --border-rgb: 49 86 111;         /* #31566f */
-  --accent-rgb: 58 155 220;        /* #3a9bdc */
-  --accent-hover-rgb: 91 178 235;  /* #5bb2eb */
-  --accent-dim-rgb: 38 125 183;    /* #267db7 */
-  --secondary-rgb: 32 214 181;     /* #20d6b5 */
-  --warning-rgb: 242 184 75;       /* #f2b84b */
-  --danger-rgb: 239 93 111;        /* #ef5d6f */
+  /* Match TO-OBS — editorial signal system: ink, paper, OBS blue */
+  --background-rgb: 9 10 10;         /* #090a0a ink */
+  --surface-rgb: 19 20 19;           /* lifted ink */
+  --surface-hover-rgb: 31 33 30;
+  --border-rgb: 62 64 59;            /* hairline on ink */
+  --accent-rgb: 58 155 220;          /* #3a9bdc OBS blue */
+  --accent-hover-rgb: 91 178 235;    /* #5bb2eb */
+  --accent-dim-rgb: 38 125 183;      /* #267db7 */
+  --secondary-rgb: 241 239 232;      /* paper */
+  --warning-rgb: 242 184 75;
+  --danger-rgb: 255 92 92;
   --accent: rgb(var(--accent-rgb));
   --accent-dim: rgb(var(--accent-dim-rgb));
   --secondary: rgb(var(--secondary-rgb));
   --warning: rgb(var(--warning-rgb));
   --danger: rgb(var(--danger-rgb));
+
+  --paper: 241 239 232;
+  --ink: 9 10 10;
 }
 
 body {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: 'Instrument Sans Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background-color: rgb(var(--background-rgb));
-  color: #dbe4f7;
+  color: rgb(var(--paper));
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'liga' 0, 'calt' 0;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
 }
 
-/* ---- CRT / terminal backdrop: ambient glow + drifting scanline ---- */
+/* ---- flat ink backdrop with margin hairlines (editorial grid) ---- */
 .app-backdrop {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(1100px 620px at 50% -240px, rgb(var(--accent-rgb) / 0.26), transparent 70%),
-    linear-gradient(180deg, rgb(var(--surface-rgb) / 0.8), rgb(var(--background-rgb)) 12%),
-    rgb(var(--background-rgb));
+  background: rgb(var(--background-rgb));
 }
 
-.app-backdrop::after {
-  /* subtle horizontal scanlines */
+.app-backdrop::before {
+  /* vertical margin rules, like a printed spec sheet */
   content: '';
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0,
-    rgba(0, 0, 0, 0) 2px,
-    rgba(0, 0, 0, 0.18) 3px
-  );
-  opacity: 0.5;
+  background-image:
+    linear-gradient(90deg, rgb(var(--paper) / 0.028) 1px, transparent 1px);
+  background-size: calc(100% / 6) 100%;
+  mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+}
+
+.app-backdrop::after {
+  /* faint blue bloom from the top */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1100px 480px at 50% -320px, rgb(var(--accent-rgb) / 0.1), transparent 70%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -121,12 +112,12 @@ body {
 }
 
 ::selection {
-  background: rgb(var(--accent-rgb) / 0.28);
-  color: #eaf7ff;
+  background: rgb(var(--accent-rgb));
+  color: rgb(var(--ink));
 }
 
 :focus-visible {
-  outline: 1px solid rgb(var(--accent-rgb) / 0.8);
+  outline: 2px solid rgb(var(--accent-rgb) / 0.9);
   outline-offset: 2px;
 }
 
@@ -137,34 +128,20 @@ input[type='checkbox'] {
 }
 
 @layer components {
-  /* terminal panel — replaces glass-card */
+  /* spec module — flat panel with hairline frame */
   .glass-card,
   .terminal-panel {
     position: relative;
-    border: 1px solid rgb(var(--border-rgb) / 0.48);
-    background:
-      linear-gradient(180deg, rgb(var(--accent-rgb) / 0.05), transparent 120px),
-      linear-gradient(rgb(var(--surface-rgb) / 0.02), rgb(5 8 15 / 2.98)),
-      rgb(var(--surface-rgb) / 0.66);
-    backdrop-filter: blur(2px);
+    border: 1px solid rgb(var(--paper) / 0.14);
+    background: rgb(var(--paper) / 0.02);
   }
 
-  /* thin top highlight so panels catch the accent */
-  .terminal-panel {
-    box-shadow: inset 0 1px 0 0 rgb(var(--accent-rgb) / 0.1);
-  }
-
-  /* shared glow skin for primary buttons — drives off the color knob */
-  .glow-primary {
-    box-shadow: 0 0 26px -8px rgb(var(--accent-rgb) / 0.55);
-    transition: box-shadow 0.2s ease;
-  }
-  .glow-primary:hover {
-    box-shadow: 0 0 34px -6px rgb(var(--accent-rgb) / 0.78);
-  }
-
-  .glow-secondary {
-    box-shadow: 0 0 24px -10px rgb(var(--secondary-rgb) / 0.62);
+  /* kept for compatibility; the signal system does not glow */
+  .glow-primary,
+  .glow-secondary,
+  .text-glow {
+    box-shadow: none;
+    text-shadow: none;
   }
 
   /* botones de IA: destello que barre el boton e invita a pulsar */
@@ -179,7 +156,7 @@ input[type='checkbox'] {
     bottom: 0;
     left: -80%;
     width: 55%;
-    background: linear-gradient(105deg, transparent, rgb(255 255 255 / 0.22), transparent);
+    background: linear-gradient(105deg, transparent, rgb(9 10 10 / 0.18), transparent);
     transform: skewX(-20deg);
     animation: ai-glint-sweep 1.4s ease-in-out infinite;
     pointer-events: none;
@@ -195,28 +172,6 @@ input[type='checkbox'] {
     .ai-glint::after { display: none; }
   }
 
-  /* corner ticks like a terminal window frame */
-  .terminal-panel::before,
-  .terminal-panel::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    border-color: rgb(var(--secondary-rgb) / 0.38);
-    border-style: solid;
-    pointer-events: none;
-  }
-  .terminal-panel::before {
-    top: -1px;
-    left: -1px;
-    border-width: 1px 0 0 1px;
-  }
-  .terminal-panel::after {
-    bottom: -1px;
-    right: -1px;
-    border-width: 0 1px 1px 0;
-  }
-
   .blink-cursor {
     display: inline-block;
     width: 0.15em;
@@ -224,7 +179,6 @@ input[type='checkbox'] {
     background: var(--accent);
     vertical-align: text-bottom;
     animation: blink 1.1s step-end infinite;
-    box-shadow: 0 0 8px rgb(var(--accent-rgb) / 0.7);
   }
 
   @keyframes blink {
@@ -236,16 +190,89 @@ input[type='checkbox'] {
     appearance: none;
     cursor: pointer;
     padding-right: 1.75rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a9bdc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f1efe8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.4rem center;
     background-size: 1rem;
   }
-}
 
-/* primary text glow helper */
-.text-glow {
-  text-shadow: 0 0 12px rgb(var(--accent-rgb) / 0.45);
+  /* ---- editorial signal utilities ---- */
+
+  /* numbered micro label, mono uppercase: 01 / CONECTAR */
+  .micro-label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--paper) / 0.55);
+  }
+
+  /* giant display word, expanded grotesque with tight tracking */
+  .display-xl {
+    font-family: 'Archivo Variable', 'Arial Black', sans-serif;
+    font-stretch: 125%;
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 0.86;
+    text-transform: uppercase;
+  }
+
+  /* outlined variant of the display word */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 2px rgb(var(--paper));
+  }
+
+  @media (max-width: 640px) {
+    .text-outline {
+      -webkit-text-stroke-width: 1.2px;
+    }
+  }
+
+  /* hairline spec row: index + label + value */
+  .spec-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    border-top: 1px solid rgb(var(--paper) / 0.12);
+    padding: 0.55rem 0;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* ruler ticks */
+  .rule-ticks {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+    color: rgb(var(--paper) / 0.4);
+  }
+  .rule-ticks > span {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+  .rule-ticks > span::after {
+    content: '';
+    width: 1px;
+    height: 10px;
+    background: rgb(var(--paper) / 0.25);
+  }
+
+  .camera-frame-preview {
+    position: relative;
+    overflow: hidden;
+    transition:
+      border-radius 180ms ease,
+      padding 180ms ease,
+      background-color 180ms ease;
+  }
 }
 
 dialog[open] {
@@ -253,8 +280,7 @@ dialog[open] {
 }
 
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.82);
 }
 
 @keyframes dialog-in {
@@ -278,13 +304,13 @@ dialog::backdrop {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--accent-rgb) / 0.18);
+  background: rgb(var(--paper) / 0.14);
   border-radius: 0;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--accent-rgb) / 0.4);
+  background: rgb(var(--paper) / 0.3);
   background-clip: padding-box;
 }

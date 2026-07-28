@@ -22,22 +22,22 @@ export function SourceTargetSelector() {
               key={t.id}
               onClick={() => setAnalysisTarget(t.id)}
               aria-pressed={selected}
-              className={`group flex flex-col items-center gap-3 rounded-none border p-5 transition-all duration-200 ${
+              className={`group flex flex-col items-center gap-3 border p-5 transition-colors duration-200 ${
                 selected
-                  ? 'border-secondary/60 bg-secondary/10 text-secondary shadow-[0_0_28px_-10px_rgba(32,214,181,0.55)]'
-                  : 'border-border bg-surface/45 text-text-muted hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-hover hover:text-text'
+                  ? 'border-primary/70 bg-primary/[0.07] text-primary'
+                  : 'border-paper/15 text-paper/50 hover:border-paper/40 hover:text-paper'
               }`}
             >
               <span
                 className={`flex h-11 w-11 items-center justify-center border transition-colors ${
                   selected
-                    ? 'border-secondary/50 bg-secondary/15 text-secondary'
-                    : 'border-border bg-surface-hover/45 text-text-muted group-hover:text-text'
+                    ? 'border-primary/50 bg-primary/10 text-primary'
+                    : 'border-paper/15 text-paper/50 group-hover:text-paper'
                 }`}
               >
                 <Icon className="h-5 w-5" />
               </span>
-              <span className="text-center text-sm font-medium lowercase tracking-terminal leading-tight">{t.label}</span>
+              <span className="text-center font-mono text-[0.65rem] uppercase tracking-[0.18em] leading-tight">{t.label}</span>
             </button>
           );
         })}

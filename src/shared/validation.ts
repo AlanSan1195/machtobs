@@ -1,4 +1,4 @@
-import type { AIRecommendation, AIRecommendationExplanation, AIRecommendationExplanationRequest, AIRecommendationField, AIRecommendationRequest, AIRecommendationSettings, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, CameraLayout, ConsoleComponentSpec, ConsoleModel, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, MicConnection, MicProfileRequest, MicProfileResponse, MicType, NoiseSuppressMethod, OBSAudioConfig, OBSAudioNoiseGate, OBSBackup, OBSConfig, OBSConnectionSettings, OBSMode, OBSPlatform, OBSSettingsSnapshot, SetCameraLayoutInput, SourceKindFriendly, SystemInfo } from './types';
+import type { AIRecommendation, AIRecommendationExplanation, AIRecommendationExplanationRequest, AIRecommendationField, AIRecommendationRequest, AIRecommendationSettings, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, CameraLayout, ConsoleComponentSpec, ConsoleModel, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, MicConnection, MicFormFactor, MicPickupPattern, MicProfileRequest, MicProfileResponse, MicType, NoiseSuppressMethod, OBSAudioConfig, OBSAudioNoiseGate, OBSBackup, OBSConfig, OBSConnectionSettings, OBSMode, OBSPlatform, OBSSettingsSnapshot, SetCameraFrameInput, SetCameraLayoutInput, SourceKindFriendly, SystemInfo } from './types';
 import {
   recommendationEncoderOptions,
   recommendationRecordingFormatOptions,
@@ -34,6 +34,8 @@ const cameraLayouts: CameraLayout[] = ['facecam', 'fullscreen'];
 const noiseSuppressMethods: NoiseSuppressMethod[] = ['rnnoise', 'speex', 'nvafx'];
 const micTypes: MicType[] = ['condenser', 'dynamic', 'electret', 'unknown'];
 const micConnections: MicConnection[] = ['usb', 'xlr', 'analog', 'wireless', 'unknown'];
+const micFormFactors: MicFormFactor[] = ['standalone', 'headset', 'lavalier', 'built_in', 'virtual', 'unknown'];
+const micPickupPatterns: MicPickupPattern[] = ['cardioid', 'supercardioid', 'omnidirectional', 'bidirectional', 'multi', 'unknown'];
 const consoleModels: ConsoleModel[] = ['ps5', 'ps5_pro', 'xbox_series_x', 'xbox_series_s', 'switch', 'switch2'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -767,6 +769,53 @@ export function validateSetCameraLayout(value: unknown): ValidationResult<SetCam
   };
 }
 
+export function validateSetCameraFrame(value: unknown): ValidationResult<SetCameraFrameInput> {
+  if (!isRecord(value)) {
+    return { success: false, message: 'La configuracion del marco debe ser un objeto.' };
+  }
+  const sceneName = validateSceneName(value.sceneName);
+  if (!sceneName.success) return sceneName;
+  const cameraInputName = validateInputName(value.cameraInputName);
+  if (!cameraInputName.success) return cameraInputName;
+  if (
+    typeof value.cameraSceneItemId !== 'number'
+    || !Number.isInteger(value.cameraSceneItemId)
+    || value.cameraSceneItemId < 0
+  ) {
+    return { success: false, message: 'El identificador de la camara no es valido.' };
+  }
+  if (!isRecord(value.config)) {
+    return { success: false, message: 'Falta la configuracion del marco.' };
+  }
+  if (typeof value.config.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(value.config.color)) {
+    return { success: false, message: 'El color del marco debe usar el formato #RRGGBB.' };
+  }
+  if (
+    typeof value.config.thickness !== 'number'
+    || !Number.isInteger(value.config.thickness)
+    || value.config.thickness < 2
+    || value.config.thickness > 48
+  ) {
+    return { success: false, message: 'El grosor del marco debe estar entre 2 y 48 px.' };
+  }
+  if (typeof value.config.rounded !== 'boolean') {
+    return { success: false, message: 'La forma rounded del marco debe ser un booleano.' };
+  }
+  return {
+    success: true,
+    value: {
+      sceneName: sceneName.value,
+      cameraSceneItemId: value.cameraSceneItemId,
+      cameraInputName: cameraInputName.value,
+      config: {
+        color: value.config.color.toUpperCase(),
+        thickness: value.config.thickness,
+        rounded: value.config.rounded,
+      },
+    },
+  };
+}
+
 export function validateCreateGuidedSourceConfig(value: unknown): ValidationResult<CreateGuidedSourceConfig> {
   if (!isRecord(value)) {
     return { success: false, message: 'La configuracion de la fuente debe ser un objeto.' };
@@ -853,7 +902,25 @@ export function validateMicProfileResponse(value: unknown): ValidationResult<Mic
         model: isNonEmptyString(profileRaw.model) ? profileRaw.model.trim().slice(0, 120) : 'Microfono',
         type: micTypes.includes(profileRaw.type as MicType) ? profileRaw.type as MicType : 'unknown',
         connection: micConnections.includes(profileRaw.connection as MicConnection) ? profileRaw.connection as MicConnection : 'unknown',
+        formFactor: micFormFactors.includes(profileRaw.formFactor as MicFormFactor)
+          ? profileRaw.formFactor as MicFormFactor
+          : 'unknown',
+        pickupPattern: micPickupPatterns.includes(profileRaw.pickupPattern as MicPickupPattern)
+          ? profileRaw.pickupPattern as MicPickupPattern
+          : 'unknown',
         hasBuiltinDsp: profileRaw.hasBuiltinDsp === true,
+        hasSoftwareProcessing: profileRaw.hasSoftwareProcessing === true,
+        hasNoiseReduction: profileRaw.hasNoiseReduction === true,
+        hasNoiseGate: profileRaw.hasNoiseGate === true,
+        hasCompressor: profileRaw.hasCompressor === true,
+        hasLimiter: profileRaw.hasLimiter === true,
+        hasHardwareGainControl: profileRaw.hasHardwareGainControl === true,
+        sensitivityDb: isFiniteNumber(profileRaw.sensitivityDb)
+          ? clampNumber(profileRaw.sensitivityDb, -100, 20, 0)
+          : undefined,
+        sampleRateKhz: isFiniteNumber(profileRaw.sampleRateKhz)
+          ? clampNumber(profileRaw.sampleRateKhz, 8, 384, 48)
+          : undefined,
         summary: asReason(profileRaw.summary),
         sources: Array.isArray(profileRaw.sources)
           ? profileRaw.sources.filter(isValidSourceUrl).map((url) => url.trim()).slice(0, 6)

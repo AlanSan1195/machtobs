@@ -1,7 +1,7 @@
 import { useAppStore } from '../store';
 import { inferObsUsage } from '../../shared/obsUsage';
 import { appAPI } from '../lib/app-api';
-import type { AIRecommendationExplanationRequest, AIRecommendationRequest, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, BeginGuidedSourceResult, CameraLayout, CaptureCapabilities, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, MicProfileRequest, MicProfileResponse, OBSAudioConfig, OBSConfig, OBSConnectionSettings, PeripheralsSnapshot } from '../../shared/types';
+import type { AIRecommendationExplanationRequest, AIRecommendationRequest, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, BeginGuidedSourceResult, CameraLayout, CaptureCapabilities, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, MicProfileRequest, MicProfileResponse, OBSAudioConfig, OBSConfig, OBSConnectionSettings, PeripheralsSnapshot, SetCameraFrameInput } from '../../shared/types';
 
 export function useAppAPI() {
   const setSystemInfo = useAppStore((state) => state.setSystemInfo);
@@ -317,6 +317,14 @@ export function useAppAPI() {
     return result;
   };
 
+  const setCameraFrame = async (input: SetCameraFrameInput) => {
+    const result = await appAPI.obs.setCameraFrame(input);
+    if (!result.success) {
+      setError(result.message);
+    }
+    return result;
+  };
+
   const setSourceToBottom = async (sceneName: string, sceneItemId: number) => {
     return appAPI.obs.setSourceToBottom({ sceneName, sceneItemId });
   };
@@ -409,6 +417,7 @@ export function useAppAPI() {
     applyGuidedSourceDevice,
     cancelGuidedSource,
     setCameraLayout,
+    setCameraFrame,
     setSourceToBottom,
     createCameraScene,
     createGuidedSource,
@@ -422,4 +431,3 @@ export function useAppAPI() {
     profileConsole,
   };
 }
-

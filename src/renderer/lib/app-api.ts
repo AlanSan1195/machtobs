@@ -12,6 +12,7 @@ import {
 } from './ai-remote';
 import { getLocalRecommendation, getLocalRecommendationExplanation } from '../../shared/localRecommendation';
 import { getLocalMicProfile } from '../../shared/localMicProfile';
+import { applyEvidenceBasedMicFilterPolicy } from '../../shared/micFilterPolicy';
 import { getLocalConsoleProfile } from '../../shared/localConsoleProfile';
 import {
   validateAIRecommendationExplanationRequest,
@@ -26,6 +27,7 @@ import {
   validateOBSConfig,
   validateOBSConnectionSettings,
   validateSceneName,
+  validateSetCameraFrame,
   validateSetCameraLayout,
 } from '../../shared/validation';
 import type {
@@ -40,6 +42,7 @@ import type {
   OBSConfig,
   OBSConnectionSettings,
   SetCameraLayoutInput,
+  SetCameraFrameInput,
 } from '../../shared/types';
 
 // Sustituye al puente IPC de Electron: misma forma que window.electronAPI,
@@ -170,6 +173,13 @@ export const appAPI = {
       }
       return obsManager.setCameraLayout(validation.value.sceneName, validation.value.sceneItemId, validation.value.layout);
     },
+    setCameraFrame: async (arg: SetCameraFrameInput) => {
+      const validation = validateSetCameraFrame(arg);
+      if (!validation.success) {
+        return { success: false, message: validation.message, warnings: [] as string[] };
+      }
+      return obsManager.setCameraFrame(validation.value);
+    },
     createCameraScene: async (arg: { sceneName: string; inputName: string; deviceId: string; propertyName: string }) => {
       const sceneName = validateSceneName(arg.sceneName);
       if (!sceneName.success) return { success: false, message: sceneName.message, warnings: [] as string[] };
@@ -265,9 +275,10 @@ export const appAPI = {
       } catch (error) {
         console.error('Error profiling microphone with integrated AI:', error);
         const localProfile = getLocalMicProfile(request);
+        const tailoredProfile = applyEvidenceBasedMicFilterPolicy(localProfile, request.mode);
         return {
-          ...localProfile,
-          reasoning: `${localProfile.reasoning} IA integrada no disponible: ${getRemoteAIUserMessage(error)}`,
+          ...tailoredProfile,
+          reasoning: `${tailoredProfile.reasoning} IA integrada no disponible: ${getRemoteAIUserMessage(error)}`,
         };
       }
     },

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildUniqueInputName,
+  cameraFrameName,
   friendlyKindFromInputKind,
+  hexToObsColor,
   resolveAllSourceKinds,
   resolveSourceKind,
 } from './scene-helpers';
@@ -74,4 +76,17 @@ describe('buildUniqueInputName', () => {
     expect(buildUniqueInputName('Camara web', ['Camara web'])).toBe('Camara web 2');
     expect(buildUniqueInputName('Camara web', ['Camara web', 'Camara web 2'])).toBe('Camara web 3');
   });
+});
+
+describe('camera frame helpers', () => {
+  it('usa un nombre determinista para poder editar el mismo marco', () => {
+    expect(cameraFrameName('Camara web')).toBe('Marco · Camara web');
+  });
+
+  it('convierte #RRGGBB al uint32 ABGR que espera OBS', () => {
+    expect(hexToObsColor('#FF0000')).toBe(4_278_190_335);
+    expect(hexToObsColor('#0000FF')).toBe(4_294_901_760);
+    expect(hexToObsColor('#FFFFFF')).toBe(4_294_967_295);
+  });
+
 });

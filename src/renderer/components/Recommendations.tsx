@@ -2,9 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../store';
 import { getLocalRecommendationExplanation, isRecommendationExplanationConsistent } from '../../shared/localRecommendation';
 import {
+  recommendationAudioBitrateOptions as audioBitrateOptions,
   recommendationEncoderOptions as encoderOptions,
+  recommendationFpsOptions as fpsOptions,
   recommendationRecordingFormatOptions as recordingFormatOptions,
   recommendationRecordingQualityOptions as recordingQualityOptions,
+  recommendationResolutionOptions as resolutionOptions,
 } from '../../shared/recommendationOptions';
 import { appAPI } from '../lib/app-api';
 import type { AIRecommendation, AIRecommendationField, AIRecommendationSettings } from '../../shared/types';
@@ -33,10 +36,6 @@ const recommendationFields: AIRecommendationField[] = [
   'recording_format',
   'recording_quality',
 ];
-const resolutionOptions = ['1280x720', '1920x1080', '2560x1440', '3840x2160'];
-const fpsOptions = [30, 60, 120];
-const audioBitrateOptions = [160, 192, 256, 320];
-
 function getExplanationConcepts(
   settings: RecommendationSettings,
   mode: string | null,
@@ -394,7 +393,7 @@ export function Recommendations() {
       {recommendation.source === 'local' && (
         <div className="mb-4 flex items-start gap-3 rounded-none border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
           <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>La IA integrada no respondio o alcanzo su limite. Esta es una recomendacion local de respaldo generada por obsee.</span>
+          <span>La IA integrada no respondio o alcanzo su limite. Esta es una recomendacion local de respaldo generada por Match TO-OBS.</span>
         </div>
       )}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-none border border-border bg-surface/45 p-3 text-xs text-text-muted">
@@ -494,7 +493,7 @@ export function Recommendations() {
             <span className="block text-xs font-semibold uppercase tracking-wider text-primary">
               Resultado de tu cambio
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+            <span className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-2.5 py-1 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-primary">
               {isExplaining && <Spinner className="h-3 w-3" />}
               {isExplaining
                 ? 'IA recalculando'

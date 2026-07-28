@@ -17,6 +17,7 @@ import {
   validateOBSConnectionSettings,
   validateSceneName,
   validateSetCameraLayout,
+  validateSetCameraFrame,
 } from './validation';
 import {
   recommendationEncoderOptions,
@@ -589,6 +590,32 @@ describe('validateSetCameraLayout', () => {
   });
 });
 
+describe('validateSetCameraFrame', () => {
+  const validFrame = {
+    sceneName: 'Escena 1',
+    cameraSceneItemId: 7,
+    cameraInputName: 'Camara web',
+    config: { color: '#3a9bdc', thickness: 12, rounded: true },
+  };
+
+  it('normaliza el color y acepta grosores dentro del rango', () => {
+    expect(validateSetCameraFrame(validFrame)).toEqual({
+      success: true,
+      value: {
+        ...validFrame,
+        config: { color: '#3A9BDC', thickness: 12, rounded: true },
+      },
+    });
+  });
+
+  it('rechaza colores y grosores que OBS no puede aplicar', () => {
+    expect(validateSetCameraFrame({ ...validFrame, config: { ...validFrame.config, color: 'azul' } }).success).toBe(false);
+    expect(validateSetCameraFrame({ ...validFrame, config: { ...validFrame.config, thickness: 1 } }).success).toBe(false);
+    expect(validateSetCameraFrame({ ...validFrame, config: { ...validFrame.config, thickness: 49 } }).success).toBe(false);
+    expect(validateSetCameraFrame({ ...validFrame, config: { ...validFrame.config, rounded: 'si' } }).success).toBe(false);
+  });
+});
+
 describe('validateCreateGuidedSourceConfig', () => {
   it('exige imagePath cuando la categoria es image', () => {
     expect(
@@ -686,6 +713,40 @@ describe('validateMicProfileResponse', () => {
     if (!result.success) return;
     expect(result.value.profile.model).toBe('Blue Yeti');
     expect(result.value.filters.gain.db).toBe(6);
+  });
+
+  it('conserva hechos estructurados que deciden la cadena de filtros', () => {
+    const result = validateMicProfileResponse({
+      ...validResponse,
+      profile: {
+        ...validResponse.profile,
+        formFactor: 'headset',
+        pickupPattern: 'omnidirectional',
+        hasSoftwareProcessing: true,
+        hasNoiseReduction: true,
+        hasNoiseGate: true,
+        hasCompressor: false,
+        hasLimiter: false,
+        hasHardwareGainControl: true,
+        sensitivityDb: -50,
+        sampleRateKhz: 48,
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.value.profile).toMatchObject({
+      formFactor: 'headset',
+      pickupPattern: 'omnidirectional',
+      hasSoftwareProcessing: true,
+      hasNoiseReduction: true,
+      hasNoiseGate: true,
+      hasCompressor: false,
+      hasLimiter: false,
+      hasHardwareGainControl: true,
+      sensitivityDb: -50,
+      sampleRateKhz: 48,
+    });
   });
 
   it('clampa numeros fuera de rango y cae a enums por defecto', () => {

@@ -17,6 +17,41 @@ describe('getLocalMicProfile', () => {
     expect(result.filters.gain.db).toBeLessThan(10);
   });
 
+  it('identifica Elgato Wave:3 como condensador USB aun sin la API remota', () => {
+    const result = getLocalMicProfile(makeRequest({ deviceName: 'Elgato Wave:3' }));
+
+    expect(result.profile.identified).toBe(true);
+    expect(result.profile.type).toBe('condenser');
+    expect(result.profile.connection).toBe('usb');
+  });
+
+  it('distingue un FIFINE AM8 dinamico de un headset Astro A50 X', () => {
+    const am8 = getLocalMicProfile(makeRequest({ deviceName: 'FIFINE AmpliGame AM8 USB/XLR' }));
+    const a50 = getLocalMicProfile(makeRequest({ deviceName: 'Astro A50 X Wireless Headset' }));
+
+    expect(am8.profile).toMatchObject({
+      identified: true,
+      type: 'dynamic',
+      formFactor: 'standalone',
+      pickupPattern: 'cardioid',
+      hasBuiltinDsp: false,
+      sensitivityDb: -50,
+    });
+    expect(a50.profile).toMatchObject({
+      identified: true,
+      formFactor: 'headset',
+      pickupPattern: 'omnidirectional',
+      hasBuiltinDsp: false,
+      hasSoftwareProcessing: true,
+      hasNoiseReduction: true,
+      hasNoiseGate: true,
+      hasCompressor: false,
+      hasLimiter: false,
+      connection: 'wireless',
+      sampleRateKhz: 48,
+    });
+  });
+
   it('identifica un dinamico y sube la ganancia sin compuerta por defecto', () => {
     const result = getLocalMicProfile(makeRequest({ deviceName: 'Shure SM7B' }));
     expect(result.profile.type).toBe('dynamic');

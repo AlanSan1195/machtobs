@@ -26,10 +26,10 @@ export function ConsoleSelector() {
               key={c.id}
               onClick={() => setConsoleModel(c.id)}
               aria-pressed={selected}
-              className={`flex items-center justify-center rounded-none border px-3 py-4 text-center text-sm font-medium lowercase tracking-terminal transition-all duration-200 ${
+              className={`flex items-center justify-center border px-3 py-4 text-center font-mono text-[0.65rem] uppercase tracking-[0.18em] transition-colors duration-200 ${
                 selected
-                  ? 'border-secondary/60 bg-secondary/10 text-secondary shadow-[0_0_28px_-10px_rgba(32,214,181,0.55)]'
-                  : 'border-border bg-surface/45 text-text-muted hover:-translate-y-0.5 hover:border-secondary/35 hover:bg-surface-hover hover:text-text'
+                  ? 'border-primary/70 bg-primary/[0.07] text-primary'
+                  : 'border-paper/15 text-paper/50 hover:border-paper/40 hover:text-paper'
               }`}
             >
               {c.label}

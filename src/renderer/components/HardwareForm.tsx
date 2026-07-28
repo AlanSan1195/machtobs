@@ -51,7 +51,7 @@ export function HardwareForm() {
       subtitle="El navegador estima la GPU. Confirma el CPU, sus nucleos y la RAM para que la recomendacion sea precisa."
     >
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 border border-border bg-white/[0.03] px-4 py-3 text-xs lowercase tracking-terminal">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 border border-paper/12 px-4 py-3 font-mono text-[0.65rem] uppercase tracking-[0.14em]">
           <span className="flex items-center gap-1.5">
             <span className="text-text-faint">gpu</span>
             <span className="text-primary">{hints.gpu.model}</span>

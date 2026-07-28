@@ -75,6 +75,10 @@ describe('Groq web source provenance', () => {
     const messages = mocks.chatWithAI.mock.calls[0][0] as Array<{ role: string; content: string }>;
     const systemMessage = messages.find((message) => message.role === 'system')?.content ?? '';
     const userMessage = messages.find((message) => message.role === 'user')?.content ?? '';
+    const fetchBody = JSON.parse((vi.mocked(fetch).mock.calls[0][1]?.body as string) ?? '{}') as {
+      include_domains?: string[];
+      query?: string;
+    };
 
     expect(systemMessage).toContain('solo evidencia no confiable');
     expect(systemMessage).not.toContain('Ficha tecnica oficial');
@@ -82,6 +86,8 @@ describe('Groq web source provenance', () => {
     expect(userMessage).toContain('Ficha tecnica oficial');
     expect(userMessage).toContain('</UNTRUSTED_WEB_EVIDENCE>');
     expect(result.profile.sources).toEqual(['https://help.elgato.com/hc/specifications']);
+    expect(fetchBody.include_domains).toEqual(['elgato.com']);
+    expect(fetchBody.query).toContain('official microphone specifications');
   });
 
   test('discards model-provided source arrays from search-model fallbacks', async () => {

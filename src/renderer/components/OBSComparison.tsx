@@ -3,7 +3,15 @@ import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
 import { ConfirmDialog } from './ConfirmDialog';
 import { IconActivity, IconCheck, IconRefresh, Section } from './ui';
-import type { AIRecommendation, OBSSettingsSnapshot } from '../../shared/types';
+import {
+  recommendationAudioBitrateOptions,
+  recommendationEncoderOptions,
+  recommendationFpsOptions,
+  recommendationRecordingFormatOptions,
+  recommendationRecordingQualityOptions,
+  recommendationResolutionOptions,
+} from '../../shared/recommendationOptions';
+import type { AIRecommendation, AIRecommendationField, AIRecommendationSettings, OBSSettingsSnapshot } from '../../shared/types';
 
 export type ComparisonRow = {
   label: string;
@@ -11,6 +19,8 @@ export type ComparisonRow = {
   recommended: string;
   type?: 'encoder' | 'recordingQuality';
   applyMethod?: 'automatic' | 'manual';
+  /** Campo de la recomendacion que alimenta la fila; si existe, la celda es editable. */
+  field?: AIRecommendationField;
 };
 
 function normalize(value: string): string {
@@ -85,39 +95,46 @@ export function buildComparisonRows(
       label: 'Lienzo base',
       current: snapshot.baseResolution,
       recommended: recommendations.canvas_resolution,
+      field: 'canvas_resolution',
     },
     {
       label: 'Salida maestra / grabacion',
       current: snapshot.outputResolution,
       recommended: recommendations.recording_resolution,
+      field: 'recording_resolution',
     },
     {
       label: 'Salida del stream',
       current: snapshot.streamResolution ?? snapshot.outputResolution,
       recommended: recommendations.resolution,
+      field: 'resolution',
     },
     {
       label: 'FPS',
       current: String(snapshot.fps),
       recommended: String(recommendations.fps),
+      field: 'fps',
     },
     {
       label: 'Encoder del stream',
       current: snapshot.encoder,
       recommended: recommendations.encoder,
       type: 'encoder',
+      field: 'encoder',
     },
     {
       label: 'Bitrate del stream',
       current: snapshot.bitrate > 0 ? String(snapshot.bitrate) : 'No disponible por WebSocket',
       recommended: String(recommendations.bitrate),
       applyMethod: snapshot.outputMode === 'Advanced' && !advancedAutomatic ? 'manual' : 'automatic',
+      field: 'bitrate',
     },
     {
       label: 'Encoder de grabacion',
       current: snapshot.advancedOutput?.recordingEncoder ?? snapshot.encoder,
       recommended: recommendations.recording_encoder,
       type: 'encoder',
+      field: 'recording_encoder',
     },
     {
       label: 'Bitrate de grabacion',
@@ -128,16 +145,19 @@ export function buildComparisonRows(
         : 'No independiente',
       recommended: String(recommendations.recording_bitrate),
       applyMethod: snapshot.outputMode === 'Advanced' && advancedAutomatic ? 'automatic' : 'manual',
+      field: 'recording_bitrate',
     },
     {
       label: 'Bitrate de audio',
       current: String(snapshot.audioBitrate),
       recommended: String(recommendations.audio_bitrate),
+      field: 'audio_bitrate',
     },
     {
       label: 'Formato de grabacion',
       current: snapshot.recordingFormat,
       recommended: recommendations.recording_format,
+      field: 'recording_format',
     },
     {
       label: 'Calidad de grabacion',
@@ -145,6 +165,7 @@ export function buildComparisonRows(
       recommended: recommendations.recording_quality,
       type: 'recordingQuality',
       applyMethod: snapshot.outputMode === 'Advanced' && !advancedAutomatic ? 'manual' : 'automatic',
+      field: 'recording_quality',
     },
   ];
 
@@ -231,8 +252,104 @@ export function buildComparisonRows(
   return rows;
 }
 
+const editableCellClasses =
+  'w-full border border-paper/15 bg-paper/[0.03] px-2 py-1.5 text-sm text-text outline-none transition-colors hover:border-paper/35 focus:border-primary/60';
+
+type RecommendedEditorProps = {
+  row: ComparisonRow;
+  onChange: (field: AIRecommendationField, value: string | number) => void;
+};
+
+/** Celda "Recomendado" editable: escribe directo en la recomendacion del store. */
+function RecommendedEditor({ row, onChange }: RecommendedEditorProps) {
+  const field = row.field;
+  if (!field) return null;
+
+  if (field === 'bitrate' || field === 'recording_bitrate') {
+    return (
+      <span className="flex items-center gap-2">
+        <input
+          type="number"
+          min={500}
+          max={field === 'bitrate' ? 100000 : 200000}
+          step={500}
+          value={row.recommended}
+          aria-label={`${row.label} recomendado`}
+          onChange={(event) => {
+            const value = Number(event.target.value);
+            if (Number.isFinite(value) && value > 0) onChange(field, value);
+          }}
+          className={`${editableCellClasses} min-w-0 flex-1`}
+        />
+        <span className="shrink-0 text-xs text-paper/40">kbps</span>
+      </span>
+    );
+  }
+
+  const selectProps = {
+    value: row.recommended,
+    'aria-label': `${row.label} recomendado`,
+    className: `${editableCellClasses} app-select cursor-pointer`,
+  } as const;
+
+  const renderOptions = (options: string[], format?: (value: string) => string) =>
+    options.map((option) => (
+      <option key={option} value={option} className="bg-background text-text">
+        {format ? format(option) : option.toUpperCase()}
+      </option>
+    ));
+
+  switch (field) {
+    case 'canvas_resolution':
+    case 'resolution':
+    case 'recording_resolution':
+      return (
+        <select {...selectProps} onChange={(event) => onChange(field, event.target.value)}>
+          {renderOptions(recommendationResolutionOptions)}
+        </select>
+      );
+    case 'fps':
+      return (
+        <select {...selectProps} onChange={(event) => onChange(field, Number(event.target.value))}>
+          {recommendationFpsOptions.map((option) => (
+            <option key={option} value={option} className="bg-background text-text">{option}</option>
+          ))}
+        </select>
+      );
+    case 'encoder':
+    case 'recording_encoder':
+      return (
+        <select {...selectProps} onChange={(event) => onChange(field, event.target.value)}>
+          {renderOptions(recommendationEncoderOptions, formatEncoderName)}
+        </select>
+      );
+    case 'audio_bitrate':
+      return (
+        <select {...selectProps} onChange={(event) => onChange(field, Number(event.target.value))}>
+          {recommendationAudioBitrateOptions.map((option) => (
+            <option key={option} value={option} className="bg-background text-text">{option}</option>
+          ))}
+        </select>
+      );
+    case 'recording_format':
+      return (
+        <select {...selectProps} onChange={(event) => onChange(field, event.target.value)}>
+          {renderOptions(recommendationRecordingFormatOptions)}
+        </select>
+      );
+    case 'recording_quality':
+      return (
+        <select {...selectProps} onChange={(event) => onChange(field, event.target.value)}>
+          {renderOptions(recommendationRecordingQualityOptions)}
+        </select>
+      );
+    default:
+      return null;
+  }
+}
+
 export function OBSComparison() {
-  const { obsSettingsSnapshot, recommendation, obsConnected, setError } = useAppStore();
+  const { obsSettingsSnapshot, recommendation, obsConnected, setError, setRecommendation } = useAppStore();
   const { getLastBackup, restoreLastBackup } = useAppAPI();
   const [restoreDialogOpen, setRestoreDialogOpen] = React.useState(false);
   const [backupDate, setBackupDate] = React.useState<string | null>(null);
@@ -254,6 +371,22 @@ export function OBSComparison() {
 
   const { recommendations } = recommendation;
   const rows = buildComparisonRows(obsSettingsSnapshot, recommendations);
+
+  const updateRecommendation = (field: AIRecommendationField, value: string | number) => {
+    // Conserva el baseline para que "config.recomendada" pueda re-explicar el
+    // impacto del ajuste del usuario (mismo patron que Recommendations).
+    const baselineRecommendations = recommendation.originalRecommendations ?? recommendation.recommendations;
+    const baselineReasoning = recommendation.originalReasoning ?? recommendation.reasoning;
+    setRecommendation({
+      ...recommendation,
+      originalRecommendations: baselineRecommendations,
+      originalReasoning: baselineReasoning,
+      recommendations: {
+        ...recommendation.recommendations,
+        [field]: value,
+      } as AIRecommendationSettings,
+    });
+  };
 
   const changeCount = rows.filter((row) => !isSameValue(row)).length;
   const manualCount = rows.filter((row) => !isSameValue(row) && row.applyMethod === 'manual').length;
@@ -283,14 +416,14 @@ export function OBSComparison() {
             <button
               type="button"
               onClick={() => setRestoreDialogOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-text transition-colors hover:border-secondary/40 hover:bg-surface-hover"
+              className="inline-flex items-center gap-1.5 border border-paper/20 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-paper/70 transition-colors hover:border-paper/50 hover:text-paper"
             >
               <IconRefresh className="h-3.5 w-3.5" />
               Restaurar configuracion anterior
             </button>
           )}
           <span
-            className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+            className={`border px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.14em] ${
               changeCount === 0
                 ? 'border-secondary/40 bg-secondary/10 text-secondary'
                 : 'border-warning/40 bg-warning/10 text-warning'
@@ -306,10 +439,10 @@ export function OBSComparison() {
       }
     >
       <div className="overflow-hidden rounded-none border border-border">
-        <div className="grid grid-cols-[1fr_1fr_1fr_104px] bg-background/80 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
+        <div className="grid grid-cols-[1fr_1fr_1fr_104px] bg-paper/[0.04] px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/50">
           <span>Ajuste</span>
           <span>OBS actual</span>
-          <span>Recomendado</span>
+          <span>Recomendado <span className="text-primary/80">/ editable</span></span>
           <span>Estado</span>
         </div>
         {rows.map((row) => {
@@ -324,21 +457,25 @@ export function OBSComparison() {
               <span className="text-text-muted">
                 {row.type === 'encoder' ? formatEncoderName(row.current) : row.current || 'Desconocido'}
               </span>
-              <span className="text-text">
-                {row.type === 'encoder' ? formatEncoderName(row.recommended) : row.recommended}
+              <span className="block text-text">
+                {row.field ? (
+                  <RecommendedEditor row={row} onChange={updateRecommendation} />
+                ) : (
+                  row.type === 'encoder' ? formatEncoderName(row.recommended) : row.recommended
+                )}
               </span>
               <span>
                 {same ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5 text-xs font-semibold text-secondary">
+                  <span className="inline-flex items-center gap-1.5 border border-paper/20 bg-paper/[0.06] px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-paper/70">
                     <IconCheck className="h-3 w-3" />
                     Mantener
                   </span>
                 ) : manual ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/35 bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning">
+                  <span className="inline-flex items-center gap-1.5 border border-warning/40 bg-warning/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-warning">
                     Manual
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/35 bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning">
+                  <span className="inline-flex items-center gap-1.5 border border-warning/40 bg-warning/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-warning">
                     Cambiar
                   </span>
                 )}
@@ -355,7 +492,7 @@ export function OBSComparison() {
         onConfirm={handleRestore}
       >
         <p>Restaurar la configuracion guardada el {readableBackupDate}?</p>
-        <p>obsee volvera a aplicar los valores de video, salida y servidor guardados en el ultimo respaldo.</p>
+        <p>Match TO-OBS volvera a aplicar los valores de video, salida y servidor guardados en el ultimo respaldo.</p>
       </ConfirmDialog>
     </Section>
   );

@@ -79,7 +79,7 @@ export function SceneList() {
                       {scene.sceneName}
                     </span>
                     {isCurrent && (
-                      <span className="shrink-0 text-[0.6rem] lowercase tracking-terminal text-primary">en vivo</span>
+                      <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-primary">en vivo</span>
                     )}
                   </button>
                   <button

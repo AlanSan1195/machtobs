@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
 import type { MicProfileResponse, OBSAudioConfig, OBSAudioDevice, OBSAudioFilterConfig } from '../../shared/types';
+import { resolveMicrophoneName } from '../lib/microphone-device';
 import { ConfirmDialog } from './ConfirmDialog';
 import { IconAlert, IconCheck, IconMic, IconRefresh, IconSparkles, IconX, Section, Spinner } from './ui';
 
@@ -116,7 +117,8 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
   const { refreshAudioSnapshot, applyAudioConfig, profileMicrophone } = useAppAPI();
   const [useAiRecommendation, setUseAiRecommendation] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
-  const localDeviceStatus = 'Permiso de microfono local no solicitado';
+  const [micResearchName, setMicResearchName] = useState('');
+  const [micIdentityStatus, setMicIdentityStatus] = useState('');
   const [detectionMessage, setDetectionMessage] = useState('');
   const [autoDetectTried, setAutoDetectTried] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -159,7 +161,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         setDetectionMessage(result.message);
       }
     }).catch(() => {
-      setDetectionMessage('obsee no pudo leer las entradas de audio desde OBS.');
+      setDetectionMessage('Match TO-OBS no pudo leer las entradas de audio desde OBS.');
     });
   }, [autoDetectTried, obsConnected, obsAudioSnapshot, refreshAudioSnapshot]);
 
@@ -181,9 +183,23 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
   const handleAnalyzeMic = async () => {
     if (!obsAudioSnapshot) return;
     setError(null);
-    const deviceName = selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName;
+    const observedName = micResearchName.trim()
+      || selectedDevice?.name
+      || obsAudioSnapshot.selectedDeviceName
+      || obsAudioSnapshot.inputName;
+    const identity = await resolveMicrophoneName(observedName);
+
+    if (identity.source === 'browser') {
+      setMicResearchName(identity.deviceName);
+      setMicIdentityStatus(`Microfono identificado localmente: ${identity.deviceName}.`);
+    } else if (identity.source === 'unresolved') {
+      setMicIdentityStatus('OBS solo expuso un nombre generico. Autoriza el microfono o escribe la marca y el modelo para buscar la ficha oficial.');
+    } else {
+      setMicIdentityStatus(`Buscando la ficha oficial de ${identity.deviceName}.`);
+    }
+
     const profile = await profileMicrophone({
-      deviceName,
+      deviceName: identity.deviceName,
       inputKind: obsAudioSnapshot.inputKind,
       mode: mode ?? 'record_only',
     });
@@ -290,8 +306,8 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         <div className="rounded-none border border-border bg-surface/45 p-4">
           <p className="text-sm text-text">
             {obsConnected
-              ? 'obsee esta buscando un dispositivo Mic/Aux o una fuente Audio Input Capture para aplicar la configuracion de voz.'
-              : 'Conecta OBS para detectar tu microfono y aplicar la configuracion de voz de obsee.'}
+              ? 'Match TO-OBS esta buscando un dispositivo Mic/Aux o una fuente Audio Input Capture para aplicar la configuracion de voz.'
+              : 'Conecta OBS para detectar tu microfono y aplicar la configuracion de voz de Match TO-OBS.'}
           </p>
           {detectionMessage && (
             <p className="mt-3 text-sm text-warning">{detectionMessage}</p>
@@ -306,7 +322,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
   const syncFrames = [1, 2, 3, 4, 5, 6];
   const selectedDuckingTargetInfo = obsAudioSnapshot.duckingTargets.find((target) => target.inputName === selectedDuckingTarget);
   const stageTwoActions = [
-    noiseSuppression ? 'Supresion de ruido RNNoise' : 'Sin supresion de ruido obsee',
+    noiseSuppression ? 'Supresion de ruido RNNoise' : 'Sin supresion de ruido Match TO-OBS',
     monitorType === 'OBS_MONITORING_TYPE_NONE' ? 'Sin monitoreo de microfono' : monitorType === 'OBS_MONITORING_TYPE_MONITOR_ONLY' ? 'Solo monitoreo' : 'Monitorizar y emitir',
     `Sync de audio: ${syncOffsetMs} ms`,
     duckingEnabled && selectedDuckingTarget ? `Ducking sobre ${selectedDuckingTarget}` : 'Ducking desactivado',
@@ -342,7 +358,13 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           <span className="mb-2 block text-xs uppercase tracking-wider text-text-muted">Microfono recomendado</span>
           <select
             value={selectedDeviceId}
-            onChange={(event) => setSelectedDeviceId(event.target.value)}
+            onChange={(event) => {
+              setSelectedDeviceId(event.target.value);
+              setMicResearchName('');
+              setMicIdentityStatus('');
+              setMicProfile(null);
+              setUseAiRecommendation(false);
+            }}
             className="app-select w-full bg-transparent text-base font-medium text-text outline-none"
           >
             {obsAudioSnapshot.devices.length === 0 ? (
@@ -357,6 +379,25 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           </select>
           <span className="mt-2 block text-xs text-text-faint">
             {selectedDevice?.reason ?? 'OBS no expuso una lista de dispositivos para esta entrada.'}
+          </span>
+          <span className="mb-1 mt-3 block text-xs uppercase tracking-wider text-text-muted">
+            Marca y modelo para la busqueda oficial
+          </span>
+          <input
+            type="text"
+            value={micResearchName}
+            onChange={(event) => {
+              setMicResearchName(event.target.value);
+              setMicIdentityStatus('');
+              setMicProfile(null);
+              setUseAiRecommendation(false);
+            }}
+            placeholder={selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}
+            maxLength={128}
+            className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm text-text outline-none transition-colors placeholder:text-text-faint focus:border-primary"
+          />
+          <span className="mt-2 block text-xs text-text-faint">
+            {micIdentityStatus || 'Si OBS muestra “Predeterminado”, al buscar se pedira permiso para leer la etiqueta real del microfono.'}
           </span>
         </label>
 
@@ -446,7 +487,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
                 <span className="block text-xs text-text-muted">
                   {obsAudioSnapshot.duckingTargets.length > 0
                     ? `Aplica un compresor a ${selectedDuckingTarget || obsAudioSnapshot.duckingTargets[0].inputName} que reduce su volumen cuando el microfono detecta voz.`
-                    : 'obsee no encontro una fuente de musica o audio de escritorio. Agrega una fuente multimedia, VLC o audio de escritorio y pulsa Actualizar OBS.'}
+                    : 'Match TO-OBS no encontro una fuente de musica o audio de escritorio. Agrega una fuente multimedia, VLC o audio de escritorio y pulsa Actualizar OBS.'}
                 </span>
               </span>
             </label>
@@ -472,11 +513,11 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           </div>
       </div>
 
-      {(obsAudioSnapshot.warnings.length > 0 || localDeviceStatus) && (
+      {obsAudioSnapshot.warnings.length > 0 && (
         <div className="mb-4 flex items-start gap-3 rounded-none border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
           <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
-            <p>{[localDeviceStatus, ...obsAudioSnapshot.warnings].filter(Boolean).join(' ')}</p>
+            <p>{obsAudioSnapshot.warnings.join(' ')}</p>
             {!monoSupported && (
               <p className="mt-3 text-warning/90">
                 Para activar Mono: OBS &gt; Propiedades avanzadas de audio &gt; busca este microfono &gt; marca Mono.
@@ -490,7 +531,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         type="button"
         onClick={() => setConfirmOpen(true)}
         disabled={isApplying}
-        className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 text-base font-bold lowercase tracking-terminal transition-all duration-200 ${
+        className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-200 ${
           isApplying
             ? 'cursor-not-allowed border border-border bg-surface/45 text-text-muted'
             : 'bg-primary text-background glow-primary hover:bg-primary-hover active:scale-[0.99]'
@@ -504,7 +545,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         ) : (
           <>
             <IconMic className="h-5 w-5" />
-            <span><span className="opacity-60">./</span>apply --voice obsee</span>
+            <span><span className="opacity-60">./</span>apply --voice match-to-obs</span>
           </>
         )}
       </button>
@@ -517,15 +558,15 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           void handleApplyWithPreview();
         }}
       >
-        <p>Aplicar configuracion de voz obsee a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
+        <p>Aplicar configuracion de voz Match TO-OBS a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
         <p>
           {obsAudioSnapshot.monoSupported
             ? 'Se activara Mono para esta entrada.'
-            : 'OBS WebSocket no expone Mono para esta entrada, asi que obsee lo dejara como paso manual en OBS.'}
+            : 'OBS WebSocket no expone Mono para esta entrada, asi que Match TO-OBS lo dejara como paso manual en OBS.'}
         </p>
         {usingAi && micProfile && (
           <>
-            <p>obsee aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
+            <p>Match TO-OBS aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
             <ul className="list-disc space-y-1 pl-5">
               {aiFilterSummary(micProfile).map((line) => (
                 <li key={line}>{line}</li>

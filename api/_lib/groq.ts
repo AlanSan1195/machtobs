@@ -153,7 +153,17 @@ const MIC_PROFILE_JSON_SHAPE = `Responde SOLO con JSON valido y exactamente con 
     "model": "Marca Modelo",
     "type": "condenser|dynamic|electret|unknown",
     "connection": "usb|xlr|analog|wireless|unknown",
+    "formFactor": "standalone|headset|lavalier|built_in|virtual|unknown",
+    "pickupPattern": "cardioid|supercardioid|omnidirectional|bidirectional|multi|unknown",
     "hasBuiltinDsp": false,
+    "hasSoftwareProcessing": false,
+    "hasNoiseReduction": false,
+    "hasNoiseGate": false,
+    "hasCompressor": false,
+    "hasLimiter": false,
+    "hasHardwareGainControl": false,
+    "sensitivityDb": -50,
+    "sampleRateKhz": 48,
     "summary": "resumen breve en espanol de las caracteristicas relevantes",
     "sources": ["https://..."]
   },
@@ -169,10 +179,49 @@ const MIC_PROFILE_JSON_SHAPE = `Responde SOLO con JSON valido y exactamente con 
 
 const MIC_PROFILE_RULES = `Reglas:
 - Si el nombre es generico (ej. "Default", "Microphone", "Built-in") y no puedes identificar un modelo real, marca "identified": false y da valores conservadores.
-- Si el microfono YA tiene DSP/cancelacion de ruido integrada, omite o suaviza la supresion de ruido de OBS.
-- Un condensador sensible suele necesitar noise gate y menos ganancia; un dinamico de baja salida (ej. SM7B) necesita mas ganancia.
+- Si la evidencia oficial coincide con la marca y el modelo detectados, marca "identified": true aunque la etiqueta incluya prefijos del sistema como "Microphone" o "Default".
+- Extrae formFactor, pickupPattern, DSP integrado, procesamiento por software, control de ganancia, sensibilidad y sample rate solo cuando la evidencia los respalde; si no, usa unknown, false u omite el numero.
+- Marca por separado hasNoiseReduction, hasNoiseGate, hasCompressor y hasLimiter. Una capacidad general de DSP/software no prueba que todos esos filtros existan.
+- Omite un filtro de OBS por procesamiento duplicado solo cuando la evidencia confirme la capacidad equivalente concreta.
+- La ficha tecnica NO contiene el ruido de la habitacion ni el nivel real de voz en OBS: no inventes una ganancia fija ni umbrales de compuerta a partir de sensibilidad, precio o “calidad”.
+- La calidad del microfono no justifica omitir compresion. Decide segun procesamiento dinamico ya integrado, formFactor y modo de uso.
+- Una compuerta silencia la entrada por debajo de un umbral; no evita que el audio se vuelva demasiado fuerte.
+- Un limitador contiene picos digitales al final de la cadena; no protege el equipo ni repara clipping ocurrido antes de OBS.
+- Cada reason debe citar una caracteristica concreta del perfil y su consecuencia. Prohibido reutilizar frases genericas como “mejora la calidad” o “sonido claro y natural”.
+- Dos dispositivos con capsula, patron, formFactor o DSP distintos no deben recibir una plantilla identica sin explicar por que.
 - "method": usa "rnnoise" salvo que recomiendes especificamente "speex" o "nvafx".
 - En cada filtro incluye "enabled" (false = omitir) y un "reason" breve en espanol.`;
+
+const MICROPHONE_OFFICIAL_DOMAINS: Array<{ pattern: RegExp; domains: string[] }> = [
+  { pattern: /elgato|wave[:\s-]?(?:1|3|dx)/i, domains: ['elgato.com'] },
+  { pattern: /\bshure\b|\bsm(?:7b|57|58)\b|\bmv7\b/i, domains: ['shure.com'] },
+  { pattern: /\br[oø]de\b|podmic|procaster|nt-?usb|nt1\b/i, domains: ['rode.com'] },
+  { pattern: /audio[- ]?technica|\bat20(?:20|35|40|50)\b/i, domains: ['audio-technica.com'] },
+  { pattern: /\bblue\b|yeti|snowball/i, domains: ['logitechg.com', 'logitech.com', 'bluemic.com'] },
+  { pattern: /logitech|\bastro\b|\ba50[\s:_-]*x?\b/i, domains: ['logitechg.com', 'logitech.com', 'logi.com'] },
+  { pattern: /hyperx|quadcast|solocast/i, domains: ['hyperx.com'] },
+  { pattern: /fifine|\bk669\b|\bam8\b/i, domains: ['fifinemicrophone.com'] },
+  { pattern: /samson|\bq2u\b/i, domains: ['samsontech.com'] },
+  { pattern: /sennheiser/i, domains: ['sennheiser.com'] },
+  { pattern: /\bakg\b/i, domains: ['akg.com'] },
+  { pattern: /electro[- ]?voice|\bre20\b/i, domains: ['electrovoice.com'] },
+  { pattern: /behringer/i, domains: ['behringer.com'] },
+  { pattern: /focusrite|scarlett/i, domains: ['focusrite.com'] },
+  { pattern: /lewitt/i, domains: ['lewitt-audio.com'] },
+  { pattern: /neumann/i, domains: ['neumann.com'] },
+  { pattern: /m-audio/i, domains: ['m-audio.com'] },
+  { pattern: /maono/i, domains: ['maono.com'] },
+  { pattern: /razer|seiren/i, domains: ['razer.com'] },
+  { pattern: /corsair/i, domains: ['corsair.com'] },
+  { pattern: /steelseries|sonar/i, domains: ['steelseries.com'] },
+  { pattern: /nvidia|broadcast|rtx voice/i, domains: ['nvidia.com'] },
+  { pattern: /macbook|imac|studio display|apple/i, domains: ['apple.com'] },
+  { pattern: /surface|microsoft/i, domains: ['microsoft.com'] },
+];
+
+function getMicrophoneOfficialDomains(deviceName: string): string[] {
+  return MICROPHONE_OFFICIAL_DOMAINS.find(({ pattern }) => pattern.test(deviceName))?.domains ?? [];
+}
 
 function buildMicContext(request: MicProfileRequest): string {
   return `Microfono detectado: "${request.deviceName}". Contexto: sistema operativo ${request.os ?? 'desconocido'}, tipo de entrada OBS "${request.inputKind ?? 'desconocido'}", uso "${request.mode}".`;
@@ -187,7 +236,11 @@ export async function getMicProfileFromGroq(request: MicProfileRequest): Promise
 
   // Intento 1: Tavily (sin tier especial, funciona en tier gratuito)
   if (process.env.TAVILY_API_KEY) {
-    const { results, sources } = await searchWeb(`${request.deviceName} microphone specifications`);
+    const officialDomains = getMicrophoneOfficialDomains(request.deviceName);
+    const { results, sources } = await searchWeb(
+      `${request.deviceName} official microphone specifications pickup pattern sensitivity DSP noise reduction noise gate`,
+      officialDomains,
+    );
     if (results.length > 0) {
       webContext = formatUntrustedWebEvidence(results);
       webSources = sources;

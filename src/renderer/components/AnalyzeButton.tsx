@@ -80,7 +80,7 @@ export function AnalyzeButton() {
       type="button"
       onClick={handleAnalyze}
       disabled={isDisabled}
-      className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 text-base font-bold lowercase tracking-terminal transition-all duration-200 ${
+      className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-200 ${
         isDisabled
           ? 'cursor-not-allowed border border-border bg-surface/45 text-text-muted'
           : 'ai-glint bg-primary text-background glow-primary hover:bg-primary-hover active:scale-[0.99]'

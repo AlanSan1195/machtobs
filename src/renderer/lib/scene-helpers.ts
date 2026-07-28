@@ -94,3 +94,19 @@ export function buildUniqueInputName(base: string, existingNames: string[]): str
   }
   return `${base} ${index}`;
 }
+
+export const CAMERA_FRAME_PREFIX = 'Marco · ';
+
+export function cameraFrameName(cameraInputName: string): string {
+  return `${CAMERA_FRAME_PREFIX}${cameraInputName}`;
+}
+
+// OBS guarda el color de una fuente en orden ABGR (alpha en el byte alto).
+// Usamos aritmetica en vez de operadores bitwise para conservar el uint32.
+export function hexToObsColor(hex: string): number {
+  const normalized = hex.replace('#', '');
+  const red = Number.parseInt(normalized.slice(0, 2), 16);
+  const green = Number.parseInt(normalized.slice(2, 4), 16);
+  const blue = Number.parseInt(normalized.slice(4, 6), 16);
+  return red + green * 256 + blue * 65_536 + 255 * 16_777_216;
+}

@@ -72,11 +72,11 @@ export function ScenesPanel() {
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
             <div>
-              <h4 className="mb-2 text-xs lowercase tracking-terminal text-text-faint">escenas</h4>
+              <h4 className="micro-label mb-2">escenas</h4>
               <SceneList />
             </div>
             <div>
-              <h4 className="mb-2 text-xs lowercase tracking-terminal text-text-faint">fuentes</h4>
+              <h4 className="micro-label mb-2">fuentes</h4>
               {wizardOpen && selectedSceneName ? (
                 <AddSourceWizard
                   sceneName={selectedSceneName}

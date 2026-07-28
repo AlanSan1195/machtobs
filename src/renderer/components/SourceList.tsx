@@ -6,7 +6,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { IconClapperboard, IconMonitor, IconTv, IconVideo, IconX } from './ui';
 
 const primaryButton =
-  'inline-flex items-center justify-center gap-1.5 rounded-none bg-primary px-4 py-2.5 text-sm font-bold lowercase tracking-terminal text-background glow-primary transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex items-center justify-center gap-1.5 rounded-none bg-primary px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50';
 
 function iconForKind(kind: SourceKindFriendly | undefined) {
   switch (kind) {
@@ -38,7 +38,7 @@ export function SourceList({ sceneName, onAddSource }: SourceListProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs lowercase tracking-terminal text-text-faint">fuentes de {sceneName}</span>
+        <span className="micro-label">fuentes de {sceneName}</span>
       </div>
 
       {sceneSources.length === 0 ? (
@@ -57,7 +57,7 @@ export function SourceList({ sceneName, onAddSource }: SourceListProps) {
               <button
                 type="button"
                 onClick={() => setSourceEnabled(sceneName, item.sceneItemId, !item.enabled)}
-                className="shrink-0 text-[0.65rem] lowercase tracking-terminal text-text-muted transition-colors hover:text-primary"
+                className="micro-label shrink-0 transition-colors hover:text-primary"
               >
                 {item.enabled ? 'ocultar' : 'mostrar'}
               </button>

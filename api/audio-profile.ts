@@ -3,6 +3,7 @@ import type { ApiRequest, ApiResponse } from './_lib/http';
 import { readBody, requireJsonPost, sendJson } from './_lib/http';
 import { checkRateLimit } from './_lib/rate-limit';
 import { validateMicProfileRequest, validateMicProfileResponse } from '../src/shared/validation';
+import { applyEvidenceBasedMicFilterPolicy } from '../src/shared/micFilterPolicy';
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {
   response.setHeader('Cache-Control', 'no-store');
@@ -29,10 +30,11 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     if (!profile.success) {
       return sendJson(response, 502, { message: profile.message });
     }
+    const tailoredProfile = applyEvidenceBasedMicFilterPolicy(profile.value, validation.value.mode);
 
     response.setHeader('X-RateLimit-Remaining', String(rateLimit.remaining));
     return sendJson(response, 200, {
-      ...profile.value,
+      ...tailoredProfile,
       source: 'ai',
     });
   } catch (error) {

@@ -7,8 +7,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['"Instrument Sans Variable"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
-        display: ['"Doto"', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        display: ['"Archivo Variable"', '"Arial Black"', 'sans-serif'],
       },
       colors: {
         background: 'rgb(var(--background-rgb) / <alpha-value>)',
@@ -20,12 +21,15 @@ module.exports = {
         'primary-dim': 'rgb(var(--accent-dim-rgb) / <alpha-value>)',
         'primary-hover': 'rgb(var(--accent-hover-rgb) / <alpha-value>)',
         secondary: 'rgb(var(--secondary-rgb) / <alpha-value>)',
+        obs: 'rgb(var(--obs-rgb) / <alpha-value>)',
         warning: 'rgb(var(--warning-rgb) / <alpha-value>)',
         danger: 'rgb(var(--danger-rgb) / <alpha-value>)',
         glow: 'rgb(var(--accent-rgb) / <alpha-value>)',
-        text: '#dbe4f7',
-        'text-muted': '#9fb6c9',
-        'text-faint': '#5d7488',
+        paper: 'rgb(var(--paper) / <alpha-value>)',
+        ink: 'rgb(var(--ink) / <alpha-value>)',
+        text: '#f1efe8',
+        'text-muted': '#b8b8b0',
+        'text-faint': '#76796d',
       },
       letterSpacing: {
         terminal: '0.08em',

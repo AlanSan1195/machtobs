@@ -84,7 +84,7 @@ export function ImportButton() {
         type="button"
         onClick={handleImportClick}
         disabled={!canImport || isApplying}
-        className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 text-base font-bold lowercase tracking-terminal transition-all duration-200 ${
+        className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-200 ${
           canImport && !isApplying
             ? 'bg-primary text-background glow-primary hover:bg-primary-hover active:scale-[0.99]'
             : 'cursor-not-allowed border border-border bg-surface/45 text-text-muted'
@@ -124,7 +124,7 @@ export function ImportButton() {
             ))}
           </div>
         ) : (
-          <p>No se detectaron diferencias, pero obsee volvera a aplicar la configuracion recomendada.</p>
+          <p>No se detectaron diferencias, pero Match TO-OBS volvera a aplicar la configuracion recomendada.</p>
         )}
         <p>Se guardara un respaldo automatico de tu configuracion actual.</p>
       </ConfirmDialog>

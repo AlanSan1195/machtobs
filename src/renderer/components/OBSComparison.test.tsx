@@ -1,6 +1,22 @@
-import { describe, expect, it } from 'vitest';
-import { buildComparisonRows, formatEncoderName, isSameValue } from './OBSComparison';
+// @vitest-environment jsdom
+
+import React from 'react';
+import { act, cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildComparisonRows, formatEncoderName, isSameValue, OBSComparison } from './OBSComparison';
+import { useAppStore } from '../store';
 import type { AIRecommendation, OBSSettingsSnapshot } from '../../shared/types';
+
+vi.mock('../lib/app-api', () => ({
+  appAPI: {
+    obs: {
+      getLastBackup: vi.fn().mockResolvedValue({ success: false }),
+      restoreLastBackup: vi.fn(),
+      onConnectionChanged: vi.fn(() => () => undefined),
+    },
+  },
+}));
 
 const snapshot: OBSSettingsSnapshot = {
   streamServer: 'rtmp://live.twitch.tv/app',
@@ -73,6 +89,17 @@ describe('buildComparisonRows', () => {
     expect(rows.find((row) => row.label === 'Salida maestra / grabacion')?.recommended).toBe('3840x2160');
     expect(rows.find((row) => row.label === 'Encoder de grabacion')?.recommended).toBe('nvenc');
     expect(rows.find((row) => row.label === 'Bitrate de grabacion')?.recommended).toBe('60000');
+  });
+
+  it('etiqueta las filas base con el campo editable de la recomendacion', () => {
+    const rows = buildComparisonRows(snapshot, recommendations);
+
+    expect(rows.find((row) => row.label === 'Lienzo base')?.field).toBe('canvas_resolution');
+    expect(rows.find((row) => row.label === 'FPS')?.field).toBe('fps');
+    expect(rows.find((row) => row.label === 'Encoder del stream')?.field).toBe('encoder');
+    expect(rows.find((row) => row.label === 'Bitrate de grabacion')?.field).toBe('recording_bitrate');
+    expect(rows.find((row) => row.label === 'Calidad de grabacion')?.field).toBe('recording_quality');
+    expect(rows.every((row) => row.field !== undefined)).toBe(true);
   });
 
   it('no confunde el bitrate simple con el bitrate avanzado no expuesto por OBS', () => {
@@ -170,5 +197,45 @@ describe('formatEncoderName', () => {
   it('presenta los identificadores internos de Apple como nombres legibles', () => {
     expect(formatEncoderName('com.apple.videotoolbox.videoencoder.ave.avc')).toBe('Apple VT H.264 (hardware)');
     expect(formatEncoderName('com.apple.videotoolbox.videoencoder.ave.hevc')).toBe('Apple VT HEVC (hardware)');
+  });
+});
+
+describe('columna Recomendado editable', () => {
+  beforeEach(() => {
+    cleanup();
+    act(() => {
+      useAppStore.setState({
+        obsConnected: true,
+        obsSettingsSnapshot: { ...snapshot, streamResolution: '1920x1080', recordingResolution: '1920x1080' },
+        recommendation: {
+          source: 'local',
+          reasoning: 'test',
+          recommendations: { ...recommendations },
+        },
+        error: null,
+      });
+    });
+  });
+
+  it('permite cambiar un valor con select y conserva el baseline original', async () => {
+    const user = userEvent.setup();
+    render(<OBSComparison />);
+
+    await user.selectOptions(screen.getByLabelText('FPS recomendado'), '120');
+
+    const state = useAppStore.getState().recommendation;
+    expect(state?.recommendations.fps).toBe(120);
+    expect(state?.originalRecommendations?.fps).toBe(60);
+  });
+
+  it('permite editar el bitrate numerico', async () => {
+    const user = userEvent.setup();
+    render(<OBSComparison />);
+
+    const input = screen.getByLabelText('Bitrate del stream recomendado');
+    await user.clear(input);
+    await user.type(input, '8000');
+
+    expect(useAppStore.getState().recommendation?.recommendations.bitrate).toBe(8000);
   });
 });

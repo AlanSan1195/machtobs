@@ -78,14 +78,14 @@ export function SourcePreview({ sourceName, intervalMs = 1200, persistent = fals
         <>
           <img src={imageData!} alt={`Vista previa de ${sourceName}`} className="h-full w-full object-contain" />
           {persistent && (
-            <span className="absolute left-2 top-2 flex items-center gap-1.5 border border-border bg-black/70 px-2 py-0.5 text-[0.65rem] lowercase tracking-terminal text-text-muted">
+            <span className="absolute left-2 top-2 flex items-center gap-1.5 border border-paper/15 bg-black/80 px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/60">
               <span className="inline-block h-1.5 w-1.5 animate-pulse-dot bg-primary" aria-hidden="true" />
               {sourceName}
             </span>
           )}
         </>
       ) : (
-        <span className="px-4 text-center text-xs lowercase tracking-terminal text-text-faint">
+        <span className="px-4 text-center font-mono text-[0.65rem] uppercase tracking-[0.18em] text-text-faint">
           {persistent && !waiting ? 'asi se vera tu stream' : 'cargando vista previa…'}
         </span>
       )}

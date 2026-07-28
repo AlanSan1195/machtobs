@@ -17,6 +17,7 @@ import type {
   SceneItemSummary,
   SceneSourcesSnapshot,
   ScenesSnapshot,
+  SetCameraFrameInput,
   SourceKindFriendly,
 } from '../../shared/types';
 import { parseResolution } from '../../shared/validation';
@@ -54,7 +55,9 @@ import {
   ENUM_UNSAFE_KINDS,
   FRIENDLY_LABELS,
   buildUniqueInputName,
+  cameraFrameName,
   friendlyKindFromInputKind,
+  hexToObsColor,
   resolveAllSourceKinds,
   resolveSourceKind,
 } from './scene-helpers';
@@ -140,19 +143,19 @@ export class OBSManager {
           success: false,
           message: typeof responseData.error === 'string'
             ? responseData.error
-            : 'El complemento de Obsee rechazó los ajustes avanzados.',
+            : 'El complemento de Match TO-OBS rechazó los ajustes avanzados.',
         };
       }
 
       return {
         success: true,
-        message: 'Ajustes avanzados aplicados por el complemento de Obsee',
+        message: 'Ajustes avanzados aplicados por el complemento de Match TO-OBS',
         control: parseAdvancedOutputControl(responseData),
       };
     } catch {
       return {
         success: false,
-        message: 'El complemento nativo de Obsee no está instalado o no respondió.',
+        message: 'El complemento nativo de Match TO-OBS no está instalado o no respondió.',
       };
     }
   }
@@ -368,7 +371,7 @@ export class OBSManager {
       const candidate = await this.getPrimaryAudioInput();
 
       if (!candidate) {
-        return { success: false, message: 'obsee no encontro una entrada de microfono en OBS. Agrega un dispositivo Mic/Aux o una fuente Audio Input Capture y luego actualiza el audio.' };
+        return { success: false, message: 'Match TO-OBS no encontro una entrada de microfono en OBS. Agrega un dispositivo Mic/Aux o una fuente Audio Input Capture y luego actualiza el audio.' };
       }
 
       const inputSettings = await this.obs.call('GetInputSettings', { inputName: candidate.name });
@@ -414,7 +417,7 @@ export class OBSManager {
       const primaryDuckingTarget = duckingTargets[0];
 
       if (!monoSupported) {
-        warnings.push('OBS WebSocket no expone la casilla Mono de Propiedades avanzadas de audio para esta entrada. obsee puede aplicar filtros automaticamente, pero Mono debe activarse manualmente en OBS.');
+        warnings.push('OBS WebSocket no expone la casilla Mono de Propiedades avanzadas de audio para esta entrada. Match TO-OBS puede aplicar filtros automaticamente, pero Mono debe activarse manualmente en OBS.');
       }
 
       return {
@@ -1616,6 +1619,163 @@ export class OBSManager {
       return { success: true, message: 'Camara en formato facecam 1:1', warnings };
     } catch (error) {
       return { success: false, message: `No se pudo ajustar la camara: ${OBSManager.describeError(error)}`, warnings };
+    }
+  }
+
+  // Crea o actualiza una fuente ligeramente mayor que la facecam. Los marcos
+  // rectos y solidos usan Color Source; rounded o animados usan Browser Source
+  // Crea o actualiza una fuente de color ligeramente mayor que la facecam.
+  // El marco queda editable y se coloca inmediatamente debajo de la camara.
+  async setCameraFrame(input: SetCameraFrameInput): Promise<{
+    success: boolean;
+    message: string;
+    frameInputName?: string;
+    frameSceneItemId?: number;
+    warnings: string[];
+  }> {
+    if (!this.connected) return { ...this.notConnected(), warnings: [] };
+
+    const warnings: string[] = [];
+    try {
+      const transformResponse = await this.obs.call('GetSceneItemTransform', {
+        sceneName: input.sceneName,
+        sceneItemId: input.cameraSceneItemId,
+      });
+      const cameraTransform = transformResponse.sceneItemTransform as Record<string, unknown>;
+      const readTransformNumber = (key: string, fallback = 0) => (
+        typeof cameraTransform[key] === 'number' ? cameraTransform[key] as number : fallback
+      );
+      const positionX = readTransformNumber('positionX');
+      const positionY = readTransformNumber('positionY');
+      const scaleX = Math.abs(readTransformNumber('scaleX', 1));
+      const scaleY = Math.abs(readTransformNumber('scaleY', 1));
+      const cameraWidth = readTransformNumber('boundsWidth')
+        || readTransformNumber('width')
+        || readTransformNumber('sourceWidth') * scaleX;
+      const cameraHeight = readTransformNumber('boundsHeight')
+        || readTransformNumber('height')
+        || readTransformNumber('sourceHeight') * scaleY;
+
+      if (cameraWidth <= 0 || cameraHeight <= 0) {
+        return {
+          success: false,
+          message: 'OBS aun no reporta el tamano de la camara. Espera un momento e intenta de nuevo.',
+          warnings,
+        };
+      }
+
+      const thickness = input.config.thickness;
+      const frameWidth = Math.round(cameraWidth + thickness * 2);
+      const frameHeight = Math.round(cameraHeight + thickness * 2);
+      const desiredFrameName = cameraFrameName(input.cameraInputName);
+      const sceneItems = await this.obs.call('GetSceneItemList', { sceneName: input.sceneName });
+      const existingFrame = sceneItems.sceneItems
+        .filter(isRecord)
+        .find((item) => getStringValue(item, ['sourceName', 'name']) === desiredFrameName);
+
+      let frameInputName = desiredFrameName;
+      let frameSceneItemId = existingFrame && typeof existingFrame.sceneItemId === 'number'
+        ? existingFrame.sceneItemId
+        : undefined;
+      const existingFrameKind = existingFrame
+        ? getOptionalString(existingFrame.inputKind) ?? getOptionalString(existingFrame.sourceKind)
+        : undefined;
+      const kindResponse = await this.obs.call('GetInputKindList');
+      const availableKinds = (kindResponse.inputKinds ?? [])
+        .filter((kind): kind is string => typeof kind === 'string');
+      const colorKind = ['color_source_v3', 'color_source'].find((kind) => availableKinds.includes(kind));
+      const desiredKind = colorKind;
+
+      if (!desiredKind) {
+        return {
+          success: false,
+          message: 'Esta instalacion de OBS no incluye la fuente de color necesaria para crear el marco.',
+          warnings,
+        };
+      }
+
+      const inputSettings: OBSJsonSettings = {
+        color: hexToObsColor(input.config.color),
+        width: frameWidth,
+        height: frameHeight,
+      };
+
+      if (input.config.rounded) {
+        warnings.push('OBS aplicó el marco sólido como recto porque Browser Source no está generando textura.');
+      }
+
+      // OBS no permite cambiar el kind de una fuente. Si existe un marco Browser
+      // transparente de una version anterior, lo reemplazamos por color nativo.
+      if (frameSceneItemId !== undefined && existingFrameKind !== desiredKind) {
+        await this.obs.call('RemoveInput', { inputName: frameInputName });
+        frameSceneItemId = undefined;
+      }
+
+      if (frameSceneItemId === undefined) {
+        const existingNames = await this.getExistingInputNames();
+        frameInputName = buildUniqueInputName(desiredFrameName, existingNames);
+        const created = await this.obs.call('CreateInput', {
+          sceneName: input.sceneName,
+          inputName: frameInputName,
+          inputKind: desiredKind,
+          inputSettings,
+        });
+        frameSceneItemId = created.sceneItemId;
+      } else {
+        await this.obs.call('SetInputSettings', {
+          inputName: frameInputName,
+          inputSettings,
+          overlay: true,
+        });
+      }
+
+      await this.obs.call('SetSceneItemTransform', {
+        sceneName: input.sceneName,
+        sceneItemId: frameSceneItemId,
+        sceneItemTransform: {
+          positionX: positionX - thickness,
+          positionY: positionY - thickness,
+          boundsType: 'OBS_BOUNDS_STRETCH',
+          boundsWidth: frameWidth,
+          boundsHeight: frameHeight,
+          boundsAlignment: 0,
+          alignment: 5,
+        },
+      });
+
+      // CreateInput agrega la fuente arriba. Si el marco tapa la camara, lo
+      // movemos al indice que ocupaba esta; OBS desplaza la camara un nivel arriba.
+      const [cameraIndexResponse, frameIndexResponse] = await Promise.all([
+        this.obs.call('GetSceneItemIndex', {
+          sceneName: input.sceneName,
+          sceneItemId: input.cameraSceneItemId,
+        }),
+        this.obs.call('GetSceneItemIndex', {
+          sceneName: input.sceneName,
+          sceneItemId: frameSceneItemId,
+        }),
+      ]);
+      if (frameIndexResponse.sceneItemIndex > cameraIndexResponse.sceneItemIndex) {
+        await this.obs.call('SetSceneItemIndex', {
+          sceneName: input.sceneName,
+          sceneItemId: frameSceneItemId,
+          sceneItemIndex: cameraIndexResponse.sceneItemIndex,
+        });
+      }
+
+      return {
+        success: true,
+        message: 'Marco sólido aplicado',
+        frameInputName,
+        frameSceneItemId,
+        warnings,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `No se pudo aplicar el marco: ${OBSManager.describeError(error)}`,
+        warnings,
+      };
     }
   }
 
