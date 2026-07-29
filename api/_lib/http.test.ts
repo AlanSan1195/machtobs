@@ -55,12 +55,12 @@ describe('JSON request boundary', () => {
   test('allows canonical same-origin JSON POST requests', () => {
     expect(requireJsonPost(request({
       'content-type': 'application/json',
-      origin: 'https://obsee.vercel.app',
+      origin: 'https://match-to-obs.vercel.app',
     }))).toEqual({ allowed: true });
   });
 
   test('allows JSON parameters and exact configured origins', () => {
-    vi.stubEnv('OBSREC_ALLOWED_ORIGINS', 'https://preview.example.com,not a URL,https://ignored.example/path');
+    vi.stubEnv('MATCH_TO_OBS_ALLOWED_ORIGINS', 'https://preview.example.com,not a URL,https://ignored.example/path');
 
     expect(requireJsonPost(request({
       'content-type': 'Application/JSON; Charset=UTF-8',
@@ -79,9 +79,9 @@ describe('JSON request boundary', () => {
   });
 
   test.each([
-    'https://obsee.vercel.app.evil.test',
-    'https://evil-obsee.vercel.app',
-    'https://obsee.vercel.app/path',
+    'https://match-to-obs.vercel.app.evil.test',
+    'https://evil-match-to-obs.vercel.app',
+    'https://match-to-obs.vercel.app/path',
     'not an origin',
     'null',
   ])('rejects hostile or malformed origin %s', (origin) => {

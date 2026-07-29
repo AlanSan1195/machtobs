@@ -1,4 +1,4 @@
-# Apuntes de estudio — obsee
+# Apuntes de estudio — match-to-obs
 
 Lecciones aprendidas durante el desarrollo, explicadas a fondo. Cada sección
 es una clase corta: qué pasó, por qué pasa, y cómo se resolvió con código
@@ -49,31 +49,30 @@ del CSS lo delata: pasó de 45.86 kB (fuentes incrustadas) a 28.37 kB.
 ## WebSocket a `ws://localhost` desde una página HTTPS
 
 **La duda razonable**: una página servida por HTTPS no puede cargar recursos
-HTTP (mixed content). ¿Cómo es que obsee, servido desde
-`https://obsee.vercel.app`, se conecta a `ws://localhost:4455` (sin TLS)?
+HTTP (mixed content). ¿Cómo es que match-to-obs, servido desde
+`https://match-to-obs.vercel.app`, se conecta a `ws://localhost:4455` (sin TLS)?
 
 **La respuesta**: la especificación de mixed content trata `localhost` y
 `127.0.0.1` como **orígenes potencialmente confiables** (*potentially
 trustworthy origins*), porque el tráfico nunca sale de la máquina — no hay
 red que interceptar, así que exigir TLS no aporta seguridad. Chrome, Edge y
-Firefox implementan esta excepción; **Safari no**, y por eso obsee no lo
+Firefox implementan esta excepción; **Safari no**, y por eso match-to-obs no lo
 soporta.
 
 **El límite importante**: la excepción es solo para localhost. Un
 `ws://192.168.1.50:4455` (OBS en otra máquina de la LAN) sí es mixed content
-y el navegador lo bloquea. Consecuencia de arquitectura: obsee solo puede
+y el navegador lo bloquea. Consecuencia de arquitectura: match-to-obs solo puede
 controlar el OBS de la misma computadora — que resultó ser una *feature* de
 privacidad: el password de OBS y las escenas nunca viajan por internet.
 
-**Bonus*to*: `obs-websocket-js` v5 funciona en navegador sin cambios porque solo
-depende de `WebSocket` global y `cryp.subtle` (para el handshake de
-autenticación SHA-256), ambos nativos del navegador. Por eso la capa
-`obs-manager.ts` se migró de Electron casi verbatim.
+**Dato adicional**: `obs-websocket-js` v5 funciona en navegador porque solo
+depende de `WebSocket` global y `crypto.subtle` para el handshake de
+autenticación SHA-256, ambos nativos del navegador.
 
 ## Detección de hardware desde el navegador: qué se puede y qué no
 
 El navegador es una sandbox: no expone modelo de CPU ni RAM real. Lo que sí
-se puede detectar, y cómo lo usa obsee:
+se puede detectar, y cómo lo usa match-to-obs:
 
 | Dato | API | Fiabilidad |
 |---|---|---|
@@ -84,7 +83,7 @@ se puede detectar, y cómo lo usa obsee:
 | Modelo de CPU | — no existe API — | Formulario manual |
 
 `navigator.hardwareConcurrency` no es un inventario físico. El navegador puede
-reducir el valor por límites internos o privacidad, así que obsee sólo lo muestra
+reducir el valor por límites internos o privacidad, así que match-to-obs sólo lo muestra
 como pista y pide confirmar el número real de núcleos antes del análisis.
 
 ### GPU: el string ANGLE
@@ -99,7 +98,7 @@ if (model.includes(': ')) model = model.split(': ').pop();
 ```
 
 Detalle extra: en Apple Silicon la GPU delata la CPU — si la GPU es
-`Apple M4`, la CPU es un M4. obsee usa eso para pre-llenar el formulario:
+`Apple M4`, la CPU es un M4. match-to-obs usa eso para pre-llenar el formulario:
 
 ```ts
 cpuModelHint: gpu.vendor === 'Apple' && /Apple M\d/i.test(gpu.model)
@@ -127,33 +126,13 @@ queremos la cámara encendida, solo el permiso), y entonces enumerar — ahora
 con labels reales que se filtran contra una lista de palabras clave de
 capturadoras (`CAPTURE_KEYWORDS`).
 
-## De IPC de Electron a un módulo del navegador: la costura `appAPI`
-
-En Electron, el renderer hablaba con el proceso main vía IPC
-(`window.electronAPI.obs.connect(...)` → `ipcMain.handle('obs:connect')`).
-La migración web eliminó el proceso main, pero **conservó la forma exacta del
-API**: `src/renderer/lib/app-api.ts` exporta un objeto `appAPI` con la misma
-estructura `{ obs, system, ai }` que tenía `window.electronAPI`.
-
-**Por qué importa**: los 31 métodos del hook `useAppAPI.ts` y todos los
-componentes quedaron intactos — el diff de la migración se concentró en una
-sola costura en vez de regarse por toda la UI. Es el patrón *adapter*: cuando
-cambias la plataforma de abajo, mantén estable el contrato de arriba.
-
-Los reemplazos de infraestructura siguieron la misma idea (misma firma,
-distinta implementación):
-
-- Backups: archivo en disco → `localStorage['obsrec-backup']` (mismos
-  exports `saveBackup`/`loadBackup`, siguen siendo `async`).
-- Install ID: `localStorage['obsrec-install-id']` con `crypto.randomUUID()`.
-
 ## Proxy de Vite en dev: esquivar CORS sin tocar el backend
 
 En producción el frontend y las funciones serverless viven en el mismo
 dominio (same-origin, sin CORS). En dev, el frontend corre en
-`localhost:5173` y llamaría a `https://obsee.vercel.app/api/...` —
+`localhost:5173` y llamaría a `https://match-to-obs.vercel.app/api/...` —
 cross-origin, y como las peticiones llevan el header custom
-`X-OBSREC-Install-Id`, el navegador exige un preflight OPTIONS que el
+`X-Match-to-obs-Install-Id`, el navegador exige un preflight OPTIONS que el
 backend no maneja.
 
 En vez de agregar manejo de CORS/OPTIONS al backend solo para desarrollo, el
@@ -164,7 +143,7 @@ proxy de Vite hace que el navegador crea que habla con su propio origen
 server: {
   proxy: {
     '/api': {
-      target: 'https://obsee.vercel.app',
+      target: 'https://match-to-obs.vercel.app',
       changeOrigin: true,
     },
   },

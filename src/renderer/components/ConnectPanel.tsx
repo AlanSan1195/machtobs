@@ -68,7 +68,7 @@ export function ConnectPanel() {
             <span className="h-px max-w-24 flex-1 bg-primary/25" aria-hidden="true" />
           </div>
           <p className="relative mt-3 max-w-2xl text-[0.82rem] leading-[1.45] text-paper/50">
-            Abre OBS y activa el servidor WebSocket. Match TO-OBS leerá tu
+            Abre OBS y activa el servidor WebSocket. Match-to-obs leerá tu
             configuración para preparar el siguiente paso.
           </p>
           <div className="relative mt-3 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[0.52rem] uppercase tracking-[0.15em] text-paper/35">

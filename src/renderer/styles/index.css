@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- self-hosted fonts (offline-safe for Electron) ---- */
+/* ---- self-hosted fonts ---- */
 @font-face {
   font-family: 'Archivo Variable';
   font-style: normal;
@@ -47,7 +47,7 @@
 }
 
 :root {
-  /* Match TO-OBS — editorial signal system: ink, paper, OBS blue */
+  /* Match-to-obs — editorial signal system: ink, paper, OBS blue */
   --background-rgb: 9 10 10;         /* #090a0a ink */
   --surface-rgb: 19 20 19;           /* lifted ink */
   --surface-hover-rgb: 31 33 30;

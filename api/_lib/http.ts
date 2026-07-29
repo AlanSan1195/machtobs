@@ -18,7 +18,7 @@ type RequestBoundaryResult =
   | { allowed: false; status: 403 | 405 | 415; message: string };
 
 const DEFAULT_ALLOWED_ORIGINS = [
-  'https://obsee.vercel.app',
+  'https://match-to-obs.vercel.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];
@@ -45,7 +45,7 @@ function normalizeOrigin(value: string): string | null {
 }
 
 function getAllowedOrigins(): Set<string> {
-  const configured = (process.env.OBSREC_ALLOWED_ORIGINS ?? '')
+  const configured = (process.env.MATCH_TO_OBS_ALLOWED_ORIGINS ?? '')
     .split(',')
     .map(normalizeOrigin)
     .filter((origin): origin is string => origin !== null);

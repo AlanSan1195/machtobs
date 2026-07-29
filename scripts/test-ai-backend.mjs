@@ -1,4 +1,4 @@
-const baseUrl = (process.env.OBSREC_AI_API_URL || 'http://localhost:5173').replace(/\/+$/, '');
+const baseUrl = (process.env.MATCH_TO_OBS_AI_API_URL || 'http://localhost:5173').replace(/\/+$/, '');
 const shouldTestAI = process.argv.includes('--ai');
 
 async function post(pathname, body) {
@@ -6,7 +6,7 @@ async function post(pathname, body) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-OBSREC-Install-Id': '123e4567-e89b-42d3-a456-426614174000',
+      'X-Match-to-obs-Install-Id': '123e4567-e89b-42d3-a456-426614174000',
     },
     body: JSON.stringify(body),
   });
@@ -48,7 +48,7 @@ const recommendationShape = {
 };
 
 try {
-  console.log(`Testing OBSREC AI backend at ${baseUrl}`);
+  console.log(`Testing Match-to-obs AI backend at ${baseUrl}`);
 
   const health = await get('/api/health');
   assertOk(health.response.ok, `/api/health failed with ${health.response.status}`);
@@ -81,6 +81,6 @@ try {
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`Backend smoke test failed: ${message}`);
-  console.error('Run pnpm dev locally or set OBSREC_AI_API_URL to another backend URL.');
+  console.error('Run pnpm dev locally or set MATCH_TO_OBS_AI_API_URL to another backend URL.');
   process.exitCode = 1;
 }

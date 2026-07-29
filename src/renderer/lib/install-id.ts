@@ -1,4 +1,4 @@
-const INSTALL_ID_KEY = 'obsrec-install-id';
+const INSTALL_ID_KEY = 'match-to-obs-install-id';
 
 export async function getInstallId(): Promise<string> {
   const existing = localStorage.getItem(INSTALL_ID_KEY);

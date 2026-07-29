@@ -45,8 +45,7 @@ import type {
   SetCameraFrameInput,
 } from '../../shared/types';
 
-// Sustituye al puente IPC de Electron: misma forma que window.electronAPI,
-// pero llamando a obsManager y a la API serverless directamente desde el navegador.
+// Fachada única para OBS, hardware e IA desde el navegador.
 void obsManager.initialize();
 
 async function searchWeb(query: string): Promise<string[]> {

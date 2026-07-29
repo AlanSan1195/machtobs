@@ -8,24 +8,24 @@ export const defaultAudioConfig = {
   noiseSuppression: true,
 };
 
-export const obsrecFilterNames = {
-  noise: 'obsee - Noise Suppression',
-  noiseGate: 'obsee - Noise Gate',
-  gain: 'obsee - Gain',
-  compressor: 'obsee - Compressor',
-  limiter: 'obsee - Limiter',
-  ducking: 'obsee - Ducking',
+export const matchToObsFilterNames = {
+  noise: 'match-to-obs - Noise Suppression',
+  noiseGate: 'match-to-obs - Noise Gate',
+  gain: 'match-to-obs - Gain',
+  compressor: 'match-to-obs - Compressor',
+  limiter: 'match-to-obs - Limiter',
+  ducking: 'match-to-obs - Ducking',
 };
 
-// Cadena de voz que obsee gestiona en el microfono. Excluye 'ducking', que vive
+// Cadena de voz que match-to-obs gestiona en el microfono. Excluye 'ducking', que vive
 // en el audio de escritorio. Se usa para poder ELIMINAR filtros omitidos sin
 // tocar filtros propios del usuario.
 export const MANAGED_MIC_FILTER_NAMES = [
-  obsrecFilterNames.noise,
-  obsrecFilterNames.noiseGate,
-  obsrecFilterNames.gain,
-  obsrecFilterNames.compressor,
-  obsrecFilterNames.limiter,
+  matchToObsFilterNames.noise,
+  matchToObsFilterNames.noiseGate,
+  matchToObsFilterNames.gain,
+  matchToObsFilterNames.compressor,
+  matchToObsFilterNames.limiter,
 ];
 
 export type OBSJsonSettings = Record<string, string | number | boolean>;
@@ -252,14 +252,14 @@ export function getFilterSettings(config: OBSAudioConfig): Record<string, OBSAud
   const f = config.filters;
 
   if (f.noiseSuppression) {
-    filters[obsrecFilterNames.noise] = {
+    filters[matchToObsFilterNames.noise] = {
       kind: 'noise_suppress_filter',
       settings: { method: f.noiseSuppressionMethod ?? 'rnnoise' },
     };
   }
 
   if (f.noiseGate?.enabled) {
-    filters[obsrecFilterNames.noiseGate] = {
+    filters[matchToObsFilterNames.noiseGate] = {
       kind: 'noise_gate_filter',
       settings: {
         open_threshold: f.noiseGate.openThresholdDb,
@@ -272,14 +272,14 @@ export function getFilterSettings(config: OBSAudioConfig): Record<string, OBSAud
   }
 
   if (f.gainEnabled !== false) {
-    filters[obsrecFilterNames.gain] = {
+    filters[matchToObsFilterNames.gain] = {
       kind: 'gain_filter',
       settings: { db: f.gainDb },
     };
   }
 
   if (f.compressorEnabled !== false) {
-    filters[obsrecFilterNames.compressor] = {
+    filters[matchToObsFilterNames.compressor] = {
       kind: 'compressor_filter',
       settings: {
         ratio: f.compressorRatio,
@@ -293,7 +293,7 @@ export function getFilterSettings(config: OBSAudioConfig): Record<string, OBSAud
   }
 
   if (f.limiterEnabled !== false) {
-    filters[obsrecFilterNames.limiter] = {
+    filters[matchToObsFilterNames.limiter] = {
       kind: 'limiter_filter',
       settings: {
         threshold: f.limiterThresholdDb,
@@ -307,7 +307,7 @@ export function getFilterSettings(config: OBSAudioConfig): Record<string, OBSAud
 
 export function getDuckingFilter(micInputName: string): Record<string, OBSAudioFilterDefinition> {
   return {
-    [obsrecFilterNames.ducking]: {
+    [matchToObsFilterNames.ducking]: {
       kind: 'compressor_filter',
       settings: {
         ratio: 4,
@@ -321,7 +321,7 @@ export function getDuckingFilter(micInputName: string): Record<string, OBSAudioF
   };
 }
 
-export function areObsrecFiltersConfigured(filters: OBSAudioFilterSnapshot[]): boolean {
+export function areMatchToObsFiltersConfigured(filters: OBSAudioFilterSnapshot[]): boolean {
   const expectedConfig: OBSAudioConfig = {
     inputName: 'snapshot',
     mono: true,

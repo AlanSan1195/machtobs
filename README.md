@@ -1,12 +1,12 @@
-# Match TO-OBS
+# Match-to-obs
 
-![Match TO-OBS — configura OBS sin saber de OBS](docs/obsee-hero.png)
+![Match-to-obs — configura OBS sin saber de OBS](public/og-image.png)
 
-**Match TO-OBS** es una app web que configura OBS Studio por ti. Analiza tu computadora, pide a una IA la mejor configuración de stream/grabación para tu hardware, te muestra **qué va a cambiar y por qué**, y la aplica a OBS con un clic.
+**Match-to-obs** es una app web que configura OBS Studio por ti. Analiza tu computadora, pide a una IA la mejor configuración de stream/grabación para tu hardware, te muestra **qué va a cambiar y por qué**, y la aplica a OBS con un clic.
 
 ## Propósito
 
-OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: prueba, decide y aplica sin explicar nada. Match TO-OBS apunta a lo contrario — que entiendas tu configuración:
+OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: prueba, decide y aplica sin explicar nada. Match-to-obs apunta a lo contrario — que entiendas tu configuración:
 
 - Explica **por qué** cada ajuste tiene sentido para tu equipo.
 - Muestra un **diff** entre tu configuración actual y la recomendada antes de tocar nada.
@@ -34,9 +34,9 @@ Para probar deliberadamente contra la API desplegada usa `pnpm run dev:remote`; 
 
 ### Seguridad de la API desplegada
 
-Los endpoints de IA aceptan únicamente `POST` con `Content-Type: application/json`. Los navegadores también deben enviar un `Origin` permitido. `https://obsee.vercel.app`, `http://localhost:5173` y `http://127.0.0.1:5173` están incluidos; previews o dominios propios se agregan como orígenes exactos, separados por comas, en `OBSREC_ALLOWED_ORIGINS`. No se admiten comodines.
+Los endpoints de IA aceptan únicamente `POST` con `Content-Type: application/json`. Los navegadores también deben enviar un `Origin` permitido. `https://match-to-obs.vercel.app`, `http://localhost:5173` y `http://127.0.0.1:5173` están incluidos; previews o dominios propios se agregan como orígenes exactos, separados por comas, en `MATCH_TO_OBS_ALLOWED_ORIGINS`. No se admiten comodines.
 
-Toda implementación de producción con Groq/Tavily requiere `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. Si cualquiera falta o Upstash no responde, la IA remota falla de forma segura y la aplicación utiliza su recomendación local. `OBSREC_ALLOW_MEMORY_RATE_LIMIT=true` sólo habilita un contador temporal durante desarrollo local; Vercel y `NODE_ENV=production` siempre ignoran esa opción. `OBSREC_AI_DAILY_LIMIT` acepta enteros de 1 a 1000 y vuelve al valor seguro 20 si la configuración no es válida.
+Toda implementación de producción con Groq/Tavily requiere `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. Si cualquiera falta o Upstash no responde, la IA remota falla de forma segura y la aplicación utiliza su recomendación local. `MATCH_TO_OBS_ALLOW_MEMORY_RATE_LIMIT=true` sólo habilita un contador temporal durante desarrollo local; Vercel y `NODE_ENV=production` siempre ignoran esa opción. `MATCH_TO_OBS_AI_DAILY_LIMIT` acepta enteros de 1 a 1000 y vuelve al valor seguro 20 si la configuración no es válida.
 
 Producción también envía una Content Security Policy estricta como header. `pnpm run security:csp` comprueba sus directivas, el hash exacto del JSON-LD de SEO, la conexión WebSocket limitada a localhost y la ausencia de scripts inline inesperados antes del build de Vercel.
 
@@ -65,7 +65,7 @@ Decisiones vigentes:
 - **IA local durante desarrollo**: Vite ejecuta los mismos handlers de `api/` contra Ollama; Groq solo se usa en producción o con `pnpm run dev:remote`.
 - **Respaldo antes de tocar**: la configuración actual de OBS se guarda en `localStorage` y se puede restaurar desde la pestaña de comparación.
 - **Salida avanzada real**: el complemento opcional de
-  [Obsee Advanced Output Control](obs-plugin/README.md) lee y aplica bitrate,
+  [Match-to-obs Advanced Output Control](obs-plugin/README.md) lee y aplica bitrate,
   control de tasa, calidad, keyframes, perfil, B-frames y AQ de los encoders de
   emisión y grabación. Sin él, la interfaz marca esos valores como manuales en
   lugar de confundirlos con la configuración antigua de Salida simple.
@@ -74,12 +74,11 @@ Decisiones vigentes:
 
 
 - **CSP vs `assetsInlineLimit` de Vite**: Vite incrusta assets < 4 KB como `data:` URIs, y una CSP con `default-src 'self'` sin `font-src` los bloquea — solo en producción, porque el dev server no incrusta. Fix: `assetsInlineLimit: 0`. → [apuntes](docs/apuntes.md#csp--vite-assetsinlinelimit-por-qué-las-fuentes-se-veían-en-local-pero-no-en-producción)
-- **`ws://localhost` desde HTTPS**: localhost es un "origen potencialmente confiable", exento de la regla de mixed content (excepto en Safari); IPs de LAN sí se bloquean — por eso Match TO-OBS solo controla el OBS local. → [apuntes](docs/apuntes.md#websocket-a-wslocalhost-desde-una-página-https)
+- **`ws://localhost` desde HTTPS**: localhost es un "origen potencialmente confiable", exento de la regla de mixed content (excepto en Safari); IPs de LAN sí se bloquean — por eso Match-to-obs solo controla el OBS local. → [apuntes](docs/apuntes.md#websocket-a-wslocalhost-desde-una-página-https)
 - **Detección de hardware en navegador**: la GPU llega envuelta en un string ANGLE que hay que parsear; `deviceMemory` satura en 8 GB por anti-fingerprinting; `enumerateDevices()` no da labels sin permiso de cámara previo. → [apuntes](docs/apuntes.md#detección-de-hardware-desde-el-navegador-qué-se-puede-y-qué-no)
-- **Patrón adapter en la migración**: `appAPI` conservó la forma exacta del viejo `window.electronAPI`, así que cambiar Electron por navegador tocó una sola costura, no toda la UI. → [apuntes](docs/apuntes.md#de-ipc-de-electron-a-un-módulo-del-navegador-la-costura-appapi)
 - **Proxy de Vite contra CORS**: en dev, `/api` se reenvía a producción para que el navegador vea same-origin y no dispare preflight por el header custom. → [apuntes](docs/apuntes.md#proxy-de-vite-en-dev-esquivar-cors-sin-tocar-el-backend)
 - **Regla `VITE_*`**: toda variable con ese prefijo se incrusta en el bundle público; los secretos viven solo en el serverless. → [apuntes](docs/apuntes.md#secretos-en-apps-frontend-la-regla-vite_)
 
 
 
-GitHub: <https://github.com/AlanSan1195/obsee>
+GitHub: <https://github.com/AlanSan1195/match-to-obs>

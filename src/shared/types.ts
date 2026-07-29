@@ -169,7 +169,7 @@ export interface OBSAudioSettingsSnapshot {
     duckingConfigured: boolean;
   }[];
   filters: OBSAudioFilterSnapshot[];
-  obsrecFiltersConfigured: boolean;
+  matchToObsFiltersConfigured: boolean;
   monoConfigured: boolean;
   monoSupported: boolean;
   warnings: string[];
@@ -229,7 +229,7 @@ export interface OBSSettingsSnapshot {
 
 export interface OBSBackup {
   createdAt: string;
-  appliedByObsrec: true;
+  appliedByMatchToObs: true;
   snapshot: OBSSettingsSnapshot;
 }
 

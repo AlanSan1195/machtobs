@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-OBSREC (package `obsee`) is a web app for OBS configuration guidance, deployed on Vercel. The React/Vite frontend lives in `src/renderer/`, with UI components in `src/renderer/components/`, hooks in `src/renderer/hooks/`, browser-side services (OBS WebSocket manager, hardware detection, localStorage stores, AI client) in `src/renderer/lib/`, and Tailwind styles in `src/renderer/styles/`. Shared types, validation, and local recommendation logic live in `src/shared/`. Serverless API functions (Groq-backed AI, Tavily web search, rate limiting) live in `api/`. Tests are colocated as `*.test.ts` or `*.test.tsx`. Production build output goes to `dist/`.
+Match-to-obs (package `match-to-obs`) is a web app for OBS configuration guidance, deployed on Vercel. The React/Vite frontend lives in `src/renderer/`, with UI components in `src/renderer/components/`, hooks in `src/renderer/hooks/`, browser-side services (OBS WebSocket manager, hardware detection, localStorage stores, AI client) in `src/renderer/lib/`, and Tailwind styles in `src/renderer/styles/`. Shared types, validation, and local recommendation logic live in `src/shared/`. Serverless API functions (Groq-backed AI, Tavily web search, rate limiting) live in `api/`. Tests are colocated as `*.test.ts` or `*.test.tsx`. Production build output goes to `dist/`.
 
 ## Build, Test, and Development Commands
 
@@ -28,4 +28,4 @@ Recent history uses short, direct commit messages, often Spanish and occasionall
 
 ## Security & Configuration Tips
 
-Do not commit `.env` or secrets. Keep `GROQ_API_KEY`, `TAVILY_API_KEY`, and rate-limit secrets only in the Vercel backend environment — never in frontend code (`VITE_*` vars are public). The app talks to OBS over `ws://localhost:4455`; browsers only allow this from Chrome/Edge/Firefox (Safari blocks it). Treat OBS mutations carefully: validate inputs, preserve backup behavior (localStorage `obsrec-backup`), and document risky changes in the PR.
+Do not commit `.env` or secrets. Keep `GROQ_API_KEY`, `TAVILY_API_KEY`, and rate-limit secrets only in the Vercel backend environment — never in frontend code (`VITE_*` vars are public). The app talks to OBS over `ws://localhost:4455`; browsers only allow this from Chrome/Edge/Firefox (Safari blocks it). Treat OBS mutations carefully: validate inputs, preserve backup behavior (localStorage `match-to-obs-backup`), and document risky changes in the PR.

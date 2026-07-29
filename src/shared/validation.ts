@@ -613,7 +613,7 @@ export function validateAIRecommendation(value: unknown): ValidationResult<Omit<
 }
 
 export function validateOBSBackup(value: unknown): ValidationResult<OBSBackup> {
-  if (!isRecord(value) || !isNonEmptyString(value.createdAt) || value.appliedByObsrec !== true || !isRecord(value.snapshot)) {
+  if (!isRecord(value) || !isNonEmptyString(value.createdAt) || value.appliedByMatchToObs !== true || !isRecord(value.snapshot)) {
     return { success: false, message: 'OBS backup is incomplete.' };
   }
 
@@ -671,7 +671,7 @@ export function validateOBSBackup(value: unknown): ValidationResult<OBSBackup> {
     success: true,
     value: {
       createdAt: value.createdAt.trim(),
-      appliedByObsrec: true,
+      appliedByMatchToObs: true,
       snapshot: backupSnapshot,
     },
   };

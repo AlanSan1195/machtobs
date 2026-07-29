@@ -29,7 +29,7 @@ import {
   type OBSAdvancedApplyRequest,
 } from './obs-advanced-control';
 import {
-  areObsrecFiltersConfigured,
+  areMatchToObsFiltersConfigured,
   collectDuckingInputCandidates,
   getBooleanValue,
   getDuckingFilter,
@@ -45,7 +45,7 @@ import {
   getStringValue,
   isAudioInputKind,
   isRecord,
-  obsrecFilterNames,
+  matchToObsFilterNames,
   scoreAudioDevice,
   scoreAudioInput,
   type OBSJsonSettings,
@@ -116,7 +116,7 @@ export class OBSManager {
   private async getAdvancedOutputControl(): Promise<OBSAdvancedOutputControl | undefined> {
     try {
       const response = await this.obs.call('CallVendorRequest', {
-        vendorName: 'obsee',
+        vendorName: 'match-to-obs',
         requestType: 'GetAdvancedOutputConfig',
         requestData: {},
       });
@@ -133,7 +133,7 @@ export class OBSManager {
   }> {
     try {
       const response = await this.obs.call('CallVendorRequest', {
-        vendorName: 'obsee',
+        vendorName: 'match-to-obs',
         requestType: 'ApplyAdvancedOutputConfig',
         requestData: request,
       });
@@ -143,19 +143,19 @@ export class OBSManager {
           success: false,
           message: typeof responseData.error === 'string'
             ? responseData.error
-            : 'El complemento de Match TO-OBS rechazó los ajustes avanzados.',
+            : 'El complemento de Match-to-obs rechazó los ajustes avanzados.',
         };
       }
 
       return {
         success: true,
-        message: 'Ajustes avanzados aplicados por el complemento de Match TO-OBS',
+        message: 'Ajustes avanzados aplicados por el complemento de Match-to-obs',
         control: parseAdvancedOutputControl(responseData),
       };
     } catch {
       return {
         success: false,
-        message: 'El complemento nativo de Match TO-OBS no está instalado o no respondió.',
+        message: 'El complemento nativo de Match-to-obs no está instalado o no respondió.',
       };
     }
   }
@@ -371,7 +371,7 @@ export class OBSManager {
       const candidate = await this.getPrimaryAudioInput();
 
       if (!candidate) {
-        return { success: false, message: 'Match TO-OBS no encontro una entrada de microfono en OBS. Agrega un dispositivo Mic/Aux o una fuente Audio Input Capture y luego actualiza el audio.' };
+        return { success: false, message: 'Match-to-obs no encontro una entrada de microfono en OBS. Agrega un dispositivo Mic/Aux o una fuente Audio Input Capture y luego actualiza el audio.' };
       }
 
       const inputSettings = await this.obs.call('GetInputSettings', { inputName: candidate.name });
@@ -417,7 +417,7 @@ export class OBSManager {
       const primaryDuckingTarget = duckingTargets[0];
 
       if (!monoSupported) {
-        warnings.push('OBS WebSocket no expone la casilla Mono de Propiedades avanzadas de audio para esta entrada. Match TO-OBS puede aplicar filtros automaticamente, pero Mono debe activarse manualmente en OBS.');
+        warnings.push('OBS WebSocket no expone la casilla Mono de Propiedades avanzadas de audio para esta entrada. Match-to-obs puede aplicar filtros automaticamente, pero Mono debe activarse manualmente en OBS.');
       }
 
       return {
@@ -443,7 +443,7 @@ export class OBSManager {
             : undefined,
           duckingTargets,
           filters,
-          obsrecFiltersConfigured: areObsrecFiltersConfigured(filters),
+          matchToObsFiltersConfigured: areMatchToObsFiltersConfigured(filters),
           monoConfigured,
           monoSupported,
           warnings,
@@ -913,7 +913,7 @@ export class OBSManager {
       const filters = await this.getAudioFilters(candidate.inputName);
       return {
         ...candidate,
-        duckingConfigured: filters.some((filter) => filter.name === obsrecFilterNames.ducking && filter.enabled),
+        duckingConfigured: filters.some((filter) => filter.name === matchToObsFilterNames.ducking && filter.enabled),
       };
     }));
   }
@@ -972,18 +972,18 @@ export class OBSManager {
 
     if (config.ducking?.enabled === false) {
       const existingFilters = await this.getAudioFilters(desktopInputName);
-      const existingFilter = existingFilters.find((filter) => filter.name === obsrecFilterNames.ducking);
+      const existingFilter = existingFilters.find((filter) => filter.name === matchToObsFilterNames.ducking);
       if (!existingFilter) return;
 
       try {
         await this.obs.call('SetSourceFilterEnabled', {
           sourceName: desktopInputName,
-          filterName: obsrecFilterNames.ducking,
+          filterName: matchToObsFilterNames.ducking,
           filterEnabled: false,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        warnings.push(`${obsrecFilterNames.ducking}: ${errorMessage}`);
+        warnings.push(`${matchToObsFilterNames.ducking}: ${errorMessage}`);
       }
     }
   }
@@ -992,7 +992,7 @@ export class OBSManager {
     sourceName: string,
     expectedFilters: Record<string, { kind: string; settings: OBSJsonSettings }>,
     warnings: string[],
-    // Nombres de filtros gestionados por obsee que deben eliminarse si ya no
+    // Nombres de filtros gestionados por match-to-obs que deben eliminarse si ya no
     // estan en el set esperado (honra "omitir"). Acotado para no tocar filtros
     // del usuario ni el ducking.
     removableManagedNames: string[] = [],
@@ -1262,7 +1262,7 @@ export class OBSManager {
       }
 
       const existing = await this.getExistingInputNames();
-      tempInputName = buildUniqueInputName('obsee captura temporal', existing);
+      tempInputName = buildUniqueInputName('match-to-obs captura temporal', existing);
       await this.obs.call('CreateInput', {
         sceneName,
         inputName: tempInputName,

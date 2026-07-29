@@ -330,7 +330,7 @@ describe('OBSManager con salida avanzada', () => {
     ]) => request === 'CallVendorRequest' && data?.requestType === 'ApplyAdvancedOutputConfig');
 
     expect(vendorApply?.[1]).toMatchObject({
-      vendorName: 'obsee',
+      vendorName: 'match-to-obs',
       requestData: {
         stream: {
           rate_control: 'CBR',

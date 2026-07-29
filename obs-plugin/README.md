@@ -1,4 +1,4 @@
-# Obsee Advanced Output Control
+# Match-to-obs Advanced Output Control
 
 Complemento nativo de OBS que cubre la parte que `obs-websocket` no expone:
 los ajustes internos de los encoders de **Salida > Avanzado > Emisión** y
@@ -10,12 +10,12 @@ los ajustes internos de los encoders de **Salida > Avanzado > Emisión** y
 - Combina esos valores con los predeterminados reales del encoder. Esto permite
   detectar opciones que OBS muestra en la interfaz aunque no estén escritas en
   el JSON.
-- Expone a Obsee los vendors `GetAdvancedOutputConfig` y
+- Expone a Match-to-obs los vendors `GetAdvancedOutputConfig` y
   `ApplyAdvancedOutputConfig`.
 - Aplica bitrate, control de tasa, calidad, límite de bitrate, ventana máxima,
   intervalo de fotogramas clave, perfil, B-frames y AQ espacial.
 - Escribe con `obs_data_save_json_safe`; OBS conserva una copia
-  `.obsee-backup` del archivo anterior.
+  `.match-to-obs-backup` del archivo anterior.
 - Rechaza cambios mientras una transmisión o grabación está activa.
 - Nunca lee ni devuelve claves de transmisión, rutas de grabación, escenas o
   credenciales.
@@ -41,17 +41,17 @@ cmake -S obs-plugin -B obs-plugin/build \
 cmake --build obs-plugin/build --config RelWithDebInfo
 ```
 
-El resultado esperado es `obsee-advanced-control.plugin`.
+El resultado esperado es `match-to-obs-advanced-control.plugin`.
 
 ## Instalar
 
 Con OBS cerrado, copia el bundle compilado a:
 
 ```text
-~/Library/Application Support/obs-studio/plugins/obsee-advanced-control.plugin
+~/Library/Application Support/obs-studio/plugins/match-to-obs-advanced-control.plugin
 ```
 
-Luego abre OBS y reinicia la conexión en Obsee. En la comparación debe aparecer
+Luego abre OBS y reinicia la conexión en Match-to-obs. En la comparación debe aparecer
 `Complemento avanzado activo`, junto con los valores reales del stream y la
 grabación.
 
@@ -61,7 +61,7 @@ Lectura:
 
 ```json
 {
-  "vendorName": "obsee",
+  "vendorName": "match-to-obs",
   "requestType": "GetAdvancedOutputConfig",
   "requestData": {}
 }
@@ -71,7 +71,7 @@ Aplicación:
 
 ```json
 {
-  "vendorName": "obsee",
+  "vendorName": "match-to-obs",
   "requestType": "ApplyAdvancedOutputConfig",
   "requestData": {
     "stream": {

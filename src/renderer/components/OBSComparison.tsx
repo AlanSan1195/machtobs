@@ -260,30 +260,45 @@ type RecommendedEditorProps = {
   onChange: (field: AIRecommendationField, value: string | number) => void;
 };
 
+function NumericRecommendationEditor({ row, onChange }: RecommendedEditorProps) {
+  const field = row.field;
+  const [draft, setDraft] = React.useState(row.recommended);
+
+  React.useEffect(() => {
+    setDraft(row.recommended);
+  }, [row.recommended]);
+
+  if (field !== 'bitrate' && field !== 'recording_bitrate') return null;
+
+  return (
+    <span className="flex items-center gap-2">
+      <input
+        type="number"
+        min={500}
+        max={field === 'bitrate' ? 100000 : 200000}
+        step={500}
+        value={draft}
+        aria-label={`${row.label} recomendado`}
+        onChange={(event) => {
+          const nextDraft = event.target.value;
+          setDraft(nextDraft);
+          const value = Number(nextDraft);
+          if (Number.isFinite(value) && value > 0) onChange(field, value);
+        }}
+        className={`${editableCellClasses} min-w-0 flex-1`}
+      />
+      <span className="shrink-0 text-xs text-paper/40">kbps</span>
+    </span>
+  );
+}
+
 /** Celda "Recomendado" editable: escribe directo en la recomendacion del store. */
 function RecommendedEditor({ row, onChange }: RecommendedEditorProps) {
   const field = row.field;
   if (!field) return null;
 
   if (field === 'bitrate' || field === 'recording_bitrate') {
-    return (
-      <span className="flex items-center gap-2">
-        <input
-          type="number"
-          min={500}
-          max={field === 'bitrate' ? 100000 : 200000}
-          step={500}
-          value={row.recommended}
-          aria-label={`${row.label} recomendado`}
-          onChange={(event) => {
-            const value = Number(event.target.value);
-            if (Number.isFinite(value) && value > 0) onChange(field, value);
-          }}
-          className={`${editableCellClasses} min-w-0 flex-1`}
-        />
-        <span className="shrink-0 text-xs text-paper/40">kbps</span>
-      </span>
-    );
+    return <NumericRecommendationEditor row={row} onChange={onChange} />;
   }
 
   const selectProps = {
@@ -492,7 +507,7 @@ export function OBSComparison() {
         onConfirm={handleRestore}
       >
         <p>Restaurar la configuracion guardada el {readableBackupDate}?</p>
-        <p>Match TO-OBS volvera a aplicar los valores de video, salida y servidor guardados en el ultimo respaldo.</p>
+        <p>Match-to-obs volvera a aplicar los valores de video, salida y servidor guardados en el ultimo respaldo.</p>
       </ConfirmDialog>
     </Section>
   );

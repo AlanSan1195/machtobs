@@ -1,6 +1,4 @@
 allowBuilds:
-  electron: true
-  electron-winstaller: true
   esbuild: true
 overrides:
   tmp@<0.2.6: ^0.2.6

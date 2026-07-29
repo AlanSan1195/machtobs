@@ -41,7 +41,7 @@ export function createDefaultAudioConfig(inputName: string, device?: OBSAudioDev
   };
 }
 
-// Traduce la recomendacion de la IA al formato de filtros que aplica obsee.
+// Traduce la recomendacion de la IA al formato de filtros que aplica match-to-obs.
 function filtersFromProfile(profile: MicProfileResponse): OBSAudioFilterConfig {
   const f = profile.filters;
   return {
@@ -161,7 +161,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         setDetectionMessage(result.message);
       }
     }).catch(() => {
-      setDetectionMessage('Match TO-OBS no pudo leer las entradas de audio desde OBS.');
+      setDetectionMessage('Match-to-obs no pudo leer las entradas de audio desde OBS.');
     });
   }, [autoDetectTried, obsConnected, obsAudioSnapshot, refreshAudioSnapshot]);
 
@@ -306,8 +306,8 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         <div className="rounded-none border border-border bg-surface/45 p-4">
           <p className="text-sm text-text">
             {obsConnected
-              ? 'Match TO-OBS esta buscando un dispositivo Mic/Aux o una fuente Audio Input Capture para aplicar la configuracion de voz.'
-              : 'Conecta OBS para detectar tu microfono y aplicar la configuracion de voz de Match TO-OBS.'}
+              ? 'Match-to-obs esta buscando un dispositivo Mic/Aux o una fuente Audio Input Capture para aplicar la configuracion de voz.'
+              : 'Conecta OBS para detectar tu microfono y aplicar la configuracion de voz de Match-to-obs.'}
           </p>
           {detectionMessage && (
             <p className="mt-3 text-sm text-warning">{detectionMessage}</p>
@@ -322,7 +322,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
   const syncFrames = [1, 2, 3, 4, 5, 6];
   const selectedDuckingTargetInfo = obsAudioSnapshot.duckingTargets.find((target) => target.inputName === selectedDuckingTarget);
   const stageTwoActions = [
-    noiseSuppression ? 'Supresion de ruido RNNoise' : 'Sin supresion de ruido Match TO-OBS',
+    noiseSuppression ? 'Supresion de ruido RNNoise' : 'Sin supresion de ruido Match-to-obs',
     monitorType === 'OBS_MONITORING_TYPE_NONE' ? 'Sin monitoreo de microfono' : monitorType === 'OBS_MONITORING_TYPE_MONITOR_ONLY' ? 'Solo monitoreo' : 'Monitorizar y emitir',
     `Sync de audio: ${syncOffsetMs} ms`,
     duckingEnabled && selectedDuckingTarget ? `Ducking sobre ${selectedDuckingTarget}` : 'Ducking desactivado',
@@ -487,7 +487,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
                 <span className="block text-xs text-text-muted">
                   {obsAudioSnapshot.duckingTargets.length > 0
                     ? `Aplica un compresor a ${selectedDuckingTarget || obsAudioSnapshot.duckingTargets[0].inputName} que reduce su volumen cuando el microfono detecta voz.`
-                    : 'Match TO-OBS no encontro una fuente de musica o audio de escritorio. Agrega una fuente multimedia, VLC o audio de escritorio y pulsa Actualizar OBS.'}
+                    : 'Match-to-obs no encontro una fuente de musica o audio de escritorio. Agrega una fuente multimedia, VLC o audio de escritorio y pulsa Actualizar OBS.'}
                 </span>
               </span>
             </label>
@@ -558,15 +558,15 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           void handleApplyWithPreview();
         }}
       >
-        <p>Aplicar configuracion de voz Match TO-OBS a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
+        <p>Aplicar configuracion de voz Match-to-obs a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
         <p>
           {obsAudioSnapshot.monoSupported
             ? 'Se activara Mono para esta entrada.'
-            : 'OBS WebSocket no expone Mono para esta entrada, asi que Match TO-OBS lo dejara como paso manual en OBS.'}
+            : 'OBS WebSocket no expone Mono para esta entrada, asi que Match-to-obs lo dejara como paso manual en OBS.'}
         </p>
         {usingAi && micProfile && (
           <>
-            <p>Match TO-OBS aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
+            <p>Match-to-obs aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
             <ul className="list-disc space-y-1 pl-5">
               {aiFilterSummary(micProfile).map((line) => (
                 <li key={line}>{line}</li>

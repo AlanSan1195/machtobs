@@ -79,7 +79,7 @@ const validRecommendation = {
 
 const validBackup = {
   createdAt: '2026-06-10T12:00:00.000Z',
-  appliedByObsrec: true,
+  appliedByMatchToObs: true,
   snapshot: {
     streamServer: 'rtmp://live.twitch.tv/app',
     baseResolution: '1920x1080',

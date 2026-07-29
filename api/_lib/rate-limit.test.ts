@@ -7,7 +7,7 @@ function request(installId = VALID_INSTALL_ID, ip = '203.0.113.10'): ApiRequest 
   return {
     method: 'POST',
     headers: {
-      'x-obsrec-install-id': installId,
+      'x-match-to-obs-install-id': installId,
       'x-forwarded-for': ip,
     },
   };
@@ -17,8 +17,8 @@ function configureRemoteProvider() {
   vi.stubEnv('AI_PROVIDER', 'groq');
   vi.stubEnv('NODE_ENV', 'production');
   vi.stubEnv('VERCEL', '1');
-  vi.stubEnv('OBSREC_AI_DAILY_LIMIT', '20');
-  vi.stubEnv('OBSREC_ALLOW_MEMORY_RATE_LIMIT', 'false');
+  vi.stubEnv('MATCH_TO_OBS_AI_DAILY_LIMIT', '20');
+  vi.stubEnv('MATCH_TO_OBS_ALLOW_MEMORY_RATE_LIMIT', 'false');
   vi.stubEnv('UPSTASH_REDIS_REST_URL', '');
   vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '');
 }
@@ -77,8 +77,8 @@ describe('distributed rate limit', () => {
   test('explicit local memory fallback enforces the configured limit', async () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('VERCEL', '');
-    vi.stubEnv('OBSREC_ALLOW_MEMORY_RATE_LIMIT', 'true');
-    vi.stubEnv('OBSREC_AI_DAILY_LIMIT', '1');
+    vi.stubEnv('MATCH_TO_OBS_ALLOW_MEMORY_RATE_LIMIT', 'true');
+    vi.stubEnv('MATCH_TO_OBS_AI_DAILY_LIMIT', '1');
     const { checkRateLimit } = await import('./rate-limit');
 
     await expect(checkRateLimit(request())).resolves.toMatchObject({ allowed: true, remaining: 0 });
@@ -88,7 +88,7 @@ describe('distributed rate limit', () => {
   test('Vercel ignores the local memory opt-in', async () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('VERCEL', '1');
-    vi.stubEnv('OBSREC_ALLOW_MEMORY_RATE_LIMIT', 'true');
+    vi.stubEnv('MATCH_TO_OBS_ALLOW_MEMORY_RATE_LIMIT', 'true');
     const { checkRateLimit } = await import('./rate-limit');
 
     await expect(checkRateLimit(request())).resolves.toMatchObject({ allowed: false });

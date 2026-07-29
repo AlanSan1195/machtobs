@@ -1,7 +1,7 @@
 import type { OBSBackup, OBSSettingsSnapshot } from '../../shared/types';
 import { validateOBSBackup } from '../../shared/validation';
 
-const BACKUP_KEY = 'obsrec-backup';
+const BACKUP_KEY = 'match-to-obs-backup';
 
 function sanitizeSnapshot(snapshot: OBSSettingsSnapshot): OBSSettingsSnapshot {
   return {
@@ -25,7 +25,7 @@ function sanitizeSnapshot(snapshot: OBSSettingsSnapshot): OBSSettingsSnapshot {
 export async function saveBackup(snapshot: OBSSettingsSnapshot): Promise<void> {
   const backup: OBSBackup = {
     createdAt: new Date().toISOString(),
-    appliedByObsrec: true,
+    appliedByMatchToObs: true,
     snapshot: sanitizeSnapshot(snapshot),
   };
 

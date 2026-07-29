@@ -5,13 +5,13 @@
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleExecutable</key>
-  <string>obsee-advanced-control</string>
+  <string>match-to-obs-advanced-control</string>
   <key>CFBundleIdentifier</key>
-  <string>app.obsee.advanced-control</string>
+  <string>app.match-to-obs.advanced-control</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Obsee Advanced Output Control</string>
+  <string>Match-to-obs Advanced Output Control</string>
   <key>CFBundlePackageType</key>
   <string>BNDL</string>
   <key>CFBundleShortVersionString</key>

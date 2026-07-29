@@ -1,33 +1,33 @@
 import { describe, expect, it } from 'vitest';
 import {
-  areObsrecFiltersConfigured,
+  areMatchToObsFiltersConfigured,
   collectDuckingInputCandidates,
   getAdvancedEncoderId,
   getSimpleEncoderId,
   getSimpleRecordingQuality,
   getStreamServer,
   getFilterSettings,
-  obsrecFilterNames,
+  matchToObsFilterNames,
   scoreAudioDevice,
 } from './obs-helpers';
 import type { OBSAudioConfig, OBSAudioFilterSnapshot } from '../../shared/types';
 
-function defaultObsrecFilters(): OBSAudioFilterSnapshot[] {
+function defaultMatchToObsFilters(): OBSAudioFilterSnapshot[] {
   return [
     {
-      name: obsrecFilterNames.noise,
+      name: matchToObsFilterNames.noise,
       kind: 'noise_suppress_filter',
       enabled: true,
       settings: { method: 'rnnoise' },
     },
     {
-      name: obsrecFilterNames.gain,
+      name: matchToObsFilterNames.gain,
       kind: 'gain_filter',
       enabled: true,
       settings: { db: 10 },
     },
     {
-      name: obsrecFilterNames.compressor,
+      name: matchToObsFilterNames.compressor,
       kind: 'compressor_filter',
       enabled: true,
       settings: {
@@ -40,7 +40,7 @@ function defaultObsrecFilters(): OBSAudioFilterSnapshot[] {
       },
     },
     {
-      name: obsrecFilterNames.limiter,
+      name: matchToObsFilterNames.limiter,
       kind: 'limiter_filter',
       enabled: true,
       settings: {
@@ -102,22 +102,22 @@ describe('scoreAudioDevice', () => {
   });
 });
 
-describe('areObsrecFiltersConfigured', () => {
-  it('acepta los cuatro filtros OBSREC habilitados con valores por defecto', () => {
-    expect(areObsrecFiltersConfigured(defaultObsrecFilters())).toBe(true);
+describe('areMatchToObsFiltersConfigured', () => {
+  it('acepta los cuatro filtros Match-to-obs habilitados con valores por defecto', () => {
+    expect(areMatchToObsFiltersConfigured(defaultMatchToObsFilters())).toBe(true);
   });
 
   it('rechaza filtros deshabilitados, modificados o ausentes', () => {
-    const disabledLimiter = defaultObsrecFilters().map((filter) => (
-      filter.name === obsrecFilterNames.limiter ? { ...filter, enabled: false } : filter
+    const disabledLimiter = defaultMatchToObsFilters().map((filter) => (
+      filter.name === matchToObsFilterNames.limiter ? { ...filter, enabled: false } : filter
     ));
-    const changedGain = defaultObsrecFilters().map((filter) => (
-      filter.name === obsrecFilterNames.gain ? { ...filter, settings: { db: 5 } } : filter
+    const changedGain = defaultMatchToObsFilters().map((filter) => (
+      filter.name === matchToObsFilterNames.gain ? { ...filter, settings: { db: 5 } } : filter
     ));
 
-    expect(areObsrecFiltersConfigured(disabledLimiter)).toBe(false);
-    expect(areObsrecFiltersConfigured(changedGain)).toBe(false);
-    expect(areObsrecFiltersConfigured([])).toBe(false);
+    expect(areMatchToObsFiltersConfigured(disabledLimiter)).toBe(false);
+    expect(areMatchToObsFiltersConfigured(changedGain)).toBe(false);
+    expect(areMatchToObsFiltersConfigured([])).toBe(false);
   });
 });
 
@@ -135,7 +135,7 @@ describe('getFilterSettings', () => {
   };
 
   it('incluye supresion de ruido cuando esta activada', () => {
-    expect(getFilterSettings(baseConfig)[obsrecFilterNames.noise]).toEqual({
+    expect(getFilterSettings(baseConfig)[matchToObsFilterNames.noise]).toEqual({
       kind: 'noise_suppress_filter',
       settings: { method: 'rnnoise' },
     });
@@ -147,7 +147,7 @@ describe('getFilterSettings', () => {
       filters: { ...baseConfig.filters, noiseSuppression: false },
     });
 
-    expect(filters[obsrecFilterNames.noise]).toBeUndefined();
+    expect(filters[matchToObsFilterNames.noise]).toBeUndefined();
   });
 
   it('respeta el metodo de supresion de ruido indicado', () => {
@@ -156,7 +156,7 @@ describe('getFilterSettings', () => {
       filters: { ...baseConfig.filters, noiseSuppressionMethod: 'speex' },
     });
 
-    expect(filters[obsrecFilterNames.noise]).toEqual({
+    expect(filters[matchToObsFilterNames.noise]).toEqual({
       kind: 'noise_suppress_filter',
       settings: { method: 'speex' },
     });
@@ -171,7 +171,7 @@ describe('getFilterSettings', () => {
       },
     });
 
-    const gate = filters[obsrecFilterNames.noiseGate];
+    const gate = filters[matchToObsFilterNames.noiseGate];
     expect(gate?.kind).toBe('noise_gate_filter');
     expect(gate?.settings.open_threshold).toBe(-35);
     expect(gate?.settings.close_threshold).toBe(-45);
@@ -188,9 +188,9 @@ describe('getFilterSettings', () => {
       },
     });
 
-    expect(filters[obsrecFilterNames.gain]).toBeUndefined();
-    expect(filters[obsrecFilterNames.compressor]).toBeUndefined();
-    expect(filters[obsrecFilterNames.limiter]).toBeUndefined();
+    expect(filters[matchToObsFilterNames.gain]).toBeUndefined();
+    expect(filters[matchToObsFilterNames.compressor]).toBeUndefined();
+    expect(filters[matchToObsFilterNames.limiter]).toBeUndefined();
   });
 });
 

@@ -1,3 +1,4 @@
+# Disabled temporarily: rename this file back to security.yml to reactivate it.
 name: Dependency Security Audit
 
 on:

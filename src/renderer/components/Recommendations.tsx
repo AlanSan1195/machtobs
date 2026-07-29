@@ -393,7 +393,7 @@ export function Recommendations() {
       {recommendation.source === 'local' && (
         <div className="mb-4 flex items-start gap-3 rounded-none border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
           <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>La IA integrada no respondio o alcanzo su limite. Esta es una recomendacion local de respaldo generada por Match TO-OBS.</span>
+          <span>La IA integrada no respondio o alcanzo su limite. Esta es una recomendacion local de respaldo generada por Match-to-obs.</span>
         </div>
       )}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-none border border-border bg-surface/45 p-3 text-xs text-text-muted">

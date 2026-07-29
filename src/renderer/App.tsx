@@ -120,11 +120,11 @@ export default function App() {
             href="#"
             onClick={(e) => e.preventDefault()}
             className="flex items-center gap-2.5"
-            aria-label="Match TO-OBS"
+            aria-label="Match-to-obs"
           >
             <span className="h-3 w-3 bg-primary" aria-hidden="true" />
             <span className="font-display text-sm font-black uppercase tracking-tight text-paper" style={{ fontStretch: '125%' }}>
-              Match<span className="text-primary">→</span>OBS
+              Match-to-<span className="text-primary">obs</span>
             </span>
           </a>
 
