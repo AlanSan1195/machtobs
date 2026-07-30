@@ -70,17 +70,22 @@ export function useAppAPI() {
     }
   };
 
-  const getCaptureCapabilities = async (deviceName?: string): Promise<CaptureCapabilities | null> => {
+  const getCaptureCapabilities = async (
+    deviceName?: string,
+    options: { reportError?: boolean } = {},
+  ): Promise<CaptureCapabilities | null> => {
     try {
       const result = await appAPI.obs.getCaptureCapabilities({ deviceName });
       if (result.success && result.capabilities) {
         setCaptureCapabilities(result.capabilities);
         return result.capabilities;
       }
-      setError(result.message);
+      if (options.reportError !== false) setError(result.message);
       return null;
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'No se pudieron leer las capacidades de la capturadora');
+      if (options.reportError !== false) {
+        setError(error instanceof Error ? error.message : 'No se pudieron leer las capacidades de la capturadora');
+      }
       return null;
     }
   };

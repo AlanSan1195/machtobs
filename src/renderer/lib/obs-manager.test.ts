@@ -288,6 +288,88 @@ describe('OBSManager con salida avanzada', () => {
     });
   });
 
+  it('restaura los ajustes internos guardados mediante el complemento', async () => {
+    obsMock.call.mockImplementation(async (request: string) => {
+      if (request === 'GetStreamServiceSettings') {
+        return { streamServiceSettings: { server: advancedSnapshot.streamServer } };
+      }
+      if (request === 'CallVendorRequest') {
+        return { responseData: advancedControlResponse };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.restoreSnapshot({
+      ...advancedSnapshot,
+      bitrate: 8000,
+      recordingBitrate: 40000,
+      recordingQuality: 'high',
+      advancedControl: {
+        available: true,
+        pluginVersion: '0.1.0',
+        outputMode: 'Advanced',
+        stream: {
+          available: true,
+          encoderId: 'com.apple.videotoolbox.videoencoder.ave.avc',
+          active: false,
+          rateControl: 'CBR',
+          bitrate: 8000,
+          quality: 60,
+          limitBitrate: false,
+          maxBitrate: 6000,
+          maxBitrateWindow: 1.5,
+          keyframeInterval: 2,
+          profile: 'high',
+          bFrames: true,
+          spatialAQMode: 1,
+        },
+        recording: {
+          available: true,
+          encoderId: 'com.apple.videotoolbox.videoencoder.ave.hevc',
+          active: false,
+          rateControl: 'CBR',
+          bitrate: 40000,
+          quality: 76,
+          limitBitrate: false,
+          maxBitrate: 6000,
+          maxBitrateWindow: 1.5,
+          keyframeInterval: 2,
+          profile: 'main10',
+          bFrames: true,
+          spatialAQMode: 1,
+        },
+      },
+    });
+
+    const restoreCall = obsMock.call.mock.calls.find(([
+      request,
+      data,
+    ]) => request === 'CallVendorRequest' && data?.requestType === 'ApplyAdvancedOutputConfig');
+
+    expect(restoreCall?.[1]).toMatchObject({
+      vendorName: 'match-to-obs',
+      requestData: {
+        stream: {
+          bitrate: 8000,
+          rate_control: 'CBR',
+          profile: 'high',
+        },
+        recording: {
+          bitrate: 40000,
+          quality: 76,
+          profile: 'main10',
+        },
+      },
+    });
+    expect(result).toEqual({
+      success: true,
+      message: 'Configuracion anterior restaurada',
+      warnings: [],
+    });
+  });
+
   it('aplica automáticamente stream y grabación con el vendor heredado obsee', async () => {
     obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
       if (request === 'GetStreamServiceSettings') {
@@ -564,6 +646,133 @@ describe('OBSManager con marcos de camara', () => {
         boundsWidth: 356,
         boundsHeight: 356,
       }),
+    });
+  });
+});
+
+describe('OBSManager con audio de OBS virgen', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    obsMock.connect.mockResolvedValue({});
+  });
+
+  it('descubre los microfonos con una fuente temporal y devuelve un snapshot aplicable', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
+      if (request === 'GetSpecialInputs') return {};
+      if (request === 'GetInputList') return { inputs: [] };
+      if (request === 'GetInputKindList') return { inputKinds: ['coreaudio_input_capture'] };
+      if (request === 'GetSceneList') {
+        return {
+          currentProgramSceneName: 'Escena',
+          scenes: [{ sceneName: 'Escena' }],
+        };
+      }
+      if (request === 'CreateInput') return { sceneItemId: 21 };
+      if (request === 'GetInputPropertiesListPropertyItems' && data?.propertyName === 'device_id') {
+        return {
+          propertyItems: [
+            { itemName: 'MacBook Microphone', itemValue: 'built-in' },
+            { itemName: 'Shure MV7 USB', itemValue: 'shure-mv7' },
+          ],
+        };
+      }
+      if (request === 'RemoveInput') return {};
+      throw new Error(`Solicitud inesperada: ${request}`);
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.getAudioSnapshot();
+
+    expect(result).toMatchObject({
+      success: true,
+      message: 'Microfono recomendado: Shure MV7 USB',
+      snapshot: {
+        inputName: 'Voz · Match-to-obs',
+        inputKind: 'coreaudio_input_capture',
+        devicePropertyName: 'device_id',
+        requiresInputCreation: true,
+        recommendedDevice: {
+          id: 'shure-mv7',
+          name: 'Shure MV7 USB',
+          isRecommended: true,
+        },
+      },
+    });
+    expect(result.snapshot?.devices.find((device) => device.id === 'shure-mv7')?.isRecommended).toBe(true);
+    expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
+      sceneName: 'Escena',
+      inputName: 'match-to-obs · deteccion temporal',
+      inputKind: 'coreaudio_input_capture',
+      sceneItemEnabled: false,
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('RemoveInput', {
+      inputName: 'match-to-obs · deteccion temporal',
+    });
+  });
+
+  it('crea la fuente de voz y selecciona el microfono recomendado al aplicar', async () => {
+    obsMock.call.mockImplementation(async (request: string) => {
+      if (request === 'GetSpecialInputs') return {};
+      if (request === 'GetInputList') return { inputs: [] };
+      if (request === 'GetInputKindList') return { inputKinds: ['coreaudio_input_capture'] };
+      if (request === 'GetSceneList') {
+        return {
+          currentProgramSceneName: 'Escena',
+          scenes: [{ sceneName: 'Escena' }],
+        };
+      }
+      if (request === 'CreateInput') return { sceneItemId: 22 };
+      if (request === 'GetInputSettings') {
+        return {
+          inputKind: 'coreaudio_input_capture',
+          inputSettings: { device: 'shure-mv7' },
+        };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    vi.spyOn(manager, 'getAudioSnapshot').mockResolvedValue({
+      success: true,
+      message: 'Audio cargado',
+    });
+
+    const result = await manager.configureAudio({
+      inputName: 'Voz · Match-to-obs',
+      inputKind: 'coreaudio_input_capture',
+      devicePropertyName: 'device',
+      createInputIfMissing: true,
+      deviceId: 'shure-mv7',
+      deviceName: 'Shure MV7 USB',
+      mono: true,
+      filters: {
+        gainDb: 0,
+        gainEnabled: false,
+        compressorRatio: 1,
+        compressorThresholdDb: 0,
+        compressorEnabled: false,
+        limiterThresholdDb: 0,
+        limiterEnabled: false,
+        noiseSuppression: false,
+      },
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+    });
+    expect(result.message).toContain('Microfono "Voz · Match-to-obs" agregado y configurado en OBS');
+    expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
+      sceneName: 'Escena',
+      inputName: 'Voz · Match-to-obs',
+      inputKind: 'coreaudio_input_capture',
+      inputSettings: { device: 'shure-mv7' },
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('SetInputSettings', {
+      inputName: 'Voz · Match-to-obs',
+      inputSettings: { device: 'shure-mv7' },
+      overlay: true,
     });
   });
 });

@@ -289,6 +289,36 @@ describe('validateOBSAudioConfig', () => {
     expect(validateOBSAudioConfig({ ...validAudioConfig, monitorType: 'invalid' }).success).toBe(false);
     expect(validateOBSAudioConfig({ ...validAudioConfig, ducking: { enabled: true, desktopInputName: '' } }).success).toBe(false);
   });
+
+  it('conserva los datos necesarios para crear una entrada de voz en OBS virgen', () => {
+    const result = validateOBSAudioConfig({
+      ...validAudioConfig,
+      inputName: 'Voz · Match-to-obs',
+      inputKind: 'coreaudio_input_capture',
+      devicePropertyName: 'device',
+      createInputIfMissing: true,
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      value: {
+        inputName: 'Voz · Match-to-obs',
+        inputKind: 'coreaudio_input_capture',
+        devicePropertyName: 'device',
+        createInputIfMissing: true,
+      },
+    });
+  });
+
+  it('rechaza crear una entrada sin un inputKind compatible', () => {
+    expect(validateOBSAudioConfig({
+      ...validAudioConfig,
+      createInputIfMissing: true,
+    })).toEqual({
+      success: false,
+      message: 'Audio input kind is required to create the microphone source.',
+    });
+  });
 });
 
 describe('validateAIRecommendation', () => {

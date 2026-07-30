@@ -191,6 +191,20 @@ describe('buildComparisonRows', () => {
     });
     expect(rows.filter((row) => row.applyMethod === 'manual')).toHaveLength(0);
   });
+
+  it('mantiene la tabla base y marca solo sus ajustes avanzados cuando falta el complemento', () => {
+    const rows = buildComparisonRows(snapshot, recommendations, 'stream_record');
+    const manualLabels = rows
+      .filter((row) => row.applyMethod === 'manual')
+      .map((row) => row.label);
+
+    expect(rows).toHaveLength(11);
+    expect(manualLabels).toEqual([
+      'Bitrate del stream',
+      'Bitrate de grabacion',
+      'Calidad de grabacion',
+    ]);
+  });
 });
 
 describe('formatEncoderName', () => {
@@ -205,6 +219,7 @@ describe('columna Recomendado editable', () => {
     cleanup();
     act(() => {
       useAppStore.setState({
+        mode: 'stream_record',
         obsConnected: true,
         obsSettingsSnapshot: { ...snapshot, streamResolution: '1920x1080', recordingResolution: '1920x1080' },
         recommendation: {
@@ -237,5 +252,20 @@ describe('columna Recomendado editable', () => {
     await user.type(input, '8000');
 
     expect(useAppStore.getState().recommendation?.recommendations.bitrate).toBe(8000);
+  });
+
+  it('abre la guia manual desde el aviso cuando falta el complemento', async () => {
+    const user = userEvent.setup();
+    render(<OBSComparison />);
+
+    expect(screen.queryByText('Ruta en OBS')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Ver guia manual' }));
+
+    expect(screen.getByText('Ruta en OBS')).not.toBeNull();
+    expect(screen.getByText('Pestaña Emision')).not.toBeNull();
+    expect(screen.getByText('Pestaña Grabacion')).not.toBeNull();
+    expect(screen.getByText('6000 Kbps')).not.toBeNull();
+    expect(screen.getByText('60000 Kbps')).not.toBeNull();
   });
 });

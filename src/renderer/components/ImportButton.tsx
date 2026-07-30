@@ -23,7 +23,7 @@ export function ImportButton() {
 
   const canImport = mode && platform && recommendation && obsConnected;
   const changedRows = recommendation && obsSettingsSnapshot
-    ? buildComparisonRows(obsSettingsSnapshot, recommendation.recommendations).filter((row) => !isSameValue(row))
+    ? buildComparisonRows(obsSettingsSnapshot, recommendation.recommendations, mode).filter((row) => !isSameValue(row))
     : [];
 
   const handleImport = async () => {
@@ -47,7 +47,7 @@ export function ImportButton() {
         recordingQuality: recommendation.recommendations.recording_quality,
         audio: obsAudioSnapshot
           ? createDefaultAudioConfig(
-            obsAudioSnapshot.inputName,
+            obsAudioSnapshot,
             obsAudioSnapshot.recommendedDevice ?? obsAudioSnapshot.devices.find((device) => device.id === obsAudioSnapshot.selectedDeviceId),
           )
           : undefined,

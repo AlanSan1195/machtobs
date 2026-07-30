@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
-import type { MicProfileResponse, OBSAudioConfig, OBSAudioDevice, OBSAudioFilterConfig } from '../../shared/types';
+import type { MicProfileResponse, OBSAudioConfig, OBSAudioDevice, OBSAudioFilterConfig, OBSAudioSettingsSnapshot } from '../../shared/types';
 import { resolveMicrophoneName } from '../lib/microphone-device';
 import { ConfirmDialog } from './ConfirmDialog';
 import { IconAlert, IconCheck, IconMic, IconRefresh, IconSparkles, IconX, Section, Spinner } from './ui';
@@ -31,9 +31,15 @@ function getDefaultDeviceId(devices: OBSAudioDevice[], currentDeviceId?: string)
   return recommended?.id ?? devices[0]?.id ?? '';
 }
 
-export function createDefaultAudioConfig(inputName: string, device?: OBSAudioDevice): OBSAudioConfig {
+export function createDefaultAudioConfig(
+  snapshot: OBSAudioSettingsSnapshot,
+  device?: OBSAudioDevice,
+): OBSAudioConfig {
   return {
-    inputName,
+    inputName: snapshot.inputName,
+    inputKind: snapshot.inputKind,
+    devicePropertyName: snapshot.devicePropertyName,
+    createInputIfMissing: snapshot.requiresInputCreation,
     deviceId: device?.id,
     deviceName: device?.name,
     mono: true,
@@ -133,11 +139,15 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
     if (obsAudioSnapshot) {
       // No pisar la eleccion manual del usuario: si su seleccion sigue existiendo
       // entre los dispositivos (p. ej. tras refrescar al aplicar), se conserva.
-      setSelectedDeviceId((prev) =>
-        prev && obsAudioSnapshot.devices.some((device) => device.id === prev)
-          ? prev
-          : getDefaultDeviceId(obsAudioSnapshot.devices, obsAudioSnapshot.selectedDeviceId),
-      );
+      setSelectedDeviceId((prev) => {
+        if (prev && obsAudioSnapshot.devices.some((device) => device.id === prev)) {
+          return prev;
+        }
+        // En OBS virgen la recomendacion se muestra, pero no se confirma por el
+        // usuario automaticamente. La seleccion explicita desbloquea Apply.
+        if (obsAudioSnapshot.requiresInputCreation) return '';
+        return getDefaultDeviceId(obsAudioSnapshot.devices, obsAudioSnapshot.selectedDeviceId);
+      });
       // "Monitorizar y emitir" por defecto: es facil de olvidar y sin el no se
       // escucha lo que sale al stream. Si OBS ya tiene otro monitoreo, se respeta.
       setMonitorType(obsAudioSnapshot.monitorType === 'OBS_MONITORING_TYPE_NONE'
@@ -169,6 +179,11 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
     if (!obsAudioSnapshot) return undefined;
     return getSelectedDevice(obsAudioSnapshot.devices, selectedDeviceId);
   }, [obsAudioSnapshot, selectedDeviceId]);
+  const awaitingMicrophoneSelection = Boolean(
+    obsAudioSnapshot?.requiresInputCreation
+      && obsAudioSnapshot.devices.length > 0
+      && !selectedDevice,
+  );
 
   const handleRefresh = async () => {
     setError(null);
@@ -233,6 +248,9 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
 
     return {
       inputName: obsAudioSnapshot!.inputName,
+      inputKind: obsAudioSnapshot!.inputKind,
+      devicePropertyName: obsAudioSnapshot!.devicePropertyName,
+      createInputIfMissing: obsAudioSnapshot!.requiresInputCreation,
       deviceId: selectedDevice?.id,
       deviceName: selectedDevice?.name,
       mono: true,
@@ -337,8 +355,13 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         <button
           type="button"
           onClick={handleAnalyzeMic}
-          disabled={isProfilingMic}
-          className={`${secondaryButtonClasses} ${isProfilingMic ? 'cursor-not-allowed opacity-60' : 'ai-glint hover:border-primary/60'}`}
+          disabled={isProfilingMic || awaitingMicrophoneSelection}
+          title={awaitingMicrophoneSelection ? 'Selecciona primero el microfono que usara OBS' : undefined}
+          className={`${secondaryButtonClasses} ${
+            isProfilingMic || awaitingMicrophoneSelection
+              ? 'cursor-not-allowed opacity-60'
+              : 'ai-glint hover:border-primary/60'
+          }`}
         >
           {isProfilingMic ? <Spinner className="h-3.5 w-3.5 border-text/60 border-t-transparent" /> : <IconSparkles className="h-3.5 w-3.5" />}
           {isProfilingMic ? 'Analizando...' : 'Buscar filtros'}
@@ -353,10 +376,37 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           onDismiss={() => { setMicProfile(null); setUseAiRecommendation(false); }}
         />
       )}
+      {obsAudioSnapshot.requiresInputCreation && (
+        <div className="mb-4 flex items-start gap-3 rounded-none border border-primary/35 bg-primary/[0.06] p-4 text-sm text-text">
+          <IconCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div>
+            <p className="font-semibold text-primary">OBS esta listo para recibir tu microfono.</p>
+            <p className="mt-1 text-text-muted">
+              Mic/Aux esta en Ninguno. Elige el microfono que quieres usar; despues Match-to-obs podra agregarlo a la escena activa.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="mb-4 grid gap-4 md:grid-cols-[1.4fr_1fr]">
-        <label className="block rounded-none border border-border bg-surface/45 p-4 transition-colors focus-within:border-primary/50">
-          <span className="mb-2 block text-xs uppercase tracking-wider text-text-muted">Microfono recomendado</span>
+        <label
+          className={`block rounded-none border p-4 transition-colors ${
+            awaitingMicrophoneSelection
+              ? 'border-primary/70 bg-primary/[0.07] shadow-[inset_3px_0_0_0_rgba(58,155,220,0.85)]'
+              : 'border-border bg-surface/45 focus-within:border-primary/50'
+          }`}
+        >
+          {awaitingMicrophoneSelection && (
+            <span className="mb-2 block font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-primary">
+              02 / seleccion requerida
+            </span>
+          )}
+          <span className={`mb-2 block text-xs uppercase tracking-wider ${
+            awaitingMicrophoneSelection ? 'font-semibold text-primary' : 'text-text-muted'
+          }`}>
+            {awaitingMicrophoneSelection ? 'Elige tu microfono' : 'Microfono recomendado'}
+          </span>
           <select
+            aria-label="Elige tu microfono"
             value={selectedDeviceId}
             onChange={(event) => {
               setSelectedDeviceId(event.target.value);
@@ -365,20 +415,33 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
               setMicProfile(null);
               setUseAiRecommendation(false);
             }}
-            className="app-select w-full bg-transparent text-base font-medium text-text outline-none"
+            className={`app-select w-full bg-transparent text-base font-medium text-text outline-none ${
+              awaitingMicrophoneSelection ? 'border-primary ring-1 ring-primary/70' : ''
+            }`}
           >
             {obsAudioSnapshot.devices.length === 0 ? (
               <option value="" className="bg-background text-text">Dispositivo actual de OBS</option>
             ) : (
-              obsAudioSnapshot.devices.map((device) => (
-                <option key={`${device.id}-${device.name}`} value={device.id} className="bg-background text-text">
-                  {device.isRecommended ? 'Recomendado - ' : ''}{device.name}
-                </option>
-              ))
+              <>
+                {obsAudioSnapshot.requiresInputCreation && (
+                  <option value="" disabled className="bg-background text-text-muted">
+                    Selecciona un microfono
+                  </option>
+                )}
+                {obsAudioSnapshot.devices.map((device) => (
+                  <option key={`${device.id}-${device.name}`} value={device.id} className="bg-background text-text">
+                    {device.isRecommended ? 'Recomendado - ' : ''}{device.name}
+                  </option>
+                ))}
+              </>
             )}
           </select>
           <span className="mt-2 block text-xs text-text-faint">
-            {selectedDevice?.reason ?? 'OBS no expuso una lista de dispositivos para esta entrada.'}
+            {selectedDevice?.reason ?? (
+              awaitingMicrophoneSelection
+                ? 'La recomendacion es una sugerencia: confirma cual dispositivo debe usar OBS.'
+                : 'OBS no expuso una lista de dispositivos para esta entrada.'
+            )}
           </span>
           <span className="mb-1 mt-3 block text-xs uppercase tracking-wider text-text-muted">
             Marca y modelo para la busqueda oficial
@@ -527,28 +590,38 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setConfirmOpen(true)}
-        disabled={isApplying}
-        className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-200 ${
-          isApplying
-            ? 'cursor-not-allowed border border-border bg-surface/45 text-text-muted'
-            : 'bg-primary text-background glow-primary hover:bg-primary-hover active:scale-[0.99]'
-        }`}
-      >
-        {isApplying ? (
-          <>
-            <Spinner className="h-5 w-5 border-background/80 border-t-transparent" />
-            <span>aplicando audio...</span>
-          </>
-        ) : (
-          <>
-            <IconMic className="h-5 w-5" />
-            <span><span className="opacity-60">./</span>apply --voice match-to-obs</span>
-          </>
-        )}
-      </button>
+      {awaitingMicrophoneSelection ? (
+        <div
+          role="status"
+          className="flex items-center gap-3 rounded-none border border-primary/35 bg-primary/[0.04] px-4 py-3 text-sm text-text-muted"
+        >
+          <IconMic className="h-4 w-4 shrink-0 text-primary" />
+          <p>Selecciona un microfono arriba para habilitar Apply.</p>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          disabled={isApplying}
+          className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-200 ${
+            isApplying
+              ? 'cursor-not-allowed border border-border bg-surface/45 text-text-muted'
+              : 'bg-primary text-background glow-primary hover:bg-primary-hover active:scale-[0.99]'
+          }`}
+        >
+          {isApplying ? (
+            <>
+              <Spinner className="h-5 w-5 border-background/80 border-t-transparent" />
+              <span>aplicando audio...</span>
+            </>
+          ) : (
+            <>
+              <IconMic className="h-5 w-5" />
+              <span><span className="opacity-60">./</span>apply --voice match-to-obs</span>
+            </>
+          )}
+        </button>
+      )}
       <ConfirmDialog
         open={confirmOpen}
         title="Confirmar configuracion de audio"
@@ -558,6 +631,9 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           void handleApplyWithPreview();
         }}
       >
+        {obsAudioSnapshot.requiresInputCreation && (
+          <p>OBS no tiene Mic/Aux configurado. Match-to-obs creara la fuente "{obsAudioSnapshot.inputName}" en la escena activa.</p>
+        )}
         <p>Aplicar configuracion de voz Match-to-obs a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
         <p>
           {obsAudioSnapshot.monoSupported

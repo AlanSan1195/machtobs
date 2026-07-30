@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
 import { ConfirmDialog } from './ConfirmDialog';
+import { OBSManualGuide } from './OBSManualGuide';
 import { IconActivity, IconCheck, IconRefresh, Section } from './ui';
 import {
   recommendationAudioBitrateOptions,
@@ -11,7 +12,7 @@ import {
   recommendationRecordingQualityOptions,
   recommendationResolutionOptions,
 } from '../../shared/recommendationOptions';
-import type { AIRecommendation, AIRecommendationField, AIRecommendationSettings, OBSSettingsSnapshot } from '../../shared/types';
+import type { AIRecommendation, AIRecommendationField, AIRecommendationSettings, OBSMode, OBSSettingsSnapshot } from '../../shared/types';
 
 export type ComparisonRow = {
   label: string;
@@ -88,8 +89,18 @@ export function isSameValue(row: ComparisonRow): boolean {
 export function buildComparisonRows(
   snapshot: OBSSettingsSnapshot,
   recommendations: AIRecommendation['recommendations'],
+  targetMode?: OBSMode | null,
 ): ComparisonRow[] {
   const advancedAutomatic = snapshot.advancedControl?.available === true;
+  const advancedOutputNeeded = targetMode
+    ? targetMode !== 'stream_only'
+    : snapshot.outputMode === 'Advanced';
+  const advancedStreamNeeded = targetMode
+    ? targetMode === 'stream_record'
+    : snapshot.outputMode === 'Advanced';
+  const advancedRecordingNeeded = targetMode
+    ? targetMode !== 'stream_only'
+    : snapshot.outputMode === 'Advanced';
   const rows: ComparisonRow[] = [
     {
       label: 'Lienzo base',
@@ -126,7 +137,7 @@ export function buildComparisonRows(
       label: 'Bitrate del stream',
       current: snapshot.bitrate > 0 ? String(snapshot.bitrate) : 'No disponible por WebSocket',
       recommended: String(recommendations.bitrate),
-      applyMethod: snapshot.outputMode === 'Advanced' && !advancedAutomatic ? 'manual' : 'automatic',
+      applyMethod: advancedStreamNeeded && !advancedAutomatic ? 'manual' : 'automatic',
       field: 'bitrate',
     },
     {
@@ -138,13 +149,13 @@ export function buildComparisonRows(
     },
     {
       label: 'Bitrate de grabacion',
-      current: snapshot.outputMode === 'Advanced'
+      current: advancedOutputNeeded
         ? snapshot.recordingBitrate && snapshot.recordingBitrate > 0
           ? String(snapshot.recordingBitrate)
           : 'No disponible por WebSocket'
         : 'No independiente',
       recommended: String(recommendations.recording_bitrate),
-      applyMethod: snapshot.outputMode === 'Advanced' && advancedAutomatic ? 'automatic' : 'manual',
+      applyMethod: advancedRecordingNeeded && !advancedAutomatic ? 'manual' : 'automatic',
       field: 'recording_bitrate',
     },
     {
@@ -164,14 +175,14 @@ export function buildComparisonRows(
       current: snapshot.recordingQuality,
       recommended: recommendations.recording_quality,
       type: 'recordingQuality',
-      applyMethod: snapshot.outputMode === 'Advanced' && !advancedAutomatic ? 'manual' : 'automatic',
+      applyMethod: advancedRecordingNeeded && !advancedAutomatic ? 'manual' : 'automatic',
       field: 'recording_quality',
     },
   ];
 
   const stream = snapshot.advancedControl?.stream;
   const recording = snapshot.advancedControl?.recording;
-  if (!advancedAutomatic || !stream || !recording) return rows;
+  if (!advancedOutputNeeded || !advancedAutomatic || !stream || !recording) return rows;
 
   const spatialAQLabel = (value: number) => {
     if (value === 2) return 'Desactivado';
@@ -180,74 +191,78 @@ export function buildComparisonRows(
   };
   const booleanLabel = (value: boolean) => value ? 'Si' : 'No';
 
-  rows.splice(6, 0,
-    {
-      label: 'Control de tasa del stream',
-      current: stream.rateControl,
-      recommended: 'CBR',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'Fotogramas clave del stream',
-      current: String(stream.keyframeInterval),
-      recommended: '2',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'Perfil del stream',
-      current: stream.profile,
-      recommended: 'high',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'B-frames del stream',
-      current: booleanLabel(stream.bFrames),
-      recommended: 'Si',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'AQ espacial del stream',
-      current: spatialAQLabel(stream.spatialAQMode),
-      recommended: 'Automatico',
-      applyMethod: 'automatic',
-    },
-  );
+  if (advancedStreamNeeded) {
+    rows.splice(6, 0,
+      {
+        label: 'Control de tasa del stream',
+        current: stream.rateControl,
+        recommended: 'CBR',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'Fotogramas clave del stream',
+        current: String(stream.keyframeInterval),
+        recommended: '2',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'Perfil del stream',
+        current: stream.profile,
+        recommended: 'high',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'B-frames del stream',
+        current: booleanLabel(stream.bFrames),
+        recommended: 'Si',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'AQ espacial del stream',
+        current: spatialAQLabel(stream.spatialAQMode),
+        recommended: 'Automatico',
+        applyMethod: 'automatic',
+      },
+    );
+  }
 
-  const recordingEncoderIndex = rows.findIndex((row) => row.label === 'Encoder de grabacion');
-  rows.splice(recordingEncoderIndex + 2, 0,
-    {
-      label: 'Control de tasa de grabacion',
-      current: recording.rateControl,
-      recommended: 'CBR',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'Fotogramas clave de grabacion',
-      current: String(recording.keyframeInterval),
-      recommended: '2',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'Perfil de grabacion',
-      current: recording.profile,
-      // La recomendación actual no cambia profundidad de color; conservar el
-      // perfil detectado evita degradar main10 a main.
-      recommended: recording.profile,
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'B-frames de grabacion',
-      current: booleanLabel(recording.bFrames),
-      recommended: 'Si',
-      applyMethod: 'automatic',
-    },
-    {
-      label: 'AQ espacial de grabacion',
-      current: spatialAQLabel(recording.spatialAQMode),
-      recommended: 'Automatico',
-      applyMethod: 'automatic',
-    },
-  );
+  if (advancedRecordingNeeded) {
+    const recordingEncoderIndex = rows.findIndex((row) => row.label === 'Encoder de grabacion');
+    rows.splice(recordingEncoderIndex + 2, 0,
+      {
+        label: 'Control de tasa de grabacion',
+        current: recording.rateControl,
+        recommended: 'CBR',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'Fotogramas clave de grabacion',
+        current: String(recording.keyframeInterval),
+        recommended: '2',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'Perfil de grabacion',
+        current: recording.profile,
+        // La recomendación actual no cambia profundidad de color; conservar el
+        // perfil detectado evita degradar main10 a main.
+        recommended: recording.profile,
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'B-frames de grabacion',
+        current: booleanLabel(recording.bFrames),
+        recommended: 'Si',
+        applyMethod: 'automatic',
+      },
+      {
+        label: 'AQ espacial de grabacion',
+        current: spatialAQLabel(recording.spatialAQMode),
+        recommended: 'Automatico',
+        applyMethod: 'automatic',
+      },
+    );
+  }
 
   return rows;
 }
@@ -364,10 +379,12 @@ function RecommendedEditor({ row, onChange }: RecommendedEditorProps) {
 }
 
 export function OBSComparison() {
-  const { obsSettingsSnapshot, recommendation, obsConnected, setError, setRecommendation } = useAppStore();
+  const { mode, obsSettingsSnapshot, recommendation, obsConnected, setError, setRecommendation } = useAppStore();
   const { getLastBackup, restoreLastBackup } = useAppAPI();
   const [restoreDialogOpen, setRestoreDialogOpen] = React.useState(false);
+  const [manualGuideOpen, setManualGuideOpen] = React.useState(false);
   const [backupDate, setBackupDate] = React.useState<string | null>(null);
+  const manualGuideId = React.useId();
 
   React.useEffect(() => {
     if (!obsConnected) {
@@ -385,7 +402,7 @@ export function OBSComparison() {
   if (!obsConnected || !obsSettingsSnapshot || !recommendation) return null;
 
   const { recommendations } = recommendation;
-  const rows = buildComparisonRows(obsSettingsSnapshot, recommendations);
+  const rows = buildComparisonRows(obsSettingsSnapshot, recommendations, mode);
 
   const updateRecommendation = (field: AIRecommendationField, value: string | number) => {
     // Conserva el baseline para que "config.recomendada" pueda re-explicar el
@@ -447,14 +464,47 @@ export function OBSComparison() {
             {obsSettingsSnapshot.advancedControl?.available
               ? `Complemento ${obsSettingsSnapshot.advancedControl.pluginVersion} · `
               : ''}
-            {automaticCount} cambio{automaticCount === 1 ? '' : 's'}
+            {changeCount === 0
+              ? 'Sin cambios'
+              : `${automaticCount} automatico${automaticCount === 1 ? '' : 's'}`}
             {manualCount > 0 ? ` · ${manualCount} manual${manualCount === 1 ? '' : 'es'}` : ''}
           </span>
         </>
       }
     >
+      {manualCount > 0 && (
+        <div className="mb-4 border border-warning/35 bg-warning/[0.045]">
+          <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <div>
+              <span className="font-mono text-[0.62rem] uppercase tracking-[0.18em] text-warning">
+                complemento avanzado no detectado
+              </span>
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-paper/70">
+                Match-to-obs aplicara lo compatible. Estos {manualCount} ajustes internos necesitan
+                que los confirmes directamente en OBS.
+              </p>
+            </div>
+            <button
+              type="button"
+              aria-expanded={manualGuideOpen}
+              aria-controls={manualGuideId}
+              onClick={() => setManualGuideOpen((open) => !open)}
+              className="border border-warning/55 bg-warning/10 px-4 py-2.5 font-mono text-[0.65rem] font-bold uppercase tracking-[0.16em] text-warning transition-colors hover:bg-warning/20"
+            >
+              {manualGuideOpen ? 'Cerrar guia' : 'Ver guia manual'}
+            </button>
+          </div>
+          <OBSManualGuide
+            id={manualGuideId}
+            open={manualGuideOpen}
+            mode={mode}
+            recommendations={recommendations}
+            onClose={() => setManualGuideOpen(false)}
+          />
+        </div>
+      )}
       <div className="overflow-hidden rounded-none border border-border">
-        <div className="grid grid-cols-[1fr_1fr_1fr_104px] bg-paper/[0.04] px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/50">
+        <div className="hidden grid-cols-[1fr_1fr_1fr_104px] bg-paper/[0.04] px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/50 lg:grid">
           <span>Ajuste</span>
           <span>OBS actual</span>
           <span>Recomendado <span className="text-primary/80">/ editable</span></span>
@@ -466,29 +516,43 @@ export function OBSComparison() {
           return (
             <div
               key={row.label}
-              className="grid grid-cols-[1fr_1fr_1fr_104px] items-center border-t border-border px-4 py-3 text-sm transition-colors hover:bg-surface-hover/70"
+              className="grid grid-cols-2 items-start gap-3 border-t border-border px-3 py-3 text-sm transition-colors first:border-t-0 hover:bg-surface-hover/70 sm:px-4 lg:grid-cols-[1fr_1fr_1fr_104px] lg:items-center lg:gap-0"
             >
-              <span className="font-medium text-text">{row.label}</span>
-              <span className="text-text-muted">
-                {row.type === 'encoder' ? formatEncoderName(row.current) : row.current || 'Desconocido'}
+              <span className="col-span-2 font-medium text-text lg:col-span-1">{row.label}</span>
+              <span className="min-w-0 text-text-muted">
+                <span className="mb-1 block font-mono text-[0.55rem] uppercase tracking-[0.14em] text-paper/35 lg:hidden">
+                  OBS actual
+                </span>
+                <span className="block break-words">
+                  {row.type === 'encoder' ? formatEncoderName(row.current) : row.current || 'Desconocido'}
+                </span>
               </span>
-              <span className="block text-text">
+              <span className="block min-w-0 text-text">
+                <span className="mb-1 block font-mono text-[0.55rem] uppercase tracking-[0.14em] text-primary/60 lg:hidden">
+                  Recomendado
+                </span>
                 {row.field ? (
                   <RecommendedEditor row={row} onChange={updateRecommendation} />
                 ) : (
                   row.type === 'encoder' ? formatEncoderName(row.recommended) : row.recommended
                 )}
               </span>
-              <span>
+              <span className="col-span-2 lg:col-span-1">
                 {same ? (
                   <span className="inline-flex items-center gap-1.5 border border-paper/20 bg-paper/[0.06] px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-paper/70">
                     <IconCheck className="h-3 w-3" />
                     Mantener
                   </span>
                 ) : manual ? (
-                  <span className="inline-flex items-center gap-1.5 border border-warning/40 bg-warning/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-warning">
+                  <button
+                    type="button"
+                    aria-expanded={manualGuideOpen}
+                    aria-controls={manualGuideId}
+                    onClick={() => setManualGuideOpen(true)}
+                    className="inline-flex items-center gap-1.5 border border-warning/40 bg-warning/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-warning transition-colors hover:bg-warning/20"
+                  >
                     Manual
-                  </span>
+                  </button>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 border border-warning/40 bg-warning/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-warning">
                     Cambiar

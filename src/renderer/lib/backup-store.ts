@@ -3,6 +3,24 @@ import { validateOBSBackup } from '../../shared/validation';
 
 const BACKUP_KEY = 'match-to-obs-backup';
 
+function sanitizeAdvancedControl(
+  advancedControl: OBSSettingsSnapshot['advancedControl'],
+): OBSSettingsSnapshot['advancedControl'] {
+  if (!advancedControl) return undefined;
+
+  const sanitizeEncoder = (
+    encoder: NonNullable<OBSSettingsSnapshot['advancedControl']>['stream'],
+  ) => encoder ? { ...encoder } : undefined;
+
+  return {
+    available: advancedControl.available,
+    pluginVersion: advancedControl.pluginVersion,
+    outputMode: advancedControl.outputMode,
+    stream: sanitizeEncoder(advancedControl.stream),
+    recording: sanitizeEncoder(advancedControl.recording),
+  };
+}
+
 function sanitizeSnapshot(snapshot: OBSSettingsSnapshot): OBSSettingsSnapshot {
   return {
     streamServer: snapshot.streamServer,
@@ -15,9 +33,11 @@ function sanitizeSnapshot(snapshot: OBSSettingsSnapshot): OBSSettingsSnapshot {
     fps: snapshot.fps,
     encoder: snapshot.encoder,
     bitrate: snapshot.bitrate,
+    recordingBitrate: snapshot.recordingBitrate,
     audioBitrate: snapshot.audioBitrate,
     recordingFormat: snapshot.recordingFormat,
     recordingQuality: snapshot.recordingQuality,
+    advancedControl: sanitizeAdvancedControl(snapshot.advancedControl),
     audio: snapshot.audio,
   };
 }

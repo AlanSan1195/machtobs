@@ -69,6 +69,14 @@ const defaultConnectionSettings: OBSConnectionSettings = {
   password: '',
 };
 
+const audioInputKindCandidates = [
+  'coreaudio_input_capture',
+  'wasapi_input_capture',
+  'pulse_input_capture',
+  'alsa_input_capture',
+] as const;
+const managedVoiceInputName = 'Voz · Match-to-obs';
+
 // `obsee` fue el nombre publicado por la primera version del complemento.
 // Conservamos compatibilidad para que las instalaciones existentes puedan
 // aplicar bitrates avanzados sin obligar al usuario a reemplazar el bundle.
@@ -229,16 +237,16 @@ export class OBSManager {
       const rawMessage = error instanceof Error ? error.message : '';
       const errorCode = typeof (error as { code?: unknown })?.code === 'number' ? (error as { code: number }).code : undefined;
       const lowerErrorMessage = rawMessage.toLowerCase();
-      let helpMessage = 'Revisa que OBS este abierto, que el servidor WebSocket este habilitado, que el puerto coincida con OBS y que el password solo se use si OBS tiene autenticacion activada.';
+      let helpMessage = 'Revisa que OBS este abierto, que el servidor WebSocket este habilitado y que el puerto coincida con OBS.';
       // Cierre abnormal (codigo 1006) o error sin mensaje: casi siempre OBS no esta
       // abierto o el servidor WebSocket esta apagado / no responde en ese puerto.
       let reason = rawMessage.trim().length > 0 ? rawMessage : 'OBS no respondio';
 
       if (lowerErrorMessage.includes('authentication failed') || lowerErrorMessage.includes('authentication')) {
-        helpMessage = 'OBS requiere password o rechazo el password enviado. Si desactivaste la autenticacion, pulsa Aplicar/Aceptar en OBS y reinicia OBS; si sigue activada, copia el password actual.';
+        helpMessage = 'OBS requiere password o rechazo el password enviado. Manten la autenticacion activada y copia la contraseña desde Herramientas -> Ajustes del servidor WebSocket -> Mostrar informacion de conexion.';
       } else if (errorCode === 1006 || rawMessage.trim().length === 0) {
         reason = 'OBS no esta abierto o el servidor WebSocket esta apagado';
-        helpMessage = `Abre OBS y activa Herramientas -> Configuracion de WebSocket -> "Habilitar servidor WebSocket" (puerto ${connectionSettings.port}). Si tiene password, escribelo aqui; si no, deja el campo vacio.`;
+        helpMessage = `Abre OBS y activa Herramientas -> Ajustes del servidor WebSocket -> "Habilitar servidor WebSocket" (puerto ${connectionSettings.port}), pulsa Aplicar y vuelve a enlazar.`;
       } else if (lowerErrorMessage.includes('econnrefused') || lowerErrorMessage.includes('connection refused')) {
         helpMessage = `OBS no acepto la conexion. Revisa que OBS este abierto, que el servidor WebSocket este activado y que el puerto sea ${connectionSettings.port}.`;
       } else if (lowerErrorMessage.includes('closed') || lowerErrorMessage.includes('close') || lowerErrorMessage.includes('socket hang up')) {
@@ -403,7 +411,7 @@ export class OBSManager {
       const candidate = await this.getPrimaryAudioInput();
 
       if (!candidate) {
-        return { success: false, message: 'Match-to-obs no encontro una entrada de microfono en OBS. Agrega un dispositivo Mic/Aux o una fuente Audio Input Capture y luego actualiza el audio.' };
+        return this.getUnconfiguredAudioSnapshot();
       }
 
       const inputSettings = await this.obs.call('GetInputSettings', { inputName: candidate.name });
@@ -411,20 +419,24 @@ export class OBSManager {
       const inputKind = inputSettings.inputKind;
       const selectedDeviceId = getOptionalString(settings.device_id) ?? getOptionalString(settings.device);
       let devices: OBSAudioDevice[] = [];
+      let devicePropertyName: string | undefined;
       const warnings: string[] = [];
 
       try {
-        devices = await this.getAudioDevices(candidate.name, selectedDeviceId);
+        const enumeration = await this.getAudioDevices(candidate.name, selectedDeviceId);
+        devices = enumeration.devices;
+        devicePropertyName = enumeration.propertyName;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         warnings.push(`OBS no expuso dispositivos de microfono seleccionables: ${errorMessage}`);
       }
 
-      const recommendedDevice = devices[0];
+      const recommendedDeviceId = devices[0]?.id;
       devices = devices.map((device) => ({
         ...device,
-        isRecommended: recommendedDevice ? device.id === recommendedDevice.id : false,
+        isRecommended: recommendedDeviceId ? device.id === recommendedDeviceId : false,
       }));
+      const recommendedDevice = devices.find((device) => device.isRecommended);
 
       if (selectedDeviceId && selectedDeviceId.toLowerCase().includes('default')) {
         warnings.push('OBS esta usando el microfono predeterminado del sistema, que puede cambiar cuando conectas hardware.');
@@ -458,6 +470,7 @@ export class OBSManager {
         snapshot: {
           inputName: candidate.name,
           inputKind,
+          devicePropertyName,
           inputUuid: candidate.uuid,
           selectedDeviceId,
           selectedDeviceName: selectedDevice?.name,
@@ -495,14 +508,79 @@ export class OBSManager {
     const warnings: string[] = [];
 
     try {
-      const currentInput = await this.obs.call('GetInputSettings', { inputName: config.inputName });
+      let targetConfig = config;
+      let createdInputName: string | undefined;
+
+      if (config.createInputIfMissing) {
+        const existingInput = await this.getPrimaryAudioInput();
+        if (existingInput) {
+          targetConfig = {
+            ...config,
+            inputName: existingInput.name,
+            inputKind: existingInput.kind,
+            createInputIfMissing: false,
+          };
+        } else {
+          const kindsResponse = await this.obs.call('GetInputKindList');
+          const availableKinds = (kindsResponse.inputKinds ?? [])
+            .filter((kind): kind is string => typeof kind === 'string');
+          const inputKind = config.inputKind && availableKinds.includes(config.inputKind) && isAudioInputKind(config.inputKind)
+            ? config.inputKind
+            : audioInputKindCandidates.find((kind) => availableKinds.includes(kind));
+
+          if (!inputKind) {
+            return {
+              success: false,
+              message: 'OBS no expone una fuente Audio Input Capture compatible en este sistema.',
+              warnings,
+            };
+          }
+
+          const sceneList = await this.obs.call('GetSceneList');
+          const sceneName = getOptionalString(sceneList.currentProgramSceneName)
+            ?? (sceneList.scenes ?? [])
+              .filter(isRecord)
+              .map((scene) => getStringValue(scene, ['sceneName', 'name']))
+              .find((name) => name.length > 0);
+          if (!sceneName) {
+            return {
+              success: false,
+              message: 'Crea al menos una escena en OBS para agregar el microfono.',
+              warnings,
+            };
+          }
+
+          const existingNames = await this.getExistingInputNames();
+          createdInputName = buildUniqueInputName(config.inputName || managedVoiceInputName, existingNames);
+          const devicePropertyName = config.devicePropertyName ?? 'device_id';
+          const inputSettings = config.deviceId
+            ? { [devicePropertyName]: config.deviceId }
+            : undefined;
+
+          await this.obs.call('CreateInput', {
+            sceneName,
+            inputName: createdInputName,
+            inputKind,
+            ...(inputSettings ? { inputSettings } : {}),
+          });
+          targetConfig = {
+            ...config,
+            inputName: createdInputName,
+            inputKind,
+            createInputIfMissing: false,
+          };
+        }
+      }
+
+      const currentInput = await this.obs.call('GetInputSettings', { inputName: targetConfig.inputName });
       const currentSettings = currentInput.inputSettings as Record<string, unknown>;
 
-      if (config.deviceId) {
+      if (targetConfig.deviceId) {
         try {
+          const propertyName = targetConfig.devicePropertyName ?? 'device_id';
           await this.obs.call('SetInputSettings', {
-            inputName: config.inputName,
-            inputSettings: { device_id: config.deviceId },
+            inputName: targetConfig.inputName,
+            inputSettings: { [propertyName]: targetConfig.deviceId },
             overlay: true,
           });
         } catch (error) {
@@ -512,24 +590,24 @@ export class OBSManager {
       }
 
       const monoSettings: OBSJsonSettings = {};
-      if ('mono' in currentSettings) monoSettings.mono = config.mono;
-      if ('force_mono' in currentSettings) monoSettings.force_mono = config.mono;
+      if ('mono' in currentSettings) monoSettings.mono = targetConfig.mono;
+      if ('force_mono' in currentSettings) monoSettings.force_mono = targetConfig.mono;
 
       if (Object.keys(monoSettings).length > 0) {
         await this.obs.call('SetInputSettings', {
-          inputName: config.inputName,
+          inputName: targetConfig.inputName,
           inputSettings: monoSettings,
           overlay: true,
         });
-      } else if (config.mono) {
+      } else if (targetConfig.mono) {
         warnings.push('OBS WebSocket no expuso Mono de Propiedades avanzadas de audio para esta entrada de microfono.');
       }
 
-      if (config.monitorType) {
+      if (targetConfig.monitorType) {
         try {
           await this.obs.call('SetInputAudioMonitorType', {
-            inputName: config.inputName,
-            monitorType: config.monitorType,
+            inputName: targetConfig.inputName,
+            monitorType: targetConfig.monitorType,
           });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -537,11 +615,11 @@ export class OBSManager {
         }
       }
 
-      if (typeof config.syncOffsetMs === 'number') {
+      if (typeof targetConfig.syncOffsetMs === 'number') {
         try {
           await this.obs.call('SetInputAudioSyncOffset', {
-            inputName: config.inputName,
-            inputAudioSyncOffset: config.syncOffsetMs,
+            inputName: targetConfig.inputName,
+            inputAudioSyncOffset: targetConfig.syncOffsetMs,
           });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -549,12 +627,15 @@ export class OBSManager {
         }
       }
 
-      await this.ensureAudioFilters(config.inputName, getFilterSettings(config), warnings, MANAGED_MIC_FILTER_NAMES);
-      await this.configureDucking(config, warnings);
+      await this.ensureAudioFilters(targetConfig.inputName, getFilterSettings(targetConfig), warnings, MANAGED_MIC_FILTER_NAMES);
+      await this.configureDucking(targetConfig, warnings);
       const snapshot = await this.getAudioSnapshot();
-      const message = warnings.length > 0
-        ? `Configuracion de audio aplicada con advertencias: ${warnings.join('; ')}`
+      const successMessage = createdInputName
+        ? `Microfono "${createdInputName}" agregado y configurado en OBS`
         : 'Configuracion de audio aplicada en OBS';
+      const message = warnings.length > 0
+        ? `${successMessage} con advertencias: ${warnings.join('; ')}`
+        : successMessage;
 
       return {
         success: true,
@@ -931,6 +1012,107 @@ export class OBSManager {
     return candidates.sort((a, b) => b.score - a.score)[0] ?? null;
   }
 
+  private async getUnconfiguredAudioSnapshot(): Promise<{
+    success: boolean;
+    message: string;
+    snapshot?: OBSAudioSettingsSnapshot;
+  }> {
+    let temporaryInputName: string | undefined;
+
+    try {
+      const [kindsResponse, sceneList, existingNames] = await Promise.all([
+        this.obs.call('GetInputKindList'),
+        this.obs.call('GetSceneList'),
+        this.getExistingInputNames(),
+      ]);
+      const availableKinds = (kindsResponse.inputKinds ?? [])
+        .filter((kind): kind is string => typeof kind === 'string');
+      const inputKind = audioInputKindCandidates.find((kind) => availableKinds.includes(kind));
+      if (!inputKind) {
+        return {
+          success: false,
+          message: 'OBS no expone una fuente Audio Input Capture compatible en este sistema.',
+        };
+      }
+
+      const sceneName = getOptionalString(sceneList.currentProgramSceneName)
+        ?? (sceneList.scenes ?? [])
+          .filter(isRecord)
+          .map((scene) => getStringValue(scene, ['sceneName', 'name']))
+          .find((name) => name.length > 0);
+      if (!sceneName) {
+        return {
+          success: false,
+          message: 'Crea al menos una escena en OBS para detectar y agregar el microfono.',
+        };
+      }
+
+      temporaryInputName = buildUniqueInputName('match-to-obs · deteccion temporal', existingNames);
+      await this.obs.call('CreateInput', {
+        sceneName,
+        inputName: temporaryInputName,
+        inputKind,
+        sceneItemEnabled: false,
+      });
+
+      const enumeration = await this.getAudioDevices(temporaryInputName);
+      const recommendedDeviceId = enumeration.devices[0]?.id;
+      const devices = enumeration.devices.map((device) => ({
+        ...device,
+        isRecommended: recommendedDeviceId ? device.id === recommendedDeviceId : false,
+      }));
+      const recommendedDevice = devices.find((device) => device.isRecommended);
+      const duckingTargets = await this.getDuckingTargets();
+      const primaryDuckingTarget = duckingTargets[0];
+      const warnings = [
+        'OBS tiene Mic/Aux en Ninguno. Match-to-obs creara una entrada de voz al aplicar.',
+      ];
+      if (devices.length === 0) {
+        warnings.push('OBS no expuso una lista de microfonos; se usara el dispositivo predeterminado al aplicar.');
+      }
+
+      return {
+        success: true,
+        message: recommendedDevice
+          ? `Microfono recomendado: ${recommendedDevice.name}`
+          : 'Entrada de voz lista para configurar',
+        snapshot: {
+          inputName: buildUniqueInputName(managedVoiceInputName, existingNames),
+          inputKind,
+          devicePropertyName: enumeration.propertyName,
+          requiresInputCreation: true,
+          devices,
+          recommendedDevice,
+          muted: false,
+          volumeDb: 0,
+          monitorType: 'OBS_MONITORING_TYPE_NONE',
+          syncOffsetMs: 0,
+          desktopAudio: primaryDuckingTarget
+            ? {
+              inputName: primaryDuckingTarget.inputName,
+              duckingConfigured: primaryDuckingTarget.duckingConfigured,
+            }
+            : undefined,
+          duckingTargets,
+          filters: [],
+          matchToObsFiltersConfigured: false,
+          monoConfigured: false,
+          monoSupported: false,
+          warnings,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `No se pudieron detectar los microfonos disponibles en OBS: ${OBSManager.describeError(error)}`,
+      };
+    } finally {
+      if (temporaryInputName) {
+        await this.obs.call('RemoveInput', { inputName: temporaryInputName }).catch(() => undefined);
+      }
+    }
+  }
+
   private async getDuckingTargets(): Promise<NonNullable<OBSAudioSettingsSnapshot['duckingTargets']>> {
     const [specialInputs, inputList] = await Promise.all([
       this.obs.call('GetSpecialInputs').catch(() => undefined),
@@ -950,7 +1132,10 @@ export class OBSManager {
     }));
   }
 
-  private async getAudioDevices(inputName: string, selectedDeviceId?: string): Promise<OBSAudioDevice[]> {
+  private async getAudioDevices(
+    inputName: string,
+    selectedDeviceId?: string,
+  ): Promise<{ devices: OBSAudioDevice[]; propertyName?: string }> {
     const propertyNames = ['device_id', 'device'];
 
     for (const propertyName of propertyNames) {
@@ -979,13 +1164,13 @@ export class OBSManager {
           .filter((device) => device.id.length > 0 || device.name !== 'Dispositivo desconocido')
           .sort((a, b) => b.score - a.score);
 
-        if (devices.length > 0) return devices;
+        if (devices.length > 0) return { devices, propertyName };
       } catch {
         // Try the next property name; OBS uses different property ids per platform/source kind.
       }
     }
 
-    return [];
+    return { devices: [] };
   }
 
   private async configureDucking(config: OBSAudioConfig, warnings: string[]): Promise<void> {

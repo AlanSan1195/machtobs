@@ -89,6 +89,18 @@ export function validateOBSAudioConfig(value: unknown): ValidationResult<OBSAudi
     return { success: false, message: 'Audio input name is required.' };
   }
 
+  if (value.createInputIfMissing !== undefined && typeof value.createInputIfMissing !== 'boolean') {
+    return { success: false, message: 'Audio input creation setting must be a boolean.' };
+  }
+
+  if (value.createInputIfMissing === true && !isNonEmptyString(value.inputKind)) {
+    return { success: false, message: 'Audio input kind is required to create the microphone source.' };
+  }
+
+  if (value.devicePropertyName !== undefined && !['device_id', 'device'].includes(value.devicePropertyName as string)) {
+    return { success: false, message: 'Audio device property is invalid.' };
+  }
+
   if (typeof value.mono !== 'boolean') {
     return { success: false, message: 'Audio mono setting must be a boolean.' };
   }
@@ -162,6 +174,9 @@ export function validateOBSAudioConfig(value: unknown): ValidationResult<OBSAudi
     success: true,
     value: {
       inputName: value.inputName.trim(),
+      ...(isNonEmptyString(value.inputKind) ? { inputKind: value.inputKind.trim() } : {}),
+      ...(typeof value.devicePropertyName === 'string' ? { devicePropertyName: value.devicePropertyName } : {}),
+      ...(value.createInputIfMissing === true ? { createInputIfMissing: true } : {}),
       deviceId: isNonEmptyString(value.deviceId) ? value.deviceId.trim() : undefined,
       deviceName: isNonEmptyString(value.deviceName) ? value.deviceName.trim() : undefined,
       mono: value.mono,
@@ -612,6 +627,81 @@ export function validateAIRecommendation(value: unknown): ValidationResult<Omit<
   };
 }
 
+function parseBackupAdvancedEncoder(
+  value: unknown,
+): NonNullable<OBSSettingsSnapshot['advancedControl']>['stream'] {
+  if (
+    !isRecord(value)
+    || typeof value.available !== 'boolean'
+    || typeof value.encoderId !== 'string'
+    || typeof value.active !== 'boolean'
+    || typeof value.rateControl !== 'string'
+    || typeof value.bitrate !== 'number'
+    || !Number.isFinite(value.bitrate)
+    || typeof value.quality !== 'number'
+    || !Number.isFinite(value.quality)
+    || typeof value.limitBitrate !== 'boolean'
+    || typeof value.maxBitrate !== 'number'
+    || !Number.isFinite(value.maxBitrate)
+    || typeof value.maxBitrateWindow !== 'number'
+    || !Number.isFinite(value.maxBitrateWindow)
+    || typeof value.keyframeInterval !== 'number'
+    || !Number.isFinite(value.keyframeInterval)
+    || typeof value.profile !== 'string'
+    || typeof value.bFrames !== 'boolean'
+    || typeof value.spatialAQMode !== 'number'
+    || !Number.isFinite(value.spatialAQMode)
+  ) {
+    return undefined;
+  }
+
+  return {
+    available: value.available,
+    encoderId: value.encoderId.trim(),
+    active: value.active,
+    rateControl: value.rateControl.trim(),
+    bitrate: Math.round(value.bitrate),
+    quality: Math.round(value.quality),
+    limitBitrate: value.limitBitrate,
+    maxBitrate: Math.round(value.maxBitrate),
+    maxBitrateWindow: value.maxBitrateWindow,
+    keyframeInterval: Math.round(value.keyframeInterval),
+    profile: value.profile.trim(),
+    bFrames: value.bFrames,
+    spatialAQMode: Math.round(value.spatialAQMode),
+  };
+}
+
+function parseBackupAdvancedControl(
+  value: unknown,
+): OBSSettingsSnapshot['advancedControl'] {
+  if (
+    !isRecord(value)
+    || typeof value.available !== 'boolean'
+    || typeof value.pluginVersion !== 'string'
+    || typeof value.outputMode !== 'string'
+  ) {
+    return undefined;
+  }
+
+  const stream = parseBackupAdvancedEncoder(value.stream);
+  const recording = parseBackupAdvancedEncoder(value.recording);
+  if (
+    (value.stream !== undefined && !stream)
+    || (value.recording !== undefined && !recording)
+  ) {
+    return undefined;
+  }
+
+  return {
+    available: value.available,
+    pluginVersion: value.pluginVersion.trim(),
+    outputMode: value.outputMode.trim(),
+    stream,
+    recording,
+  };
+}
+
 export function validateOBSBackup(value: unknown): ValidationResult<OBSBackup> {
   if (!isRecord(value) || !isNonEmptyString(value.createdAt) || value.appliedByMatchToObs !== true || !isRecord(value.snapshot)) {
     return { success: false, message: 'OBS backup is incomplete.' };
@@ -661,9 +751,14 @@ export function validateOBSBackup(value: unknown): ValidationResult<OBSBackup> {
     fps: Math.round(snapshot.fps),
     encoder: snapshot.encoder.trim(),
     bitrate: Math.round(snapshot.bitrate),
+    recordingBitrate: typeof snapshot.recordingBitrate === 'number'
+      && Number.isFinite(snapshot.recordingBitrate)
+      ? Math.round(snapshot.recordingBitrate)
+      : undefined,
     audioBitrate: Math.round(snapshot.audioBitrate),
     recordingFormat: snapshot.recordingFormat.trim(),
     recordingQuality: snapshot.recordingQuality.trim(),
+    advancedControl: parseBackupAdvancedControl(snapshot.advancedControl),
     audio: isRecord(snapshot.audio) ? snapshot.audio as unknown as OBSSettingsSnapshot['audio'] : undefined,
   };
 

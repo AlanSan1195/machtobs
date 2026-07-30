@@ -95,6 +95,9 @@ export type OBSAudioMonitorType =
 
 export interface OBSAudioConfig {
   inputName: string;
+  inputKind?: string;
+  devicePropertyName?: string;
+  createInputIfMissing?: boolean;
   deviceId?: string;
   deviceName?: string;
   mono: boolean;
@@ -150,6 +153,8 @@ export interface OBSAudioFilterSnapshot {
 export interface OBSAudioSettingsSnapshot {
   inputName: string;
   inputKind: string;
+  devicePropertyName?: string;
+  requiresInputCreation?: boolean;
   inputUuid?: string;
   selectedDeviceId?: string;
   selectedDeviceName?: string;
