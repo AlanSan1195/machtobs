@@ -16,6 +16,8 @@ import type { AIRecommendation, AIRecommendationField, AIRecommendationSettings,
 
 export type ComparisonRow = {
   label: string;
+  /** Explicacion breve de que hace el ajuste, para ensenar al usuario. */
+  description?: string;
   current: string;
   recommended: string;
   type?: 'encoder' | 'recordingQuality';
@@ -104,30 +106,35 @@ export function buildComparisonRows(
   const rows: ComparisonRow[] = [
     {
       label: 'Lienzo base',
+      description: 'Area donde armas tu escena; debe igualar la resolucion de tu fuente o pantalla.',
       current: snapshot.baseResolution,
       recommended: recommendations.canvas_resolution,
       field: 'canvas_resolution',
     },
     {
       label: 'Salida maestra / grabacion',
+      description: 'Resolucion de tus grabaciones; define su nitidez y el peso del archivo.',
       current: snapshot.outputResolution,
       recommended: recommendations.recording_resolution,
       field: 'recording_resolution',
     },
     {
       label: 'Salida del stream',
+      description: 'Resolucion que recibe la plataforma; bajarla reduce cortes y carga.',
       current: snapshot.streamResolution ?? snapshot.outputResolution,
       recommended: recommendations.resolution,
       field: 'resolution',
     },
     {
       label: 'FPS',
+      description: 'Fluidez del video; mas FPS exigen mas GPU y mas bitrate.',
       current: String(snapshot.fps),
       recommended: String(recommendations.fps),
       field: 'fps',
     },
     {
       label: 'Encoder del stream',
+      description: 'Quien comprime el directo; por hardware libera a la CPU.',
       current: snapshot.encoder,
       recommended: recommendations.encoder,
       type: 'encoder',
@@ -135,6 +142,7 @@ export function buildComparisonRows(
     },
     {
       label: 'Bitrate del stream',
+      description: 'Datos que envias por segundo; lo limitan tu subida y la plataforma.',
       current: snapshot.bitrate > 0 ? String(snapshot.bitrate) : 'No disponible por WebSocket',
       recommended: String(recommendations.bitrate),
       applyMethod: advancedStreamNeeded && !advancedAutomatic ? 'manual' : 'automatic',
@@ -142,6 +150,7 @@ export function buildComparisonRows(
     },
     {
       label: 'Encoder de grabacion',
+      description: 'Quien comprime tus grabaciones; puede ser de mas calidad que el del stream.',
       current: snapshot.advancedOutput?.recordingEncoder ?? snapshot.encoder,
       recommended: recommendations.recording_encoder,
       type: 'encoder',
@@ -149,6 +158,7 @@ export function buildComparisonRows(
     },
     {
       label: 'Bitrate de grabacion',
+      description: 'Calidad del archivo; al ser local puede ir muy por encima del stream.',
       current: advancedOutputNeeded
         ? snapshot.recordingBitrate && snapshot.recordingBitrate > 0
           ? String(snapshot.recordingBitrate)
@@ -160,18 +170,21 @@ export function buildComparisonRows(
     },
     {
       label: 'Bitrate de audio',
+      description: 'Calidad del sonido; 160-320 kbps bastan para voz nitida.',
       current: String(snapshot.audioBitrate),
       recommended: String(recommendations.audio_bitrate),
       field: 'audio_bitrate',
     },
     {
       label: 'Formato de grabacion',
+      description: 'Contenedor del video; MKV no pierde la grabacion si OBS se cierra.',
       current: snapshot.recordingFormat,
       recommended: recommendations.recording_format,
       field: 'recording_format',
     },
     {
       label: 'Calidad de grabacion',
+      description: 'Nivel de compresion del archivo; mas calidad ocupa mas disco.',
       current: snapshot.recordingQuality,
       recommended: recommendations.recording_quality,
       type: 'recordingQuality',
@@ -195,30 +208,35 @@ export function buildComparisonRows(
     rows.splice(6, 0,
       {
         label: 'Control de tasa del stream',
+        description: 'Reparto del bitrate; CBR lo mantiene estable, como piden las plataformas.',
         current: stream.rateControl,
         recommended: 'CBR',
         applyMethod: 'automatic',
       },
       {
         label: 'Fotogramas clave del stream',
+        description: 'Cada cuanto va un fotograma completo; 2s es el estandar de las plataformas.',
         current: String(stream.keyframeInterval),
         recommended: '2',
         applyMethod: 'automatic',
       },
       {
         label: 'Perfil del stream',
+        description: 'Nivel de compresion; "high" rinde mas calidad al mismo bitrate.',
         current: stream.profile,
         recommended: 'high',
         applyMethod: 'automatic',
       },
       {
         label: 'B-frames del stream',
+        description: 'Fotogramas predictivos; mejoran la calidad sin subir el bitrate.',
         current: booleanLabel(stream.bFrames),
         recommended: 'Si',
         applyMethod: 'automatic',
       },
       {
         label: 'AQ espacial del stream',
+        description: 'Da mas bitrate a las zonas con detalle para evitar pixelado.',
         current: spatialAQLabel(stream.spatialAQMode),
         recommended: 'Automatico',
         applyMethod: 'automatic',
@@ -231,18 +249,21 @@ export function buildComparisonRows(
     rows.splice(recordingEncoderIndex + 2, 0,
       {
         label: 'Control de tasa de grabacion',
+        description: 'Reparto del bitrate; CBR lo mantiene estable en toda la grabacion.',
         current: recording.rateControl,
         recommended: 'CBR',
         applyMethod: 'automatic',
       },
       {
         label: 'Fotogramas clave de grabacion',
+        description: 'Cada cuanto se guarda un fotograma completo; 2s facilita editar.',
         current: String(recording.keyframeInterval),
         recommended: '2',
         applyMethod: 'automatic',
       },
       {
         label: 'Perfil de grabacion',
+        description: 'Nivel de compresion; se conserva el que ya usa tu OBS.',
         current: recording.profile,
         // La recomendación actual no cambia profundidad de color; conservar el
         // perfil detectado evita degradar main10 a main.
@@ -251,12 +272,14 @@ export function buildComparisonRows(
       },
       {
         label: 'B-frames de grabacion',
+        description: 'Fotogramas predictivos; mas calidad sin archivos mas grandes.',
         current: booleanLabel(recording.bFrames),
         recommended: 'Si',
         applyMethod: 'automatic',
       },
       {
         label: 'AQ espacial de grabacion',
+        description: 'Da mas bitrate a las zonas con detalle para evitar pixelado.',
         current: spatialAQLabel(recording.spatialAQMode),
         recommended: 'Automatico',
         applyMethod: 'automatic',
@@ -504,7 +527,7 @@ export function OBSComparison() {
         </div>
       )}
       <div className="overflow-hidden rounded-none border border-border">
-        <div className="hidden grid-cols-[1fr_1fr_1fr_104px] bg-paper/[0.04] px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/50 lg:grid">
+        <div className="hidden grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.3fr)_auto] gap-4 bg-paper/[0.04] px-4 py-3 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/50 lg:grid">
           <span>Ajuste</span>
           <span>OBS actual</span>
           <span>Recomendado <span className="text-primary/80">/ editable</span></span>
@@ -516,9 +539,14 @@ export function OBSComparison() {
           return (
             <div
               key={row.label}
-              className="grid grid-cols-2 items-start gap-3 border-t border-border px-3 py-3 text-sm transition-colors first:border-t-0 hover:bg-surface-hover/70 sm:px-4 lg:grid-cols-[1fr_1fr_1fr_104px] lg:items-center lg:gap-0"
+              className="grid grid-cols-2 items-start gap-3 border-t border-border px-3 py-3 text-sm transition-colors first:border-t-0 hover:bg-surface-hover/70 sm:px-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.3fr)_auto] lg:items-center lg:gap-4"
             >
-              <span className="col-span-2 font-medium text-text lg:col-span-1">{row.label}</span>
+              <span className="col-span-2 min-w-0 lg:col-span-1">
+                <span className="block font-medium text-text">{row.label}</span>
+                {row.description && (
+                  <span className="mt-1 block text-xs leading-snug text-paper/45">{row.description}</span>
+                )}
+              </span>
               <span className="min-w-0 text-text-muted">
                 <span className="mb-1 block font-mono text-[0.55rem] uppercase tracking-[0.14em] text-paper/35 lg:hidden">
                   OBS actual
@@ -537,7 +565,7 @@ export function OBSComparison() {
                   row.type === 'encoder' ? formatEncoderName(row.recommended) : row.recommended
                 )}
               </span>
-              <span className="col-span-2 lg:col-span-1">
+              <span className="col-span-2 whitespace-nowrap lg:col-span-1">
                 {same ? (
                   <span className="inline-flex items-center gap-1.5 border border-paper/20 bg-paper/[0.06] px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-paper/70">
                     <IconCheck className="h-3 w-3" />

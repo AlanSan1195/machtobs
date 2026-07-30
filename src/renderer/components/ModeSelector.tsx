@@ -12,7 +12,7 @@ export function ModeSelector() {
   const { mode, setMode } = useAppStore();
 
   return (
-    <Section title="modo" icon={<span className="text-xs">[1]</span>}>
+    <Section title="modo">
       <div className="grid grid-cols-3 gap-3">
         {modes.map((m) => {
           const selected = mode === m.id;

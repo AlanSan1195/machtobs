@@ -49,14 +49,10 @@ function SignalArrow({ className }: { className?: string }) {
   );
 }
 
-function StepHeader({ index, word, hint, outline = false }: { index: string; word: string; hint: string; outline?: boolean }) {
+function StepHeader({ word, outline = false }: { word: string; outline?: boolean }) {
   return (
     <div className="border-b border-paper/10 pb-5">
-      <div className="flex items-baseline justify-between gap-4">
-        <span className="micro-label">{index} / {word}</span>
-        <span className="micro-label hidden sm:block">{hint}</span>
-      </div>
-      <h2 className={`display-xl mt-4 text-[clamp(2.6rem,7vw,5.5rem)] ${outline ? 'text-outline' : 'text-paper'}`}>
+      <h2 className={`display-xl text-[clamp(2.6rem,7vw,5.5rem)] ${outline ? 'text-outline' : 'text-paper'}`}>
         {word}
       </h2>
     </div>
@@ -214,8 +210,7 @@ export default function App() {
           <div className="pb-16">
             {/* hero */}
             <section className="relative border-b border-paper/10 py-14 sm:py-20">
-              <div className="mb-10 flex items-center justify-between font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/40">
-                <span>setup / entrada</span>
+              <div className="mb-10 flex items-center justify-end font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/40">
                 <span>{obsConnected ? 'status / conectado' : 'status / disponible'}</span>
               </div>
 
@@ -250,7 +245,7 @@ export default function App() {
 
         {activeTab === 1 && (
           <div className="space-y-8 py-10">
-            <StepHeader index="02" word="ajustes" hint="entrada / hardware / destino" />
+            <StepHeader word="ajustes" />
             <div className="grid gap-5 lg:grid-cols-2">
               <ModeSelector />
               <PlatformSelector />
@@ -269,7 +264,7 @@ export default function App() {
 
         {activeTab === 2 && (
           <div className="space-y-8 py-10">
-            <StepHeader index="03" word="deteccion" hint="match / revision / aplicar" outline />
+            <StepHeader word="deteccion" outline />
             <ConsoleReport />
             <Recommendations />
             <OBSComparison />
@@ -279,7 +274,7 @@ export default function App() {
 
         {activeTab === 3 && (
           <div className="space-y-8 py-10">
-            <StepHeader index="04" word="escenas" hint="fuentes / importar" />
+            <StepHeader word="escenas" />
             <ScenesPanel />
             <ImportButton />
             <div className="border-t border-paper/10 pt-6">

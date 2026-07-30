@@ -102,6 +102,13 @@ describe('buildComparisonRows', () => {
     expect(rows.every((row) => row.field !== undefined)).toBe(true);
   });
 
+  it('explica brevemente que hace cada ajuste de la tabla', () => {
+    const rows = buildComparisonRows(snapshot, recommendations);
+
+    expect(rows.every((row) => typeof row.description === 'string' && row.description.length > 0)).toBe(true);
+    expect(rows.find((row) => row.label === 'FPS')?.description).toContain('Fluidez');
+  });
+
   it('no confunde el bitrate simple con el bitrate avanzado no expuesto por OBS', () => {
     const rows = buildComparisonRows({
       ...snapshot,

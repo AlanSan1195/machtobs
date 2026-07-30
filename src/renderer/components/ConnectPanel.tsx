@@ -54,23 +54,13 @@ export function ConnectPanel() {
 
   return (
     <section
-      aria-labelledby="obs-connect-title"
+      aria-label="Conectar con OBS"
       className="relative border-y border-paper/15 bg-background/55"
     >
       <header className="border-b border-paper/10">
         <div className="flex min-w-0 items-center gap-3 px-5 py-3">
           <span className="h-1.5 w-1.5 shrink-0 bg-primary" aria-hidden="true" />
           <IconPlug className="h-4 w-4 shrink-0 text-primary" />
-          <h2
-            id="obs-connect-title"
-            className="truncate font-mono text-[0.68rem] font-medium uppercase tracking-[0.18em] text-paper"
-          >
-            01 / obs.conectar
-          </h2>
-          <span className="hidden h-px min-w-8 flex-1 bg-paper/10 sm:block" aria-hidden="true" />
-          <span className="hidden font-mono text-[0.55rem] uppercase tracking-[0.16em] text-paper/30 sm:block">
-            localhost / 4455
-          </span>
         </div>
       </header>
 
@@ -160,10 +150,7 @@ export function ConnectPanel() {
                 >
                   01
                 </span>
-                <p className="font-mono text-[0.56rem] uppercase tracking-[0.16em] text-primary">
-                  paso / 01
-                </p>
-                <p className="mt-3 font-display text-2xl font-black uppercase tracking-tight text-paper">
+                <p className="font-display text-2xl font-black uppercase tracking-tight text-paper">
                   abre OBS
                 </p>
                 <p className="mt-4 max-w-lg text-sm leading-relaxed text-paper/50">
@@ -179,10 +166,7 @@ export function ConnectPanel() {
                 >
                   02
                 </span>
-                <p className="font-mono text-[0.56rem] uppercase tracking-[0.16em] text-primary">
-                  paso / 02
-                </p>
-                <div className="mt-3 flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   <span className="grid h-7 w-7 place-items-center border border-primary text-primary">
                     <IconCheck className="h-4 w-4" />
                   </span>
@@ -207,12 +191,9 @@ export function ConnectPanel() {
                 >
                   03
                 </span>
-                <p className="font-mono text-[0.56rem] uppercase tracking-[0.16em] text-primary">
-                  paso / 03
-                </p>
                 <label
                   htmlFor="obs-guide-password"
-                  className="mt-3 block font-display text-2xl font-black uppercase tracking-tight text-paper"
+                  className="block font-display text-2xl font-black uppercase tracking-tight text-paper"
                 >
                   pega la contraseña
                 </label>
@@ -257,10 +238,7 @@ export function ConnectPanel() {
                   04
                 </span>
                 <span className="relative text-center">
-                  <span className="block font-mono text-[0.56rem] uppercase tracking-[0.16em] opacity-60">
-                    paso / 04
-                  </span>
-                  <span className="mt-3 block font-display text-4xl font-black uppercase tracking-[-0.04em]">
+                  <span className="block font-display text-4xl font-black uppercase tracking-[-0.04em]">
                     {isConnecting ? 'enlazando' : 'enlazar'}
                   </span>
                   <span className="mt-3 block font-mono text-[0.56rem] uppercase tracking-[0.14em] opacity-55">

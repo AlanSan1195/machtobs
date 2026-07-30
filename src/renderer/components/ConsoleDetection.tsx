@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
-import { IconMonitor, IconRefresh, Section, Spinner } from './ui';
+import { IconRefresh, Section, Spinner } from './ui';
 
 const secondaryButtonClasses =
   'inline-flex items-center gap-1.5 rounded-none border border-border px-3 py-2 text-xs font-semibold text-text transition-colors hover:border-primary/40 hover:bg-white/[0.04]';
@@ -85,7 +85,6 @@ export function ConsoleDetection() {
   return (
     <Section
       title="equipo detectado"
-      icon={<IconMonitor className="h-4 w-4" />}
       subtitle="La capturadora y la pantalla se detectan automaticamente. Solo corrige el modelo si algo no coincide (ej. una TV conectada a la consola)."
       action={
         <button

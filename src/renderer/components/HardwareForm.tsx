@@ -47,7 +47,6 @@ export function HardwareForm() {
   return (
     <Section
       title="hardware.config"
-      icon={<span className="text-xs">[hw]</span>}
       subtitle="El navegador estima la GPU. Confirma el CPU, sus nucleos y la RAM para que la recomendacion sea precisa."
     >
       <div className="space-y-4">

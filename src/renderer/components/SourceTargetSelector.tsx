@@ -11,7 +11,7 @@ export function SourceTargetSelector() {
   const { analysisTarget, setAnalysisTarget } = useAppStore();
 
   return (
-    <Section title="fuente" icon={<span className="text-xs">[3]</span>} subtitle="Que vas a transmitir: tu PC, o una consola capturada con tarjeta capturadora.">
+    <Section title="fuente" subtitle="Que vas a transmitir: tu PC, o una consola capturada con tarjeta capturadora.">
       <div className="grid grid-cols-2 gap-3">
         {targets.map((t) => {
           const selected = analysisTarget === t.id;

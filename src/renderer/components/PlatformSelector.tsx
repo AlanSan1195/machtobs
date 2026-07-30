@@ -23,7 +23,7 @@ export function PlatformSelector() {
   const { platform, setPlatform } = useAppStore();
 
   return (
-    <Section title="plataforma" icon={<span className="text-xs">[2]</span>}>
+    <Section title="plataforma">
       <div className="grid grid-cols-2 gap-3">
         {platforms.map((p) => {
           const selected = platform === p.id;

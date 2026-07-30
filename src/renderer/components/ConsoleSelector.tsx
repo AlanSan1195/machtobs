@@ -16,7 +16,7 @@ export function ConsoleSelector() {
   const { consoleModel, setConsoleModel } = useAppStore();
 
   return (
-    <Section title="consola" icon={<span className="text-xs">[4]</span>}>
+    <Section title="consola">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {consoles.map((c) => {
           const selected = consoleModel === c.id;
