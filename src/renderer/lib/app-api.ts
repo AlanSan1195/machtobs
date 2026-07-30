@@ -21,6 +21,7 @@ import {
   validateBeginGuidedSource,
   validateConsoleProfileRequest,
   validateCreateGuidedSourceConfig,
+  validateEnsureCaptureAudioInput,
   validateInputName,
   validateMicProfileRequest,
   validateOBSAudioConfig,
@@ -37,6 +38,7 @@ import type {
   BeginGuidedSourceInput,
   ConsoleProfileRequest,
   CreateGuidedSourceConfig,
+  EnsureCaptureAudioInput,
   MicProfileRequest,
   OBSAudioConfig,
   OBSConfig,
@@ -143,6 +145,13 @@ export const appAPI = {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
       return obsManager.applyGuidedSourceDevice(validation.value);
+    },
+    ensureCaptureAudio: async (arg: EnsureCaptureAudioInput) => {
+      const validation = validateEnsureCaptureAudioInput(arg);
+      if (!validation.success) {
+        return { success: false, message: validation.message, warnings: [] as string[] };
+      }
+      return obsManager.ensureCaptureAudio(validation.value);
     },
     cancelGuidedSource: async (name: string) => {
       const validation = validateInputName(name);

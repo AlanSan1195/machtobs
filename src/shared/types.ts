@@ -496,6 +496,14 @@ export interface ApplyGuidedSourceDeviceInput {
   deviceId: string;
 }
 
+// Payload validado para crear o actualizar la fuente de audio de la capturadora.
+// deviceNameHint es el nombre del dispositivo de video elegido; se usa para
+// encontrar su equivalente de audio porque los ids difieren entre ambos.
+export interface EnsureCaptureAudioInput {
+  sceneName: string;
+  deviceNameHint?: string;
+}
+
 // Como se coloca la camara en la escena:
 // - 'facecam': cuadrado 1:1 en una esquina (ideal para stream).
 // - 'fullscreen': abarca todo el lienzo.

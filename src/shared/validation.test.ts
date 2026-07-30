@@ -9,6 +9,7 @@ import {
   validateConsoleProfileRequest,
   validateConsoleProfileResponse,
   validateCreateGuidedSourceConfig,
+  validateEnsureCaptureAudioInput,
   validateMicProfileRequest,
   validateMicProfileResponse,
   validateOBSBackup,
@@ -605,6 +606,40 @@ describe('validateAIRecommendationRequest currentSettings', () => {
     if (result.success) {
       expect(result.value.currentSettings).toBeUndefined();
     }
+  });
+});
+
+describe('validateEnsureCaptureAudioInput', () => {
+  it('acepta una escena sin pista de dispositivo', () => {
+    const result = validateEnsureCaptureAudioInput({ sceneName: 'Gameplay' });
+
+    expect(result).toEqual({
+      success: true,
+      value: {
+        sceneName: 'Gameplay',
+        deviceNameHint: undefined,
+      },
+    });
+  });
+
+  it('recorta el nombre de dispositivo proporcionado', () => {
+    const result = validateEnsureCaptureAudioInput({
+      sceneName: 'Gameplay',
+      deviceNameHint: '  Elgato Game Capture 4K X  ',
+    });
+
+    expect(result).toEqual({
+      success: true,
+      value: {
+        sceneName: 'Gameplay',
+        deviceNameHint: 'Elgato Game Capture 4K X',
+      },
+    });
+  });
+
+  it('rechaza valores que no son objetos y escenas vacias', () => {
+    expect(validateEnsureCaptureAudioInput('Gameplay').success).toBe(false);
+    expect(validateEnsureCaptureAudioInput({ sceneName: '' }).success).toBe(false);
   });
 });
 

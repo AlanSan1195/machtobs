@@ -776,3 +776,137 @@ describe('OBSManager con audio de OBS virgen', () => {
     });
   });
 });
+
+describe('OBSManager audio de capturadora', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    obsMock.connect.mockResolvedValue({});
+  });
+
+  it('crea la fuente y vincula el dispositivo de audio que coincide por nombre', async () => {
+    obsMock.call.mockImplementation(async (request: string) => {
+      if (request === 'GetInputKindList') return { inputKinds: ['coreaudio_input_capture'] };
+      if (request === 'GetInputList') return { inputs: [{ inputName: 'Consola' }] };
+      if (request === 'CreateInput') return { sceneItemId: 31 };
+      if (request === 'GetInputPropertiesListPropertyItems') {
+        return {
+          propertyItems: [
+            { itemName: 'Microfono integrado', itemValue: 'builtin-mic' },
+            { itemName: 'Elgato Game Capture 4K X', itemValue: 'elgato-audio-uid' },
+          ],
+        };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.ensureCaptureAudio({
+      sceneName: 'Gameplay',
+      deviceNameHint: 'Elgato Game Capture 4K X',
+    });
+
+    expect(result.success).toBe(true);
+    expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
+      sceneName: 'Gameplay',
+      inputName: 'Audio/Capturadora',
+      inputKind: 'coreaudio_input_capture',
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('SetInputSettings', {
+      inputName: 'Audio/Capturadora',
+      inputSettings: { device_id: 'elgato-audio-uid' },
+      overlay: true,
+    });
+  });
+
+  it('usa el patron de capturadora cuando no hay nombre elegido', async () => {
+    obsMock.call.mockImplementation(async (request: string) => {
+      if (request === 'GetInputKindList') return { inputKinds: ['coreaudio_input_capture'] };
+      if (request === 'GetInputList') return { inputs: [] };
+      if (request === 'CreateInput') return { sceneItemId: 31 };
+      if (request === 'GetInputPropertiesListPropertyItems') {
+        return {
+          propertyItems: [
+            { itemName: 'Microfono (Realtek)', itemValue: 'realtek-mic' },
+            { itemName: 'HDMI Capture', itemValue: 'hdmi-audio' },
+          ],
+        };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.ensureCaptureAudio({ sceneName: 'Gameplay' });
+
+    expect(result.success).toBe(true);
+    expect(obsMock.call).toHaveBeenCalledWith('SetInputSettings', {
+      inputName: 'Audio/Capturadora',
+      inputSettings: { device_id: 'hdmi-audio' },
+      overlay: true,
+    });
+  });
+
+  it('elimina la fuente creada cuando no encuentra audio de capturadora', async () => {
+    obsMock.call.mockImplementation(async (request: string) => {
+      if (request === 'GetInputKindList') return { inputKinds: ['coreaudio_input_capture'] };
+      if (request === 'GetInputList') return { inputs: [] };
+      if (request === 'CreateInput') return { sceneItemId: 31 };
+      if (request === 'GetInputPropertiesListPropertyItems') {
+        return {
+          propertyItems: [
+            { itemName: 'Microfono integrado', itemValue: 'builtin-mic' },
+          ],
+        };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.ensureCaptureAudio({ sceneName: 'Gameplay' });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('Agregalo manualmente');
+    expect(obsMock.call).toHaveBeenCalledWith('RemoveInput', {
+      inputName: 'Audio/Capturadora',
+    });
+  });
+
+  it('reutiliza la fuente administrada y la agrega a la escena sin duplicarla', async () => {
+    obsMock.call.mockImplementation(async (request: string) => {
+      if (request === 'GetInputKindList') return { inputKinds: ['coreaudio_input_capture'] };
+      if (request === 'GetInputList') {
+        return { inputs: [{ inputName: 'Audio/Capturadora' }] };
+      }
+      if (request === 'GetSceneItemList') return { sceneItems: [] };
+      if (request === 'GetInputPropertiesListPropertyItems') {
+        return {
+          propertyItems: [
+            { itemName: 'Elgato Game Capture 4K X', itemValue: 'elgato-audio-uid' },
+          ],
+        };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.ensureCaptureAudio({
+      sceneName: 'Gameplay',
+      deviceNameHint: 'Elgato Game Capture 4K X',
+    });
+
+    expect(result.success).toBe(true);
+    expect(obsMock.call).not.toHaveBeenCalledWith('CreateInput', expect.anything());
+    expect(obsMock.call).toHaveBeenCalledWith('CreateSceneItem', {
+      sceneName: 'Gameplay',
+      sourceName: 'Audio/Capturadora',
+    });
+    expect(obsMock.call).toHaveBeenCalledWith('SetInputSettings', {
+      inputName: 'Audio/Capturadora',
+      inputSettings: { device_id: 'elgato-audio-uid' },
+      overlay: true,
+    });
+  });
+});

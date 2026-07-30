@@ -5,6 +5,7 @@ import type {
   CaptureCapabilities,
   CreateGuidedSourceConfig,
   DeviceOption,
+  EnsureCaptureAudioInput,
   OBSAudioConfig,
   OBSAudioDevice,
   OBSAudioFilterSnapshot,
@@ -76,6 +77,9 @@ const audioInputKindCandidates = [
   'alsa_input_capture',
 ] as const;
 const managedVoiceInputName = 'Voz · Match-to-obs';
+// Nombres tipicos de capturadoras vistas como dispositivo (video o audio).
+const CAPTURE_DEVICE_NAME_PATTERN = /capture|hdmi|elgato|avermedia|ugreen|macro|cam link|live gamer|ripsaw/i;
+const managedCaptureAudioInputName = 'Audio/Capturadora';
 
 // `obsee` fue el nombre publicado por la primera version del complemento.
 // Conservamos compatibilidad para que las instalaciones existentes puedan
@@ -1492,7 +1496,7 @@ export class OBSManager {
       const chosen = (filter
         ? devices.find((device) => device.name.toLowerCase().includes(filter) || filter.includes(device.name.toLowerCase()))
         : undefined)
-        ?? devices.find((device) => /capture|hdmi|elgato|avermedia|ugreen|macro|cam link|live gamer|ripsaw/i.test(device.name))
+        ?? devices.find((device) => CAPTURE_DEVICE_NAME_PATTERN.test(device.name))
         ?? devices[0];
 
       if (!chosen) {
@@ -1651,6 +1655,91 @@ export class OBSManager {
       return { success: true, message: 'Dispositivo seleccionado', warnings };
     } catch (error) {
       return { success: false, message: `No se pudo aplicar el dispositivo: ${OBSManager.describeError(error)}`, warnings };
+    }
+  }
+
+  async ensureCaptureAudio(input: EnsureCaptureAudioInput): Promise<{ success: boolean; message: string; inputName?: string; warnings: string[] }> {
+    if (!this.connected) return { ...this.notConnected(), warnings: [] };
+
+    const warnings: string[] = [];
+    try {
+      const kindsResponse = await this.obs.call('GetInputKindList');
+      const kinds = (kindsResponse.inputKinds ?? []).filter((kind): kind is string => typeof kind === 'string');
+      const inputKind = audioInputKindCandidates.find((candidate) => kinds.includes(candidate));
+      if (!inputKind) {
+        return {
+          success: false,
+          message: 'OBS no expone una fuente Audio Input Capture compatible en este sistema.',
+          warnings,
+        };
+      }
+
+      const existingNames = await this.getExistingInputNames();
+      const existingInputName = existingNames.find((name) => name === managedCaptureAudioInputName);
+      const inputName = existingInputName
+        ?? buildUniqueInputName(managedCaptureAudioInputName, existingNames);
+      const created = !existingInputName;
+
+      if (created) {
+        await this.obs.call('CreateInput', {
+          sceneName: input.sceneName,
+          inputName,
+          inputKind,
+        });
+      } else {
+        const sceneItems = await this.obs.call('GetSceneItemList', { sceneName: input.sceneName });
+        const isInScene = (sceneItems.sceneItems ?? [])
+          .filter(isRecord)
+          .some((item) => getStringValue(item, ['sourceName', 'name']) === inputName);
+        if (!isInScene) {
+          try {
+            await this.obs.call('CreateSceneItem', {
+              sceneName: input.sceneName,
+              sourceName: inputName,
+            });
+          } catch (error) {
+            warnings.push(`No se pudo agregar la fuente de audio a la escena: ${OBSManager.describeError(error)}`);
+          }
+        }
+      }
+
+      const enumeration = await this.getAudioDevices(inputName);
+      const hint = (input.deviceNameHint ?? '').toLowerCase().trim();
+      const chosen = (hint
+        ? enumeration.devices.find((device) => device.name.toLowerCase().includes(hint) || hint.includes(device.name.toLowerCase()))
+        : undefined)
+        ?? enumeration.devices.find((device) => CAPTURE_DEVICE_NAME_PATTERN.test(device.name));
+
+      if (chosen && enumeration.propertyName) {
+        await this.obs.call('SetInputSettings', {
+          inputName,
+          inputSettings: { [enumeration.propertyName]: chosen.id },
+          overlay: true,
+        });
+        return {
+          success: true,
+          message: created
+            ? `Audio de la capturadora "${chosen.name}" agregado como "${inputName}"`
+            : `Audio de la capturadora actualizado a "${chosen.name}"`,
+          inputName,
+          warnings,
+        };
+      }
+
+      if (created) {
+        await this.obs.call('RemoveInput', { inputName }).catch(() => undefined);
+      }
+      return {
+        success: false,
+        message: 'No se encontro el dispositivo de audio de la capturadora en OBS. Agregalo manualmente: en Fuentes pulsa "+" → "Captura de entrada de audio" y elige tu capturadora.',
+        warnings,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `No se pudo agregar el audio de la capturadora: ${OBSManager.describeError(error)}`,
+        warnings,
+      };
     }
   }
 

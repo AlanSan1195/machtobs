@@ -1,7 +1,7 @@
 import { useAppStore } from '../store';
 import { inferObsUsage } from '../../shared/obsUsage';
 import { appAPI } from '../lib/app-api';
-import type { AIRecommendationExplanationRequest, AIRecommendationRequest, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, BeginGuidedSourceResult, CameraLayout, CaptureCapabilities, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, MicProfileRequest, MicProfileResponse, OBSAudioConfig, OBSConfig, OBSConnectionSettings, PeripheralsSnapshot, SetCameraFrameInput } from '../../shared/types';
+import type { AIRecommendationExplanationRequest, AIRecommendationRequest, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, BeginGuidedSourceResult, CameraLayout, CaptureCapabilities, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, EnsureCaptureAudioInput, MicProfileRequest, MicProfileResponse, OBSAudioConfig, OBSConfig, OBSConnectionSettings, PeripheralsSnapshot, SetCameraFrameInput } from '../../shared/types';
 
 export function useAppAPI() {
   const setSystemInfo = useAppStore((state) => state.setSystemInfo);
@@ -310,6 +310,14 @@ export function useAppAPI() {
     return result;
   };
 
+  const ensureCaptureAudio = async (arg: EnsureCaptureAudioInput) => {
+    const result = await appAPI.obs.ensureCaptureAudio(arg);
+    if (!result.success) {
+      setError(result.message);
+    }
+    return result;
+  };
+
   const cancelGuidedSource = async (inputName: string) => {
     return appAPI.obs.cancelGuidedSource(inputName);
   };
@@ -420,6 +428,7 @@ export function useAppAPI() {
     loadSceneSources,
     beginGuidedSource,
     applyGuidedSourceDevice,
+    ensureCaptureAudio,
     cancelGuidedSource,
     setCameraLayout,
     setCameraFrame,

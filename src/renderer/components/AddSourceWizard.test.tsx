@@ -10,6 +10,7 @@ import { AddSourceWizard } from './AddSourceWizard';
 const apiMocks = vi.hoisted(() => ({
   beginGuidedSource: vi.fn(),
   applyGuidedSourceDevice: vi.fn(),
+  ensureCaptureAudio: vi.fn(),
   cancelGuidedSource: vi.fn(),
   setCameraLayout: vi.fn(),
   setCameraFrame: vi.fn(),
@@ -127,6 +128,92 @@ describe('AddSourceWizard marco de facecam', () => {
           rounded: false,
         },
       });
+    });
+  });
+});
+
+describe('AddSourceWizard audio de capturadora', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    apiMocks.beginGuidedSource.mockResolvedValue({
+      success: true,
+      message: 'Consola creada',
+      inputName: 'Consola',
+      sceneItemId: 9,
+      supportsDeviceEnum: true,
+      propertyName: 'device',
+      devices: [{ id: 'cap-1', name: 'Elgato Game Capture 4K X', isDefault: false }],
+      warnings: [],
+    });
+    apiMocks.applyGuidedSourceDevice.mockResolvedValue({
+      success: true,
+      message: 'Dispositivo aplicado',
+      warnings: [],
+    });
+    apiMocks.renameSource.mockResolvedValue({ success: true, message: 'Sin cambios' });
+    act(() => {
+      useAppStore.setState({
+        availableSourceKinds: [
+          {
+            friendly: 'game_console',
+            inputKind: 'av_capture_input_v2',
+            supportsDeviceEnum: true,
+            available: true,
+          },
+        ],
+        sceneSources: [],
+      });
+    });
+  });
+
+  it('agrega el audio al terminar con el nombre del dispositivo elegido', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const onCreated = vi.fn();
+    apiMocks.ensureCaptureAudio.mockResolvedValue({
+      success: true,
+      message: 'Audio agregado',
+      warnings: [],
+    });
+    render(<AddSourceWizard sceneName="Gameplay" onClose={onClose} onCreated={onCreated} />);
+
+    await user.click(screen.getByRole('button', { name: /Consola \(PS5\/Xbox\/Switch\)/i }));
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
+    await user.click(screen.getByRole('button', { name: 'Listo' }));
+
+    await waitFor(() => {
+      expect(apiMocks.ensureCaptureAudio).toHaveBeenCalledWith({
+        sceneName: 'Gameplay',
+        deviceNameHint: 'Elgato Game Capture 4K X',
+      });
+    });
+    expect(onCreated).toHaveBeenCalledOnce();
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('cierra el asistente aunque no pueda agregar el audio', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const onCreated = vi.fn();
+    apiMocks.ensureCaptureAudio.mockResolvedValue({
+      success: false,
+      message: 'No se encontro el audio',
+      warnings: [],
+    });
+    render(<AddSourceWizard sceneName="Gameplay" onClose={onClose} onCreated={onCreated} />);
+
+    await user.click(screen.getByRole('button', { name: /Consola \(PS5\/Xbox\/Switch\)/i }));
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
+    await user.click(screen.getByRole('button', { name: 'Listo' }));
+
+    await waitFor(() => {
+      expect(apiMocks.ensureCaptureAudio).toHaveBeenCalledOnce();
+      expect(onCreated).toHaveBeenCalledOnce();
+      expect(onClose).toHaveBeenCalledOnce();
     });
   });
 });

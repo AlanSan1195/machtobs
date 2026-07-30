@@ -1,4 +1,4 @@
-import type { AIRecommendation, AIRecommendationExplanation, AIRecommendationExplanationRequest, AIRecommendationField, AIRecommendationRequest, AIRecommendationSettings, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, CameraLayout, ConsoleComponentSpec, ConsoleModel, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, MicConnection, MicFormFactor, MicPickupPattern, MicProfileRequest, MicProfileResponse, MicType, NoiseSuppressMethod, OBSAudioConfig, OBSAudioNoiseGate, OBSBackup, OBSConfig, OBSConnectionSettings, OBSMode, OBSPlatform, OBSSettingsSnapshot, SetCameraFrameInput, SetCameraLayoutInput, SourceKindFriendly, SystemInfo } from './types';
+import type { AIRecommendation, AIRecommendationExplanation, AIRecommendationExplanationRequest, AIRecommendationField, AIRecommendationRequest, AIRecommendationSettings, ApplyGuidedSourceDeviceInput, BeginGuidedSourceInput, CameraLayout, ConsoleComponentSpec, ConsoleModel, ConsoleProfileRequest, ConsoleProfileResponse, CreateGuidedSourceConfig, EnsureCaptureAudioInput, MicConnection, MicFormFactor, MicPickupPattern, MicProfileRequest, MicProfileResponse, MicType, NoiseSuppressMethod, OBSAudioConfig, OBSAudioNoiseGate, OBSBackup, OBSConfig, OBSConnectionSettings, OBSMode, OBSPlatform, OBSSettingsSnapshot, SetCameraFrameInput, SetCameraLayoutInput, SourceKindFriendly, SystemInfo } from './types';
 import {
   recommendationEncoderOptions,
   recommendationRecordingFormatOptions,
@@ -842,6 +842,21 @@ export function validateApplyGuidedSourceDevice(value: unknown): ValidationResul
       sceneItemId: value.sceneItemId,
       propertyName: value.propertyName.trim(),
       deviceId: value.deviceId.trim(),
+    },
+  };
+}
+
+export function validateEnsureCaptureAudioInput(value: unknown): ValidationResult<EnsureCaptureAudioInput> {
+  if (!isRecord(value)) {
+    return { success: false, message: 'La solicitud para agregar el audio de la capturadora debe ser un objeto.' };
+  }
+  const sceneName = validateSceneName(value.sceneName);
+  if (!sceneName.success) return sceneName;
+  return {
+    success: true,
+    value: {
+      sceneName: sceneName.value,
+      deviceNameHint: isNonEmptyString(value.deviceNameHint) ? value.deviceNameHint.trim() : undefined,
     },
   };
 }

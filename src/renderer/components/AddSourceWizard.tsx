@@ -46,6 +46,7 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
   const {
     beginGuidedSource,
     applyGuidedSourceDevice,
+    ensureCaptureAudio,
     cancelGuidedSource,
     setCameraLayout,
     setCameraFrame,
@@ -341,6 +342,13 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
           return;
         }
         finalInputName = trimmed;
+      }
+      if (friendly === 'game_console') {
+        // La fuente de video ya quedo lista; el audio es un complemento
+        // best-effort. Si falla, el hook muestra el aviso global y cerramos
+        // igual: bloquear aqui obligaria a cancelar y eso borraria el video.
+        const deviceNameHint = devices.find((device) => device.id === selectedDeviceId)?.name;
+        await ensureCaptureAudio({ sceneName, deviceNameHint });
       }
       if (frameEnabled && sceneItemId !== null) {
         const frameResult = await setCameraFrame({
