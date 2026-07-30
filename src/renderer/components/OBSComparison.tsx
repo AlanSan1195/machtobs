@@ -445,6 +445,10 @@ export function OBSComparison() {
 
   const changeCount = rows.filter((row) => !isSameValue(row)).length;
   const manualCount = rows.filter((row) => !isSameValue(row) && row.applyMethod === 'manual').length;
+  // Campos que la comparacion marco como cambio manual; la guia resalta solo esos.
+  const manualRequiredFields = rows.flatMap((row) =>
+    !isSameValue(row) && row.applyMethod === 'manual' && row.field ? [row.field] : [],
+  );
   const automaticCount = changeCount - manualCount;
   const readableBackupDate = backupDate ? new Date(backupDate).toLocaleString() : '';
 
@@ -522,6 +526,7 @@ export function OBSComparison() {
             open={manualGuideOpen}
             mode={mode}
             recommendations={recommendations}
+            requiredFields={manualRequiredFields}
             onClose={() => setManualGuideOpen(false)}
           />
         </div>

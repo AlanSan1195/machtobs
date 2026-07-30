@@ -270,9 +270,12 @@ describe('columna Recomendado editable', () => {
     await user.click(screen.getByRole('button', { name: 'Ver guia manual' }));
 
     expect(screen.getByText('Ruta en OBS')).not.toBeNull();
-    expect(screen.getByText('Pestaña Emision')).not.toBeNull();
-    expect(screen.getByText('Pestaña Grabacion')).not.toBeNull();
-    expect(screen.getByText('6000 Kbps')).not.toBeNull();
+    // Abre directo en la pestaña con cambios manuales (grabacion) y resalta el bitrate.
+    expect(screen.getByRole('tab', { name: /grabacion/i }).getAttribute('aria-selected')).toBe('true');
     expect(screen.getByText('60000 Kbps')).not.toBeNull();
+    expect(screen.getAllByText('manual').length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('tab', { name: /emision/i }));
+    expect(screen.getByText('6000 Kbps')).not.toBeNull();
   });
 });

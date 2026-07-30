@@ -24,15 +24,15 @@ describe('buildManualGroups', () => {
       {
         title: 'Emision',
         settings: expect.arrayContaining([
-          { label: 'Bitrate', value: '9000 Kbps' },
-          { label: 'Perfil', value: 'High' },
+          expect.objectContaining({ label: 'Bitrate', value: '9000 Kbps' }),
+          expect.objectContaining({ label: 'Perfil', value: 'High' }),
         ]),
       },
       {
         title: 'Grabacion',
         settings: expect.arrayContaining([
-          { label: 'Bitrate', value: '40000 Kbps' },
-          { label: 'Calidad', value: 'Alta', optional: true },
+          expect.objectContaining({ label: 'Bitrate', value: '40000 Kbps' }),
+          expect.objectContaining({ label: 'Calidad', value: 'Alta', optional: true }),
         ]),
       },
     ]);
@@ -43,5 +43,15 @@ describe('buildManualGroups', () => {
       .toEqual(['Emision']);
     expect(buildManualGroups('record_only', recommendations).map((group) => group.title))
       .toEqual(['Grabacion']);
+  });
+
+  it('enlaza los ajustes manuales con los campos de la tabla comparativa', () => {
+    const groups = buildManualGroups('stream_record', recommendations);
+    const emision = groups.find((group) => group.title === 'Emision');
+    const grabacion = groups.find((group) => group.title === 'Grabacion');
+
+    expect(emision?.settings.find((setting) => setting.label === 'Bitrate')?.field).toBe('bitrate');
+    expect(grabacion?.settings.find((setting) => setting.label === 'Bitrate')?.field).toBe('recording_bitrate');
+    expect(grabacion?.settings.find((setting) => setting.label === 'Calidad')?.field).toBe('recording_quality');
   });
 });
