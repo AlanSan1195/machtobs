@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
       ...(useLocalApi ? {} : {
         proxy: {
           '/api': {
-            target: 'https://match-to-obs.vercel.app',
+            target: 'https://matchtoobs.vercel.app',
             changeOrigin: true,
           },
         },

@@ -50,7 +50,7 @@ del CSS lo delata: pasó de 45.86 kB (fuentes incrustadas) a 28.37 kB.
 
 **La duda razonable**: una página servida por HTTPS no puede cargar recursos
 HTTP (mixed content). ¿Cómo es que match-to-obs, servido desde
-`https://match-to-obs.vercel.app`, se conecta a `ws://localhost:4455` (sin TLS)?
+`https://matchtoobs.vercel.app`, se conecta a `ws://localhost:4455` (sin TLS)?
 
 **La respuesta**: la especificación de mixed content trata `localhost` y
 `127.0.0.1` como **orígenes potencialmente confiables** (*potentially
@@ -130,7 +130,7 @@ capturadoras (`CAPTURE_KEYWORDS`).
 
 En producción el frontend y las funciones serverless viven en el mismo
 dominio (same-origin, sin CORS). En dev, el frontend corre en
-`localhost:5173` y llamaría a `https://match-to-obs.vercel.app/api/...` —
+`localhost:5173` y llamaría a `https://matchtoobs.vercel.app/api/...` —
 cross-origin, y como las peticiones llevan el header custom
 `X-Match-to-obs-Install-Id`, el navegador exige un preflight OPTIONS que el
 backend no maneja.
@@ -143,7 +143,7 @@ proxy de Vite hace que el navegador crea que habla con su propio origen
 server: {
   proxy: {
     '/api': {
-      target: 'https://match-to-obs.vercel.app',
+      target: 'https://matchtoobs.vercel.app',
       changeOrigin: true,
     },
   },

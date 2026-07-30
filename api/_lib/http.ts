@@ -18,7 +18,7 @@ type RequestBoundaryResult =
   | { allowed: false; status: 403 | 405 | 415; message: string };
 
 const DEFAULT_ALLOWED_ORIGINS = [
-  'https://match-to-obs.vercel.app',
+  'https://matchtoobs.vercel.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];

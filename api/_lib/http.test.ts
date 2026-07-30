@@ -55,7 +55,7 @@ describe('JSON request boundary', () => {
   test('allows canonical same-origin JSON POST requests', () => {
     expect(requireJsonPost(request({
       'content-type': 'application/json',
-      origin: 'https://match-to-obs.vercel.app',
+      origin: 'https://matchtoobs.vercel.app',
     }))).toEqual({ allowed: true });
   });
 
@@ -79,9 +79,9 @@ describe('JSON request boundary', () => {
   });
 
   test.each([
-    'https://match-to-obs.vercel.app.evil.test',
-    'https://evil-match-to-obs.vercel.app',
-    'https://match-to-obs.vercel.app/path',
+    'https://matchtoobs.vercel.app.evil.test',
+    'https://evil-matchtoobs.vercel.app',
+    'https://matchtoobs.vercel.app/path',
     'not an origin',
     'null',
   ])('rejects hostile or malformed origin %s', (origin) => {
