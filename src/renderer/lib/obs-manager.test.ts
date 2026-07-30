@@ -288,12 +288,15 @@ describe('OBSManager con salida avanzada', () => {
     });
   });
 
-  it('aplica automáticamente stream y grabación avanzada cuando el complemento responde', async () => {
-    obsMock.call.mockImplementation(async (request: string) => {
+  it('aplica automáticamente stream y grabación con el vendor heredado obsee', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
       if (request === 'GetStreamServiceSettings') {
         return { streamServiceSettings: { server: 'rtmps://live-upload.youtube.com/live2', key: 'preservada' } };
       }
       if (request === 'CallVendorRequest') {
+        if (data?.vendorName === 'match-to-obs') {
+          throw new Error('No vendor was found by that name.');
+        }
         return { responseData: advancedControlResponse };
       }
       return {};
@@ -324,13 +327,14 @@ describe('OBSManager con salida avanzada', () => {
       recordingQuality: 'high',
     });
 
-    const vendorApply = obsMock.call.mock.calls.find(([
+    const vendorApplyCalls = obsMock.call.mock.calls.filter(([
       request,
       data,
     ]) => request === 'CallVendorRequest' && data?.requestType === 'ApplyAdvancedOutputConfig');
+    const vendorApply = vendorApplyCalls.find(([, data]) => data?.vendorName === 'obsee');
 
     expect(vendorApply?.[1]).toMatchObject({
-      vendorName: 'match-to-obs',
+      vendorName: 'obsee',
       requestData: {
         stream: {
           rate_control: 'CBR',
@@ -350,6 +354,10 @@ describe('OBSManager con salida avanzada', () => {
         },
       },
     });
+    expect(vendorApplyCalls.map(([, data]) => data?.vendorName)).toEqual([
+      'match-to-obs',
+      'obsee',
+    ]);
     expect(result).toMatchObject({
       success: true,
       requiresManualConfirmation: false,

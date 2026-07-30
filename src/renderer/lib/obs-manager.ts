@@ -69,6 +69,11 @@ const defaultConnectionSettings: OBSConnectionSettings = {
   password: '',
 };
 
+// `obsee` fue el nombre publicado por la primera version del complemento.
+// Conservamos compatibilidad para que las instalaciones existentes puedan
+// aplicar bitrates avanzados sin obligar al usuario a reemplazar el bundle.
+const advancedOutputVendorNames = ['match-to-obs', 'obsee'] as const;
+
 // Parsea items de resolucion que OBS devuelve para una capturadora ("1920x1080",
 // "1920x1080 @ 60fps", etc.). Devuelve resolucion normalizada + fps si viene.
 function parseCaptureResString(value: string): { res: string; pixels: number; fps?: number } | null {
@@ -90,6 +95,9 @@ type AudioInputCandidate = {
   uuid?: string;
   score: number;
 };
+
+type VendorJsonValue = string | number | boolean | null | VendorJsonObject | VendorJsonValue[];
+type VendorJsonObject = { [key: string]: VendorJsonValue };
 
 type OBSConnectionStatus = {
   connected: boolean;
@@ -113,14 +121,34 @@ export class OBSManager {
     this.statusListener?.({ connected: this.connected, message });
   }
 
+  private async callAdvancedOutputVendor(
+    requestType: 'GetAdvancedOutputConfig' | 'ApplyAdvancedOutputConfig',
+    requestData: unknown,
+  ): Promise<unknown> {
+    let lastError: unknown;
+
+    for (const vendorName of advancedOutputVendorNames) {
+      try {
+        const response = await this.obs.call('CallVendorRequest', {
+          vendorName,
+          requestType,
+          requestData: requestData as VendorJsonObject,
+        });
+        return response.responseData;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('No se encontro un complemento avanzado compatible.');
+  }
+
   private async getAdvancedOutputControl(): Promise<OBSAdvancedOutputControl | undefined> {
     try {
-      const response = await this.obs.call('CallVendorRequest', {
-        vendorName: 'match-to-obs',
-        requestType: 'GetAdvancedOutputConfig',
-        requestData: {},
-      });
-      return parseAdvancedOutputControl(response.responseData);
+      const responseData = await this.callAdvancedOutputVendor('GetAdvancedOutputConfig', {});
+      return parseAdvancedOutputControl(responseData);
     } catch {
       return undefined;
     }
@@ -132,12 +160,16 @@ export class OBSManager {
     control?: OBSAdvancedOutputControl;
   }> {
     try {
-      const response = await this.obs.call('CallVendorRequest', {
-        vendorName: 'match-to-obs',
-        requestType: 'ApplyAdvancedOutputConfig',
-        requestData: request,
-      });
-      const responseData = response.responseData as Record<string, unknown>;
+      const responseData = await this.callAdvancedOutputVendor(
+        'ApplyAdvancedOutputConfig',
+        request,
+      );
+      if (!isRecord(responseData)) {
+        return {
+          success: false,
+          message: 'El complemento de Match-to-obs devolvio una respuesta invalida.',
+        };
+      }
       if (responseData.success !== true) {
         return {
           success: false,

@@ -12,6 +12,8 @@ los ajustes internos de los encoders de **Salida > Avanzado > Emisión** y
   el JSON.
 - Expone a Match-to-obs los vendors `GetAdvancedOutputConfig` y
   `ApplyAdvancedOutputConfig`.
+- La aplicación también reconoce el vendor heredado `obsee` usado por la
+  primera versión publicada del complemento.
 - Aplica bitrate, control de tasa, calidad, límite de bitrate, ventana máxima,
   intervalo de fotogramas clave, perfil, B-frames y AQ espacial.
 - Escribe con `obs_data_save_json_safe`; OBS conserva una copia
@@ -96,4 +98,3 @@ Aplicación:
 
 `spatial_aq_mode` usa los valores de Apple VideoToolbox: `1` automático, `2`
 desactivado y `3` activado.
-

@@ -64,6 +64,34 @@ describe('getLocalConsoleProfile', () => {
     expect(result.recommendations.recording_resolution).toBe('3840x2160');
   });
 
+  it('separa el techo de captura del techo de carga simultanea en un M4 con 16GB', () => {
+    const appleSystem: SystemInfo = {
+      cpu: { model: 'Apple M4', cores: 10 },
+      gpu: { model: 'Apple M4', vendor: 'Apple', hasNvenc: false },
+      ram: { total: 16 },
+      os: { platform: 'darwin', distro: 'macOS', release: '15' },
+    };
+    const result = getLocalConsoleProfile(makeRequest({
+      console: 'ps5_pro',
+      systemInfo: appleSystem,
+      captureCard: 'Elgato 4K X',
+      captureMaxResolution: '3840x2160',
+      captureMaxFps: 60,
+    }));
+
+    expect(result.profile.captureResolution).toBe('3840x2160');
+    expect(result.recommendations).toMatchObject({
+      canvas_resolution: '3840x2160',
+      resolution: '1920x1080',
+      recording_resolution: '2560x1440',
+      fps: 60,
+      encoder: 'apple vt h264',
+      bitrate: 6000,
+      recording_encoder: 'apple vt hevc',
+      recording_bitrate: 20000,
+    });
+  });
+
   it('prioriza capacidades verificadas y encoder Apple sobre una respuesta incorrecta de IA', () => {
     const appleSystem: SystemInfo = {
       cpu: { model: 'Apple M4', cores: 10 },
@@ -95,15 +123,16 @@ describe('getLocalConsoleProfile', () => {
     expect(result.recommendations).toMatchObject({
       canvas_resolution: '3840x2160',
       resolution: '1920x1080',
-      recording_resolution: '3840x2160',
+      recording_resolution: '2560x1440',
       fps: 60,
       encoder: 'apple vt h264',
       recording_encoder: 'apple vt hevc',
-      recording_bitrate: 40000,
+      recording_bitrate: 20000,
     });
     expect(result.reasoning).toContain('**stream 1920x1080 a 6000 kbps**');
     expect(result.reasoning).not.toContain('60000 kbps');
-    expect(result.reasoning).toContain('**grabacion 3840x2160 con APPLE VT HEVC a 40000 kbps**');
+    expect(result.reasoning).toContain('**grabacion 2560x1440 con APPLE VT HEVC a 20000 kbps**');
+    expect(result.reasoning).toContain('reserva margen');
     expect(result.reasoning).toContain('**encoder APPLE VT H264**');
     expect(result.reasoning).not.toContain('NVENC');
     expect(result.profile.bottleneck).toContain('capturadora fija el techo');

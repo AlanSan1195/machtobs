@@ -205,7 +205,7 @@ describe('getLocalRecommendation', () => {
     expect(streamOnly.recording_bitrate).toBe(streamOnly.bitrate);
   });
 
-  it('respeta stream 1080p y grabacion 4K solicitados en hardware capaz', () => {
+  it('limita la grabacion simultanea a 1440p60 en Apple Silicon con 16GB', () => {
     const result = getLocalRecommendation(makeRequest({
       platform: 'youtube',
       goal: {
@@ -222,11 +222,34 @@ describe('getLocalRecommendation', () => {
     })).recommendations;
 
     expect(result).toMatchObject({
-      canvas_resolution: '3840x2160',
+      canvas_resolution: '2560x1440',
       resolution: '1920x1080',
-      recording_resolution: '3840x2160',
+      recording_resolution: '2560x1440',
       fps: 60,
       bitrate: 9000,
+      recording_encoder: 'apple vt hevc',
+      recording_bitrate: 20000,
+    });
+  });
+
+  it('conserva 4K60 en Apple Silicon con 16GB cuando solo se graba', () => {
+    const result = getLocalRecommendation(makeRequest({
+      mode: 'record_only',
+      goal: {
+        description: 'Grabar a 4K60 sin emitir.',
+        recordingResolution: '3840x2160',
+        fps: 60,
+      },
+      systemInfo: {
+        cpu: { model: 'Apple M4', cores: 10 },
+        gpu: { vendor: 'Apple', model: 'Apple M4', hasNvenc: false },
+        ram: { total: 16 },
+      },
+    })).recommendations;
+
+    expect(result).toMatchObject({
+      recording_resolution: '3840x2160',
+      fps: 60,
       recording_encoder: 'apple vt hevc',
       recording_bitrate: 40000,
     });
@@ -254,6 +277,34 @@ describe('getLocalRecommendationExplanation', () => {
     expect(explanation.reasoning).toContain('Cambiaste **resolucion del stream** de **1920X1080** a **2560X1440**');
     expect(explanation.reasoning).toContain('Cambiaste **bitrate del stream** de **9000** a **8000**');
     expect(explanation.reasoning).toContain('carga de video sube');
+  });
+
+  it('calcula juntas las cargas del stream y la grabacion simultaneos', () => {
+    const request = makeRequest({
+      systemInfo: {
+        cpu: { model: 'Apple M4', cores: 10 },
+        gpu: { vendor: 'Apple', model: 'Apple M4', hasNvenc: false },
+        ram: { total: 16 },
+      },
+    });
+    const originalRecommendations = {
+      ...getLocalRecommendation(request).recommendations,
+      resolution: '1920x1080',
+      recording_resolution: '3840x2160',
+      recording_bitrate: 40000,
+    };
+    const explanation = getLocalRecommendationExplanation({
+      ...request,
+      originalRecommendations,
+      currentRecommendations: {
+        ...originalRecommendations,
+        recording_resolution: '2560x1440',
+        recording_bitrate: 20000,
+      },
+      changedFields: ['recording_resolution', 'recording_bitrate'],
+    });
+
+    expect(explanation.reasoning).toContain('carga de video baja aproximadamente 44%');
   });
 
   it('rechaza una explicacion de encoder que invierte el efecto sobre el CPU', () => {

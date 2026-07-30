@@ -1,5 +1,6 @@
 import type { ConsoleComponentSpec, ConsoleModel, ConsoleProfileRequest, ConsoleProfileResponse } from './types';
 import {
+  clampRecordingResolutionForHardware,
   getLocalRecommendation,
   getPreferredEncoder,
   getPreferredRecordingEncoder,
@@ -62,9 +63,23 @@ export function normalizeConsoleProfileForRequest(
     request.goal?.streamResolution ?? response.recommendations.resolution,
     verifiedCaptureResolution,
   );
+  const finalFps = Math.min(
+    request.goal?.fps ?? response.recommendations.fps,
+    verifiedCaptureFps,
+  );
+  const requestedRecordingResolution = minResolution(
+    request.goal?.recordingResolution ?? verifiedCaptureResolution,
+    verifiedCaptureResolution,
+  );
   const recordingResolution = request.mode === 'stream_only'
     ? streamResolution
-    : minResolution(request.goal?.recordingResolution ?? verifiedCaptureResolution, verifiedCaptureResolution);
+    : clampRecordingResolutionForHardware(
+      request,
+      requestedRecordingResolution,
+      finalFps,
+    );
+  const recordingWasLimited = request.mode === 'stream_record'
+    && resPixels(recordingResolution) < resPixels(requestedRecordingResolution);
   const preferredEncoder = getPreferredEncoder(request.systemInfo);
   const wantsRecording = request.mode !== 'stream_only';
   const preferredRecordingEncoder = wantsRecording
@@ -85,10 +100,6 @@ export function normalizeConsoleProfileForRequest(
       ? `OBS verifico que la capturadora fija el techo de captura en ${verifiedCaptureResolution} a ${verifiedCaptureFps}fps. El monitor solo afecta el passthrough y no reduce la grabacion de OBS.`
       : `OBS verifico captura hasta ${verifiedCaptureResolution} a ${verifiedCaptureFps}fps sin un limite inferior al de la consola. El monitor solo afecta el passthrough.`
     : response.profile.bottleneck;
-  const finalFps = Math.min(
-    request.goal?.fps ?? response.recommendations.fps,
-    verifiedCaptureFps,
-  );
   const finalStreamBitrate = getStreamBitrate(request.platform, streamResolution, finalFps);
   const captureMatch = hasVerifiedCaptureCaps
     ? `La **${consoleInfo.name}** y la capturadora hacen match en **${verifiedCaptureResolution} a ${verifiedCaptureFps} FPS**, capacidad comprobada directamente por OBS.`
@@ -97,7 +108,9 @@ export function normalizeConsoleProfileForRequest(
     ? ''
     : `El **stream ${streamResolution} a ${finalStreamBitrate} kbps** adapta esa señal a ${request.platform} para priorizar una emision estable.`;
   const recordingMatch = wantsRecording
-    ? `La **grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${recordingBitrate} kbps** conserva mas detalle en el archivo local sin atarla al limite del stream.`
+    ? recordingWasLimited
+      ? `La **grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${recordingBitrate} kbps** reserva margen para emitir y grabar al mismo tiempo sin sobrecargar el equipo.`
+      : `La **grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${recordingBitrate} kbps** conserva mas detalle en el archivo local sin atarla al limite del stream.`
     : '';
   const encoderMatch = `El **encoder ${preferredEncoder.toUpperCase()}** aprovecha ${request.systemInfo.gpu.model}; los **${finalFps} FPS** mantienen fluido el movimiento.`;
   const reasoning = [captureMatch, streamMatch, recordingMatch, encoderMatch].filter(Boolean).join(' ');
@@ -259,17 +272,22 @@ export function getLocalConsoleProfile(request: ConsoleProfileRequest): ConsoleP
     captureResolution,
   );
   const wantsRecording = request.mode !== 'stream_only';
+  const finalFps = Math.min(base.fps, captureFps);
   const recordingResolution = wantsRecording
-    ? minResolution(request.goal?.recordingResolution ?? captureResolution, captureResolution)
+    ? clampRecordingResolutionForHardware(
+      request,
+      minResolution(request.goal?.recordingResolution ?? captureResolution, captureResolution),
+      finalFps,
+    )
     : streamResolution;
   const recommendations = {
     ...base,
     canvas_resolution: captureResolution,
     resolution: streamResolution,
     recording_resolution: recordingResolution,
-    fps: Math.min(base.fps, captureFps),
+    fps: finalFps,
     recording_bitrate: wantsRecording
-      ? getRecordingBitrate(recordingResolution, Math.min(base.fps, captureFps), base.recording_encoder)
+      ? getRecordingBitrate(recordingResolution, finalFps, base.recording_encoder)
       : base.bitrate,
   };
 

@@ -117,6 +117,8 @@ Campos de resolucion:
 - "encoder" y "bitrate" pertenecen exclusivamente al stream.
 - "recording_encoder" y "recording_bitrate" pertenecen exclusivamente al archivo local. No reutilices el bitrate limitado del stream para grabar.
 - En Apple Silicon, prefiere Apple VT H264 para el stream y Apple VT HEVC para grabacion local. Como referencia, 4K60 HEVC puede usar 40000 kbps; 4K60 H264 requiere aproximadamente 60000 kbps.
+- Evalua la carga COMBINADA cuando el modo sea "stream_record": son dos codificaciones y puede haber reescalado, no dos capacidades independientes.
+- En Apple Silicon con 16GB de memoria unificada y 60 FPS, limita la grabacion simultanea a 2560x1440 aunque la captura entregue 4K. Reserva 3840x2160 para "record_only" o para hardware con mas margen.
 
 La explicacion debe tener un maximo de 90 palabras y lenguaje sencillo. Explica el match entre el hardware detectado y los ajustes, el resultado que obtiene el usuario y por que se separan stream y grabacion cuando aplique. Define cada termino dentro de su consecuencia practica: lienzo = area de trabajo, stream = lo que ve la audiencia, grabacion = archivo local, FPS = fluidez y encoder = quien comprime el video. Resalta los nombres y valores importantes con **doble asterisco**. No menciones el proceso interno, las fuentes ni que eres una IA.
 
@@ -381,9 +383,10 @@ const CONSOLE_PROFILE_RULES = `Reglas:
 - "captureResolution"/"captureFps" = lo maximo que conviene capturar = el MENOR techo entre consola y capturadora.
 - "canvas_resolution" es el lienzo base de OBS y debe preservar la resolucion nativa de captura cuando el hardware pueda procesarla.
 - "resolution" es EXCLUSIVAMENTE la salida del stream. Ajustala a la plataforma; en Twitch normalmente 1920x1080 aunque se capture y grabe en 4K.
-- "recording_resolution" es la resolucion del archivo grabado. Si el modo incluye grabacion y la capturadora entrega 4K60, conserva 3840x2160 cuando el hardware de la PC pueda codificarlo.
+- "recording_resolution" es la resolucion del archivo grabado. Si la capturadora entrega 4K60, conserva 3840x2160 solo cuando la carga combinada y el hardware de la PC puedan sostenerlo.
 - "encoder"/"bitrate" son solo para emision; "recording_encoder"/"recording_bitrate" son solo para el archivo local y deben recomendarse por separado.
 - En una Mac Apple Silicon, usa Apple VT H264 para el stream y Apple VT HEVC para la grabacion. Para grabacion 4K60 usa 40000 kbps con HEVC; con H264 usa alrededor de 60000 kbps. Nunca reduzcas la grabacion al bitrate del stream.
+- En modo "stream_record", Apple Silicon con 16GB de memoria unificada y 60 FPS debe grabar como maximo a 2560x1440, aunque OBS confirme captura 4K60. El limite protege las dos codificaciones y el reescalado simultaneos; en "record_only" puede conservar 4K60.
 - En modo "stream_record", lienzo/grabacion y stream pueden ser distintos: por ejemplo 3840x2160 para lienzo y grabacion, 1920x1080 para Twitch.
 - "recommendations" son los ajustes de OBS en la PC: usa el hardware de la PC para "encoder"/"bitrate" y nunca superes el techo real de la capturadora.
 - "consoleSettings": pasos concretos para ajustar la salida de video de la consola (resolucion, fps, HDR/RGB) de forma compatible con la capturadora.

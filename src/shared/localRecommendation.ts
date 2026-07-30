@@ -51,6 +51,52 @@ function resolutionPixels(resolution: string): number {
   return dims ? dims.width * dims.height : 0;
 }
 
+function isAppleSilicon(systemInfo: SystemInfo): boolean {
+  const vendor = systemInfo.gpu.vendor.toLowerCase();
+  const model = systemInfo.gpu.model.toLowerCase();
+  return vendor.includes('apple') || model.includes('apple');
+}
+
+export function getRecordingResolutionCeiling(
+  request: AIRecommendationRequest,
+  fps: number,
+): string {
+  const encoder = getPreferredEncoder(request.systemInfo);
+  const hasHardwareEncoder = encoder !== 'x264';
+  const canHandleHighResolution = request.systemInfo.ram.total >= 16
+    && (hasHardwareEncoder || request.systemInfo.cpu.cores >= 12);
+
+  if (!canHandleHighResolution) {
+    return getHardwareVideoProfile(request, encoder).resolution;
+  }
+
+  // En Apple Silicon la RAM tambien alimenta GPU, escalado y encoders. La
+  // captura 4K60 puede funcionar por separado, pero dos salidas simultaneas
+  // (H.264 para stream + HEVC para grabacion) dejan poco margen con 16 GB.
+  // 1440p60 conserva una mejora clara sobre 1080p sin saturar esa configuracion.
+  if (
+    request.mode === 'stream_record'
+    && fps >= 50
+    && isAppleSilicon(request.systemInfo)
+    && request.systemInfo.ram.total <= 16
+  ) {
+    return '2560x1440';
+  }
+
+  return '3840x2160';
+}
+
+export function clampRecordingResolutionForHardware(
+  request: AIRecommendationRequest,
+  requestedResolution: string,
+  fps: number,
+): string {
+  const ceiling = getRecordingResolutionCeiling(request, fps);
+  return resolutionPixels(requestedResolution) <= resolutionPixels(ceiling)
+    ? requestedResolution
+    : ceiling;
+}
+
 function clampGoalResolution(
   requested: string | undefined,
   fallback: string,
@@ -132,19 +178,19 @@ export function getLocalRecommendation(request: AIRecommendationRequest): AIReco
   const hasHardwareEncoder = encoder !== 'x264';
   const canHandleHighResolution = request.systemInfo.ram.total >= 16
     && (hasHardwareEncoder || request.systemInfo.cpu.cores >= 12);
+  const fps = request.goal?.fps
+    ? Math.min(request.goal.fps, canHandleHighResolution ? 60 : videoProfile.fps)
+    : videoProfile.fps;
   const streamMaximum = canHandleHighResolution && request.platform === 'youtube'
     ? '3840x2160'
     : videoProfile.resolution;
-  const recordingMaximum = canHandleHighResolution ? '3840x2160' : videoProfile.resolution;
+  const recordingMaximum = getRecordingResolutionCeiling(request, fps);
   const streamResolution = request.mode === 'record_only'
     ? videoProfile.resolution
     : clampGoalResolution(request.goal?.streamResolution, videoProfile.resolution, streamMaximum);
   const recordingResolution = request.mode === 'stream_only'
     ? streamResolution
     : clampGoalResolution(request.goal?.recordingResolution, videoProfile.resolution, recordingMaximum);
-  const fps = request.goal?.fps
-    ? Math.min(request.goal.fps, canHandleHighResolution ? 60 : videoProfile.fps)
-    : videoProfile.fps;
   const hasExplicitGoal = Boolean(
     request.goal?.streamResolution
     || request.goal?.recordingResolution
@@ -165,7 +211,11 @@ export function getLocalRecommendation(request: AIRecommendationRequest): AIReco
     ? `El **encoder ${encoder.toUpperCase()}** usa los ${request.systemInfo.cpu.cores} nucleos del CPU porque no se detecto un encoder de video dedicado.`
     : `El **encoder ${encoder.toUpperCase()}** hace match con la GPU ${request.systemInfo.gpu.model} y codifica por hardware para quitarle carga al CPU.`;
   const baselineMatch = request.goal?.streamResolution || request.goal?.recordingResolution || request.goal?.fps
-    ? 'La salida se ajusto al objetivo que describiste, sin superar el techo seguro del hardware.'
+    ? request.goal.recordingResolution
+      && request.mode === 'stream_record'
+      && resolutionPixels(request.goal.recordingResolution) > resolutionPixels(recordingResolution)
+      ? `La grabacion se limito a **${recordingResolution}** para reservar margen a las dos salidas simultaneas.`
+      : 'La salida se ajusto al objetivo que describiste, sin superar el techo seguro del hardware.'
     : videoProfile.usedBaseline
     ? 'Se conservo la base que OBS ya habia ajustado para tu equipo y tu red.'
     : 'La resolucion y los FPS se limitaron a un nivel seguro para el hardware detectado.';
@@ -215,10 +265,15 @@ function readResolutionPixels(resolution: string): number {
   return width * height;
 }
 
-function getWorkload(settings: AIRecommendationSettings): number {
+function getWorkload(settings: AIRecommendationSettings, mode: AIRecommendationRequest['mode']): number {
   const streamPixels = readResolutionPixels(settings.resolution);
   const recordingPixels = readResolutionPixels(settings.recording_resolution);
-  return Math.max(streamPixels, recordingPixels) * settings.fps;
+  const outputPixels = mode === 'stream_only'
+    ? streamPixels
+    : mode === 'record_only'
+      ? recordingPixels
+      : streamPixels + recordingPixels;
+  return outputPixels * settings.fps;
 }
 
 function getBitrateGuidance(settings: AIRecommendationSettings, platform: AIRecommendationRequest['platform']): string {
@@ -280,8 +335,8 @@ export function getLocalRecommendationExplanation(request: AIRecommendationExpla
   const changedText = changedFields
     .map((field) => `Cambiaste **${fieldLabels[field]}** de **${String(originalRecommendations[field]).toUpperCase()}** a **${String(currentRecommendations[field]).toUpperCase()}**`)
     .join('. ');
-  const originalWorkload = getWorkload(originalRecommendations);
-  const currentWorkload = getWorkload(currentRecommendations);
+  const originalWorkload = getWorkload(originalRecommendations, request.mode);
+  const currentWorkload = getWorkload(currentRecommendations, request.mode);
   const workloadRatio = originalWorkload > 0 ? currentWorkload / originalWorkload : 1;
   const workloadText = workloadRatio > 1.15
     ? `La carga de video sube aproximadamente ${Math.round((workloadRatio - 1) * 100)}%, asi que OBS necesitara mas GPU/CPU y red.`

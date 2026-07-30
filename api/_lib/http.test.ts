@@ -114,6 +114,56 @@ describe('JSON request boundary', () => {
     expect(endpointMocks.getRecommendationFromGroq).not.toHaveBeenCalled();
   });
 
+  test('limits simultaneous 4K60 recording for Apple Silicon with 16GB', async () => {
+    endpointMocks.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 19 });
+    endpointMocks.getRecommendationFromGroq.mockResolvedValue({
+      recommendations: {
+        canvas_resolution: '3840x2160',
+        resolution: '1920x1080',
+        recording_resolution: '3840x2160',
+        fps: 60,
+        encoder: 'apple vt h264',
+        bitrate: 6000,
+        recording_encoder: 'apple vt hevc',
+        recording_bitrate: 40000,
+        audio_bitrate: 320,
+        recording_format: 'mkv',
+        recording_quality: 'high',
+      },
+      reasoning: 'La captura y la grabacion funcionan a 4K60.',
+    });
+    const result = createResponse();
+
+    await recommendationHandler({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: {
+        systemInfo: {
+          cpu: { model: 'Apple M4', cores: 10, speed: 4.4 },
+          gpu: { model: 'Apple M4', vendor: 'Apple', hasNvenc: false },
+          ram: { total: 16 },
+          os: { platform: 'darwin', distro: 'macOS', release: '15.5' },
+        },
+        mode: 'stream_record',
+        platform: 'twitch',
+      },
+    }, result.response);
+
+    expect(result.getStatus()).toBe(200);
+    expect(result.getBody()).toMatchObject({
+      recommendations: {
+        canvas_resolution: '3840x2160',
+        resolution: '1920x1080',
+        recording_resolution: '2560x1440',
+        fps: 60,
+        recording_encoder: 'apple vt hevc',
+        recording_bitrate: 20000,
+      },
+    });
+    expect((result.getBody() as { reasoning: string }).reasoning).toContain('reserva margen');
+    expect((result.getBody() as { reasoning: string }).reasoning).not.toContain('funcionan a 4K60');
+  });
+
   test('returns the safe 502 path for unsupported AI-controlled OBS values', async () => {
     endpointMocks.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 19 });
     endpointMocks.getRecommendationFromGroq.mockResolvedValue({

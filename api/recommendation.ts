@@ -4,6 +4,7 @@ import { readBody, requireJsonPost, sendJson } from './_lib/http';
 import { checkRateLimit } from './_lib/rate-limit';
 import { validateAIRecommendation, validateAIRecommendationRequest } from '../src/shared/validation';
 import {
+  clampRecordingResolutionForHardware,
   getPreferredEncoder,
   getPreferredRecordingEncoder,
   getRecordingBitrate,
@@ -41,6 +42,15 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     const preferredRecordingEncoder = wantsRecording
       ? getPreferredRecordingEncoder(validation.value.systemInfo)
       : preferredStreamEncoder;
+    const recordingResolution = wantsRecording
+      ? clampRecordingResolutionForHardware(
+        validation.value,
+        recommendation.value.recommendations.recording_resolution,
+        recommendation.value.recommendations.fps,
+      )
+      : recommendation.value.recommendations.resolution;
+    const recordingWasLimited = recordingResolution
+      !== recommendation.value.recommendations.recording_resolution;
     const normalizedRecommendations = {
       ...recommendation.value.recommendations,
       encoder: preferredStreamEncoder,
@@ -49,10 +59,11 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         recommendation.value.recommendations.resolution,
         recommendation.value.recommendations.fps,
       ),
+      recording_resolution: recordingResolution,
       recording_encoder: preferredRecordingEncoder,
       recording_bitrate: wantsRecording
         ? getRecordingBitrate(
-          recommendation.value.recommendations.recording_resolution,
+          recordingResolution,
           recommendation.value.recommendations.fps,
           preferredRecordingEncoder,
         )
@@ -63,6 +74,9 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     return sendJson(response, 200, {
       ...recommendation.value,
       recommendations: normalizedRecommendations,
+      reasoning: recordingWasLimited
+        ? `El stream ${normalizedRecommendations.resolution} a ${normalizedRecommendations.bitrate} kbps prioriza estabilidad en ${validation.value.platform}. La grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${normalizedRecommendations.recording_bitrate} kbps reserva margen para emitir y grabar al mismo tiempo. Los ${normalizedRecommendations.fps} FPS conservan fluidez.`
+        : recommendation.value.reasoning,
       source: 'ai',
     });
   } catch (error) {
