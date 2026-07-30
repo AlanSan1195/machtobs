@@ -1,9 +1,12 @@
 import React from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
+import { appAPI } from '../lib/app-api';
+import { getLocalRecommendationExplanation, isRecommendationExplanationConsistent } from '../../shared/localRecommendation';
 import { ConfirmDialog } from './ConfirmDialog';
+import { InlineEmphasis } from './InlineEmphasis';
 import { OBSManualGuide } from './OBSManualGuide';
-import { IconActivity, IconCheck, IconRefresh, Section } from './ui';
+import { IconActivity, IconAlert, IconCheck, IconRefresh, Section, Spinner } from './ui';
 import {
   recommendationAudioBitrateOptions,
   recommendationEncoderOptions,
@@ -13,6 +16,20 @@ import {
   recommendationResolutionOptions,
 } from '../../shared/recommendationOptions';
 import type { AIRecommendation, AIRecommendationField, AIRecommendationSettings, OBSMode, OBSSettingsSnapshot } from '../../shared/types';
+
+const recommendationFields: AIRecommendationField[] = [
+  'canvas_resolution',
+  'resolution',
+  'recording_resolution',
+  'fps',
+  'encoder',
+  'bitrate',
+  'recording_encoder',
+  'recording_bitrate',
+  'audio_bitrate',
+  'recording_format',
+  'recording_quality',
+];
 
 export type ComparisonRow = {
   label: string;
@@ -28,6 +45,35 @@ export type ComparisonRow = {
 
 function normalize(value: string): string {
   return value.trim().toLowerCase();
+}
+
+function getChangedFields(
+  originalRecommendations: AIRecommendationSettings,
+  currentRecommendations: AIRecommendationSettings,
+): AIRecommendationField[] {
+  return recommendationFields.filter((field) => (
+    originalRecommendations[field] !== currentRecommendations[field]
+  ));
+}
+
+function isUsableRecommendation(settings: AIRecommendationSettings): boolean {
+  return Boolean(
+    /^\d{3,4}x\d{3,4}$/.test(settings.canvas_resolution)
+    && /^\d{3,4}x\d{3,4}$/.test(settings.resolution)
+    && /^\d{3,4}x\d{3,4}$/.test(settings.recording_resolution)
+    && settings.fps > 0
+    && settings.bitrate > 0
+    && settings.recording_bitrate > 0
+    && settings.audio_bitrate > 0
+    && settings.encoder.trim()
+    && settings.recording_encoder.trim()
+    && settings.recording_format.trim()
+    && settings.recording_quality.trim(),
+  );
+}
+
+function getSourceLabel(source: AIRecommendation['source']): string {
+  return source === 'ai' ? 'IA integrada' : 'Recomendacion local';
 }
 
 export function normalizeEncoder(value: string): string {
@@ -402,11 +448,23 @@ function RecommendedEditor({ row, onChange }: RecommendedEditorProps) {
 }
 
 export function OBSComparison() {
-  const { mode, obsSettingsSnapshot, recommendation, obsConnected, setError, setRecommendation } = useAppStore();
+  const {
+    mode,
+    platform,
+    systemInfo,
+    obsSettingsSnapshot,
+    recommendation,
+    obsConnected,
+    setError,
+    setRecommendation,
+  } = useAppStore();
   const { getLastBackup, restoreLastBackup } = useAppAPI();
   const [restoreDialogOpen, setRestoreDialogOpen] = React.useState(false);
   const [manualGuideOpen, setManualGuideOpen] = React.useState(false);
   const [backupDate, setBackupDate] = React.useState<string | null>(null);
+  const [isExplaining, setIsExplaining] = React.useState(false);
+  const [explanationSource, setExplanationSource] = React.useState<AIRecommendation['source'] | null>(null);
+  const explanationRequestIdRef = React.useRef(0);
   const manualGuideId = React.useId();
 
   React.useEffect(() => {
@@ -422,14 +480,104 @@ export function OBSComparison() {
       .catch(() => setBackupDate(null));
   }, [getLastBackup, obsConnected]);
 
+  React.useEffect(() => {
+    if (!recommendation || !mode || !platform || !systemInfo) return undefined;
+
+    const originalRecommendations = recommendation.originalRecommendations ?? recommendation.recommendations;
+    const changedFields = getChangedFields(originalRecommendations, recommendation.recommendations);
+    if (changedFields.length === 0 || !isUsableRecommendation(recommendation.recommendations)) {
+      setIsExplaining(false);
+      setExplanationSource(null);
+      if (
+        changedFields.length === 0
+        && recommendation.originalReasoning
+        && recommendation.reasoning !== recommendation.originalReasoning
+      ) {
+        setRecommendation({
+          ...recommendation,
+          reasoning: recommendation.originalReasoning,
+        });
+      }
+      return undefined;
+    }
+
+    const requestId = explanationRequestIdRef.current + 1;
+    explanationRequestIdRef.current = requestId;
+    setIsExplaining(true);
+
+    const request = {
+      systemInfo,
+      mode,
+      platform,
+      originalRecommendations,
+      currentRecommendations: recommendation.recommendations,
+      changedFields,
+    };
+
+    const timeoutId = window.setTimeout(async () => {
+      const remoteExplanation = await appAPI.ai.explainRecommendation(request)
+        .catch(() => getLocalRecommendationExplanation(request));
+      const explanation = isRecommendationExplanationConsistent(request, remoteExplanation.reasoning)
+        ? remoteExplanation
+        : getLocalRecommendationExplanation(request);
+
+      if (explanationRequestIdRef.current !== requestId) return;
+
+      const latestRecommendation = useAppStore.getState().recommendation;
+      if (!latestRecommendation) return;
+
+      setRecommendation({
+        ...latestRecommendation,
+        originalRecommendations: latestRecommendation.originalRecommendations ?? originalRecommendations,
+        reasoning: explanation.reasoning,
+      });
+      setExplanationSource(explanation.source);
+      setIsExplaining(false);
+    }, 700);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [
+    mode,
+    platform,
+    recommendation?.originalRecommendations?.audio_bitrate,
+    recommendation?.originalRecommendations?.bitrate,
+    recommendation?.originalRecommendations?.canvas_resolution,
+    recommendation?.originalRecommendations?.encoder,
+    recommendation?.originalRecommendations?.fps,
+    recommendation?.originalRecommendations?.recording_format,
+    recommendation?.originalRecommendations?.recording_bitrate,
+    recommendation?.originalRecommendations?.recording_encoder,
+    recommendation?.originalRecommendations?.recording_quality,
+    recommendation?.originalRecommendations?.recording_resolution,
+    recommendation?.originalRecommendations?.resolution,
+    recommendation?.originalReasoning,
+    recommendation?.recommendations.audio_bitrate,
+    recommendation?.recommendations.bitrate,
+    recommendation?.recommendations.canvas_resolution,
+    recommendation?.recommendations.encoder,
+    recommendation?.recommendations.fps,
+    recommendation?.recommendations.recording_format,
+    recommendation?.recommendations.recording_bitrate,
+    recommendation?.recommendations.recording_encoder,
+    recommendation?.recommendations.recording_quality,
+    recommendation?.recommendations.recording_resolution,
+    recommendation?.recommendations.resolution,
+    setRecommendation,
+    systemInfo,
+  ]);
+
   if (!obsConnected || !obsSettingsSnapshot || !recommendation) return null;
 
   const { recommendations } = recommendation;
   const rows = buildComparisonRows(obsSettingsSnapshot, recommendations, mode);
+  const originalRecommendations = recommendation.originalRecommendations ?? recommendations;
+  const hasUserChanges = getChangedFields(originalRecommendations, recommendations).length > 0;
 
   const updateRecommendation = (field: AIRecommendationField, value: string | number) => {
-    // Conserva el baseline para que "config.recomendada" pueda re-explicar el
-    // impacto del ajuste del usuario (mismo patron que Recommendations).
+    // Conserva el baseline para re-explicar el impacto de cualquier ajuste
+    // editable sin necesitar una segunda tabla de recomendaciones.
     const baselineRecommendations = recommendation.originalRecommendations ?? recommendation.recommendations;
     const baselineReasoning = recommendation.originalReasoning ?? recommendation.reasoning;
     setRecommendation({
@@ -499,6 +647,20 @@ export function OBSComparison() {
         </>
       }
     >
+      {recommendation.source === 'local' && (
+        <div className="mb-4 flex items-start gap-3 border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
+          <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>La IA integrada no respondio o alcanzo su limite. Esta comparacion usa una recomendacion local de respaldo generada por Match-to-obs.</span>
+        </div>
+      )}
+      <div className="mb-4 grid gap-2 border border-border bg-surface/45 p-3 text-xs text-text-muted sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-4">
+        <span className="font-mono font-semibold uppercase tracking-[0.16em] text-primary">
+          Recomendado por {getSourceLabel(recommendation.source)}
+        </span>
+        <span className="sm:text-right">
+          Privacidad: solo se usa informacion tecnica del equipo, modo y plataforma; nunca archivos ni claves de OBS.
+        </span>
+      </div>
       {manualCount > 0 && (
         <div className="mb-4 border border-warning/35 bg-warning/[0.045]">
           <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -596,6 +758,26 @@ export function OBSComparison() {
           );
         })}
       </div>
+      {hasUserChanges && (
+        <div className="mt-4 border border-primary/30 bg-primary/[0.06] p-4 sm:p-5">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-primary">
+              Impacto de tus cambios
+            </span>
+            <span className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-primary">
+              {isExplaining && <Spinner className="h-3 w-3" />}
+              {isExplaining
+                ? 'IA recalculando'
+                : explanationSource === 'local'
+                  ? 'Analisis verificado'
+                  : 'IA integrada actualizada'}
+            </span>
+          </div>
+          <p aria-live="polite" className="text-sm leading-relaxed text-text">
+            <InlineEmphasis text={recommendation.reasoning} />
+          </p>
+        </div>
+      )}
       <ConfirmDialog
         open={restoreDialogOpen}
         title="Restaurar configuracion anterior"

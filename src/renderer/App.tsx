@@ -8,7 +8,6 @@ import { ConsoleSelector } from './components/ConsoleSelector';
 import { ConsoleDetection } from './components/ConsoleDetection';
 import { ConsoleReport } from './components/ConsoleReport';
 import { HardwareForm } from './components/HardwareForm';
-import { Recommendations } from './components/Recommendations';
 import { OBSComparison } from './components/OBSComparison';
 import { AudioConfiguration } from './components/AudioConfiguration';
 import { ScenesPanel } from './components/ScenesPanel';
@@ -266,7 +265,6 @@ export default function App() {
           <div className="space-y-8 py-10">
             <StepHeader word="deteccion" outline />
             <ConsoleReport />
-            <Recommendations />
             <OBSComparison />
             <AudioConfiguration onApplySuccess={() => setActiveTab(3)} />
           </div>

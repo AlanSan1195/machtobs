@@ -1,18 +1,27 @@
 // @vitest-environment jsdom
 
 import React from 'react';
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildComparisonRows, formatEncoderName, isSameValue, OBSComparison } from './OBSComparison';
 import { useAppStore } from '../store';
 import type { AIRecommendation, OBSSettingsSnapshot } from '../../shared/types';
 
+const appApiMocks = vi.hoisted(() => ({
+  explainRecommendation: vi.fn(),
+  getLastBackup: vi.fn().mockResolvedValue({ success: false }),
+  restoreLastBackup: vi.fn(),
+}));
+
 vi.mock('../lib/app-api', () => ({
   appAPI: {
+    ai: {
+      explainRecommendation: appApiMocks.explainRecommendation,
+    },
     obs: {
-      getLastBackup: vi.fn().mockResolvedValue({ success: false }),
-      restoreLastBackup: vi.fn(),
+      getLastBackup: appApiMocks.getLastBackup,
+      restoreLastBackup: appApiMocks.restoreLastBackup,
       onConnectionChanged: vi.fn(() => () => undefined),
     },
   },
@@ -224,9 +233,14 @@ describe('formatEncoderName', () => {
 describe('columna Recomendado editable', () => {
   beforeEach(() => {
     cleanup();
+    vi.clearAllMocks();
+    appApiMocks.getLastBackup.mockResolvedValue({ success: false });
+    appApiMocks.explainRecommendation.mockRejectedValue(new Error('IA no disponible'));
     act(() => {
       useAppStore.setState({
         mode: 'stream_record',
+        platform: null,
+        systemInfo: null,
         obsConnected: true,
         obsSettingsSnapshot: { ...snapshot, streamResolution: '1920x1080', recordingResolution: '1920x1080' },
         recommendation: {
@@ -237,6 +251,16 @@ describe('columna Recomendado editable', () => {
         error: null,
       });
     });
+  });
+
+  it('concentra recomendacion y comparacion en una sola seccion', () => {
+    render(<OBSComparison />);
+
+    expect(screen.getByText('obs.comparar')).not.toBeNull();
+    expect(screen.queryByText('config.recomendada')).toBeNull();
+    expect(screen.getByText('Recomendado por Recomendacion local')).not.toBeNull();
+    expect(screen.getByText(/Esta comparacion usa una recomendacion local de respaldo/i)).not.toBeNull();
+    expect(screen.getByText(/Privacidad: solo se usa informacion tecnica/i)).not.toBeNull();
   });
 
   it('permite cambiar un valor con select y conserva el baseline original', async () => {
@@ -259,6 +283,31 @@ describe('columna Recomendado editable', () => {
     await user.type(input, '8000');
 
     expect(useAppStore.getState().recommendation?.recommendations.bitrate).toBe(8000);
+  });
+
+  it('explica dentro de la misma tabla el impacto de los valores editados', async () => {
+    const user = userEvent.setup();
+    act(() => {
+      useAppStore.setState({
+        platform: 'twitch',
+        systemInfo: {
+          cpu: { model: 'Apple M3', cores: 8, speed: 3.5 },
+          gpu: { model: 'Apple M3 GPU', vram: 8192, vendor: 'Apple', hasNvenc: false },
+          ram: { total: 16 },
+          os: { platform: 'darwin', distro: 'macOS', release: '15.5' },
+        },
+      });
+    });
+    render(<OBSComparison />);
+
+    await user.selectOptions(screen.getByLabelText('FPS recomendado'), '120');
+
+    expect(screen.getByText('Impacto de tus cambios')).not.toBeNull();
+    expect(screen.getByText('IA recalculando')).not.toBeNull();
+    await waitFor(() => {
+      expect(useAppStore.getState().recommendation?.reasoning).toContain('Cambiaste');
+      expect(screen.getByText('Analisis verificado')).not.toBeNull();
+    }, { timeout: 2000 });
   });
 
   it('abre la guia manual desde el aviso cuando falta el complemento', async () => {
