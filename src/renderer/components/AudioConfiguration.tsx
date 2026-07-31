@@ -111,7 +111,6 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
   const {
     obsConnected,
     obsAudioSnapshot,
-    obsSettingsSnapshot,
     isApplying,
     mode,
     micProfile,
@@ -129,11 +128,6 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
   const [autoDetectTried, setAutoDetectTried] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [previewConfirmOpen, setPreviewConfirmOpen] = useState(false);
-  const [noiseSuppression, setNoiseSuppression] = useState(true);
-  const [monitorType, setMonitorType] = useState<OBSAudioConfig['monitorType']>('OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT');
-  const [syncOffsetMs, setSyncOffsetMs] = useState(0);
-  const [duckingEnabled, setDuckingEnabled] = useState(false);
-  const [selectedDuckingTarget, setSelectedDuckingTarget] = useState('');
 
   useEffect(() => {
     if (obsAudioSnapshot) {
@@ -148,16 +142,6 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         if (obsAudioSnapshot.requiresInputCreation) return '';
         return getDefaultDeviceId(obsAudioSnapshot.devices, obsAudioSnapshot.selectedDeviceId);
       });
-      // "Monitorizar y emitir" por defecto: es facil de olvidar y sin el no se
-      // escucha lo que sale al stream. Si OBS ya tiene otro monitoreo, se respeta.
-      setMonitorType(obsAudioSnapshot.monitorType === 'OBS_MONITORING_TYPE_NONE'
-        ? 'OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT'
-        : obsAudioSnapshot.monitorType as OBSAudioConfig['monitorType']);
-      setSyncOffsetMs(obsAudioSnapshot.syncOffsetMs);
-      const defaultDuckingTarget = obsAudioSnapshot.duckingTargets.find((target) => target.duckingConfigured)
-        ?? obsAudioSnapshot.duckingTargets[0];
-      setSelectedDuckingTarget(defaultDuckingTarget?.inputName ?? '');
-      setDuckingEnabled(Boolean(defaultDuckingTarget?.duckingConfigured));
       setDetectionMessage('');
     }
   }, [obsAudioSnapshot]);
@@ -237,7 +221,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           compressorEnabled: false,
           limiterThresholdDb: 0,
           limiterEnabled: false,
-          noiseSuppression,
+          noiseSuppression: false,
           noiseSuppressionMethod: 'rnnoise',
           noiseGate: {
             enabled: false,
@@ -255,14 +239,6 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
       deviceName: selectedDevice?.name,
       mono: true,
       filters,
-      monitorType,
-      syncOffsetMs,
-      ducking: selectedDuckingTarget
-        ? {
-          enabled: duckingEnabled,
-          desktopInputName: selectedDuckingTarget,
-        }
-        : undefined,
     };
   };
 
@@ -335,15 +311,8 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
     );
   }
 
-  const monoSupported = obsAudioSnapshot.monoSupported;
-  const fps = obsSettingsSnapshot?.fps ?? 60;
-  const syncFrames = [1, 2, 3, 4, 5, 6];
-  const selectedDuckingTargetInfo = obsAudioSnapshot.duckingTargets.find((target) => target.inputName === selectedDuckingTarget);
   const stageTwoActions = [
-    noiseSuppression ? 'Supresion de ruido RNNoise' : 'Sin supresion de ruido Match-to-obs',
-    monitorType === 'OBS_MONITORING_TYPE_NONE' ? 'Sin monitoreo de microfono' : monitorType === 'OBS_MONITORING_TYPE_MONITOR_ONLY' ? 'Solo monitoreo' : 'Monitorizar y emitir',
-    `Sync de audio: ${syncOffsetMs} ms`,
-    duckingEnabled && selectedDuckingTarget ? `Ducking sobre ${selectedDuckingTarget}` : 'Ducking desactivado',
+    'Configuracion de audio optimizada por IA',
   ];
 
   return (
@@ -472,121 +441,12 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-          <label className="flex items-start gap-3 rounded-none border border-border p-3 transition-colors hover:border-border">
-            <input
-              type="checkbox"
-              checked={noiseSuppression}
-              onChange={(event) => setNoiseSuppression(event.target.checked)}
-              className="mt-1"
-            />
-            <span>
-              <span className="block text-sm font-semibold text-text">Supresion de ruido</span>
-              <span className="block text-xs text-text-muted">Filtro RNNoise para limpiar estatica y ruido de fondo.</span>
-            </span>
-          </label>
 
-          <label className="block rounded-none border border-border p-3 transition-colors focus-within:border-primary/50">
-            <span className="mb-2 block text-sm font-semibold text-text">Monitoreo</span>
-            <select
-              value={monitorType}
-              onChange={(event) => setMonitorType(event.target.value as OBSAudioConfig['monitorType'])}
-              className="app-select w-full bg-transparent text-sm text-text outline-none"
-            >
-              <option value="OBS_MONITORING_TYPE_NONE" className="bg-background text-text">Sin monitoreo</option>
-              <option value="OBS_MONITORING_TYPE_MONITOR_ONLY" className="bg-background text-text">Solo monitoreo</option>
-              <option value="OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT" className="bg-background text-text">Monitorizar y emitir</option>
-            </select>
-            <span className="mt-2 block text-xs text-text-muted">
-              Usa audifonos conectados a la salida de monitoreo de OBS para escuchar exactamente lo que se transmite y evitar eco.
-            </span>
-          </label>
-
-          <div className="rounded-none border border-border p-3 transition-colors focus-within:border-primary/50">
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-text">Sincronizacion (lip sync)</span>
-              <input
-                type="number"
-                min={-950}
-                max={950}
-                step={5}
-                value={syncOffsetMs}
-                onChange={(event) => setSyncOffsetMs(Number(event.target.value))}
-                className="w-full rounded-none border border-border bg-background px-3 py-2 text-sm text-text outline-none transition-colors focus:border-primary"
-              />
-            </label>
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-xs text-text-muted">Cuadros</span>
-              <select
-                value=""
-                onChange={(event) => {
-                  const frames = Number(event.target.value);
-                  if (frames > 0) setSyncOffsetMs(Math.round(frames * 1000 / fps));
-                }}
-                className="app-select rounded-none border border-border bg-background  px-6 py-1 text-xs text-text outline-none"
-              >
-                <option value="" className="bg-background text-text">Elegir</option>
-                {syncFrames.map((frames) => (
-                  <option key={frames} value={frames} className="bg-background text-text">{frames}</option>
-                ))}
-              </select>
-            </div>
-            <span className="mt-2 block text-xs text-text-muted">
-              cuadros de desfase x (1000 / FPS) = ms; ej. 3 cuadros a 60 fps = 50 ms.
-            </span>
-          </div>
-
-          <div className={`rounded-none border border-border p-3 ${obsAudioSnapshot.duckingTargets.length > 0 ? '' : 'opacity-60'}`}>
-            <label className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                checked={duckingEnabled}
-                disabled={obsAudioSnapshot.duckingTargets.length === 0}
-                onChange={(event) => setDuckingEnabled(event.target.checked)}
-                className="mt-1"
-              />
-              <span>
-                <span className="block text-sm font-semibold text-text">Bajar la musica al hablar (ducking)</span>
-                <span className="block text-xs text-text-muted">
-                  {obsAudioSnapshot.duckingTargets.length > 0
-                    ? `Aplica un compresor a ${selectedDuckingTarget || obsAudioSnapshot.duckingTargets[0].inputName} que reduce su volumen cuando el microfono detecta voz.`
-                    : 'Match-to-obs no encontro una fuente de musica o audio de escritorio. Agrega una fuente multimedia, VLC o audio de escritorio y pulsa Actualizar OBS.'}
-                </span>
-              </span>
-            </label>
-            {obsAudioSnapshot.duckingTargets.length > 0 && (
-              <label className="mt-3 block">
-                <span className="mb-2 block text-xs text-text-muted">Fuente para ducking</span>
-                <select
-                  value={selectedDuckingTarget}
-                  onChange={(event) => setSelectedDuckingTarget(event.target.value)}
-                  className="app-select w-full bg-transparent text-sm text-text outline-none"
-                >
-                  {obsAudioSnapshot.duckingTargets.map((target) => (
-                    <option key={`${target.inputKind}-${target.inputName}`} value={target.inputName} className="bg-background text-text">
-                      {target.inputName}{target.duckingConfigured ? ' (configurado)' : ''}
-                    </option>
-                  ))}
-                </select>
-                <span className="mt-2 block text-xs text-text-faint">
-                  Tipo OBS: {selectedDuckingTargetInfo?.inputKind ?? 'desconocido'}
-                </span>
-              </label>
-            )}
-          </div>
-      </div>
 
       {obsAudioSnapshot.warnings.length > 0 && (
         <div className="mb-4 flex items-start gap-3 rounded-none border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
           <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
-            <p>{obsAudioSnapshot.warnings.join(' ')}</p>
-            {!monoSupported && (
-              <p className="mt-3 text-warning/90">
-                Para activar Mono: OBS &gt; Propiedades avanzadas de audio &gt; busca este microfono &gt; marca Mono.
-              </p>
-            )}
-          </div>
+          <p>{obsAudioSnapshot.warnings.join(' ')}</p>
         </div>
       )}
 
@@ -635,11 +495,6 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           <p>OBS no tiene Mic/Aux configurado. Match-to-obs creara la fuente "{obsAudioSnapshot.inputName}" en la escena activa.</p>
         )}
         <p>Aplicar configuracion de voz Match-to-obs a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
-        <p>
-          {obsAudioSnapshot.monoSupported
-            ? 'Se activara Mono para esta entrada.'
-            : 'OBS WebSocket no expone Mono para esta entrada, asi que Match-to-obs lo dejara como paso manual en OBS.'}
-        </p>
         {usingAi && micProfile && (
           <>
             <p>Match-to-obs aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
