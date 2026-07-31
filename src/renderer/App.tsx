@@ -13,7 +13,6 @@ import { AudioConfiguration } from './components/AudioConfiguration';
 import { ScenesPanel } from './components/ScenesPanel';
 import { ConnectPanel } from './components/ConnectPanel';
 import { ImportButton } from './components/ImportButton';
-import { StatusBar } from './components/StatusBar';
 import { HeroObsEye } from './components/HeroObsEye';
 import { SiteFooter } from './components/SiteFooter';
 import { appAPI } from './lib/app-api';
@@ -330,7 +329,6 @@ export default function App() {
       )}
 
       <SiteFooter />
-      <StatusBar />
     </div>
   );
 }
