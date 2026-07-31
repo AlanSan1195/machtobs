@@ -14,6 +14,7 @@ import { ScenesPanel } from './components/ScenesPanel';
 import { ConnectPanel } from './components/ConnectPanel';
 import { ImportButton } from './components/ImportButton';
 import { HeroObsEye } from './components/HeroObsEye';
+import obsEyeSvg from './assets/obs-eye.svg';
 import { SiteFooter } from './components/SiteFooter';
 import { appAPI } from './lib/app-api';
 import { IconAlert, IconX } from './components/ui';
@@ -102,12 +103,15 @@ export default function App() {
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
-            className="flex items-center gap-2.5"
+            className="flex items-center gap-x-1 sm:gapx-2"
             aria-label="Match-to-obs"
           >
-            <span className="h-3 w-3 bg-primary" aria-hidden="true" />
-            <span className="font-display text-sm font-black uppercase tracking-tight text-paper" style={{ fontStretch: '125%' }}>
-              Match-to-<span className="text-primary">obs</span>
+            <span className="relative flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center">
+              <span className="absolute inset-[0.9px] rounded-full bg-[#3a9bdc] " />
+              <img src={obsEyeSvg} alt="" className="relative h-4 w-4 sm:h-6 sm:w-6 " style={{ filter: 'brightness(0) saturate(100%)' }} />
+            </span>
+            <span className="font-display text-sm font-black  uppercase tracking-tight text-paper " style={{ fontStretch: '125%' }}>
+              Macht<span style={{ color: 'transparent', WebkitTextStroke: '0.8px rgb(var(--paper))', margin:'1px' }}>obs</span>
             </span>
           </a>
 
@@ -196,27 +200,17 @@ export default function App() {
         {activeTab === 0 && (
           <div className="pb-16">
             {/* hero */}
-            <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10 py-10 sm:py-14 lg:py-16">
-              <div className="hero-grid" aria-hidden="true" />
-
-              <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em]">
-                <span className="flex items-center gap-3 text-paper/45">
-                  <span className="bg-primary px-2 py-1 font-bold text-ink">01</span>
-                  <span>señal de configuración</span>
-                </span>
-                <span className="flex items-center gap-2 text-paper/45">
-                  <span
-                    aria-hidden="true"
-                    className={`h-1.5 w-1.5 ${obsConnected ? 'animate-pulse-dot bg-primary' : 'bg-paper/30'}`}
-                  />
-                  {obsConnected ? 'sistema / conectado' : 'sistema / listo'}
-                </span>
-              </div>
+            <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10 py-10 sm:py-14 lg:py-16 ">
 
               <div className="relative z-10 py-[clamp(3.5rem,8vw,7.5rem)]">
-                <p className="mb-4 font-mono text-[0.58rem] uppercase tracking-[0.26em] text-primary sm:mb-6">
-                  tu hardware × el mejor perfil de OBS
-                </p>
+               <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em] py-5 ">
+                <span className="flex items-center gap-3 text-paper/45">
+                  <span className="bg-primary px-2 font-bold text-ink h-5 w-6"></span>
+                  <span> tu hardware × el mejor perfil de OBS</span>
+                </span>
+                
+              </div>
+               
                 <h1 className="hero-wordmark select-none " aria-label="machtobs">
                   <span aria-hidden="true" className="hero-wordmark__inner gap-x-6">
                     <span className="text-paper">macht</span>

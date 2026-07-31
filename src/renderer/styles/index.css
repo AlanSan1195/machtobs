@@ -228,11 +228,6 @@ input[type='checkbox'] {
     -webkit-text-stroke: 2px rgb(var(--paper));
   }
 
-  .text-outline-footer {
-    color: transparent;
-    -webkit-text-stroke: 1px rgb(var(--paper) / 0.72);
-  }
-
   /* ---- machtobs hero wordmark ---- */
   .hero-shell::before {
     content: '';
@@ -347,7 +342,7 @@ input[type='checkbox'] {
   }
 
   .hero-obs-eye--running .hero-obs-eye__fan {
-    animation: hero-obs-fan-spin 0.12s steps(5, end) 1.05s 25;
+    animation: hero-obs-fan-spin 0.08s steps(5, end) 1.05s 10;
   }
 
   .hero-obs-eye--running .hero-obs-eye__mark {

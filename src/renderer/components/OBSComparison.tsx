@@ -355,7 +355,7 @@ function NumericRecommendationEditor({ row, onChange }: RecommendedEditorProps) 
   if (field !== 'bitrate' && field !== 'recording_bitrate') return null;
 
   return (
-    <span className="flex items-center gap-2">
+    <span className="relative">
       <input
         type="number"
         min={500}
@@ -369,9 +369,9 @@ function NumericRecommendationEditor({ row, onChange }: RecommendedEditorProps) 
           const value = Number(nextDraft);
           if (Number.isFinite(value) && value > 0) onChange(field, value);
         }}
-        className={`${editableCellClasses} min-w-0 flex-1`}
+        className={`${editableCellClasses} w-full pr-[1.75rem]`}
       />
-      <span className="shrink-0 text-xs text-paper/40">kbps</span>
+      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[0.55rem] uppercase tracking-widest text-paper/25">kbps</span>
     </span>
   );
 }
