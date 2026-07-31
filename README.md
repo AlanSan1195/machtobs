@@ -1,6 +1,6 @@
 # Match-to-obs
 
-![Match-to-obs — configura OBS sin saber de OBS](public/og-image.png)
+![Match-to-obs — configura OBS sin saber de OBS](public/machtobs.png)
 
 **Match-to-obs** es una app web que configura OBS Studio por ti. Analiza tu computadora, pide a una IA la mejor configuración de stream/grabación para tu hardware, te muestra **qué va a cambiar y por qué**, y la aplica a OBS con un clic.
 
