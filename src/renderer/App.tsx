@@ -14,6 +14,8 @@ import { ScenesPanel } from './components/ScenesPanel';
 import { ConnectPanel } from './components/ConnectPanel';
 import { ImportButton } from './components/ImportButton';
 import { StatusBar } from './components/StatusBar';
+import { HeroObsEye } from './components/HeroObsEye';
+import { SiteFooter } from './components/SiteFooter';
 import { appAPI } from './lib/app-api';
 import { IconAlert, IconX } from './components/ui';
 
@@ -34,20 +36,6 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SignalArrow({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 120 24"
-      fill="none"
-      className={className}
-    >
-      <path d="M0 12h96" stroke="currentColor" strokeWidth="3" />
-      <path d="M88 2l20 10-20 10V2z" fill="currentColor" />
-    </svg>
-  );
-}
-
 function StepHeader({ word, outline = false }: { word: string; outline?: boolean }) {
   return (
     <div className="border-b border-paper/10 pb-5">
@@ -60,6 +48,7 @@ function StepHeader({ word, outline = false }: { word: string; outline?: boolean
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabIndex>(0);
+  const [heroObsAnimationRun, setHeroObsAnimationRun] = useState(0);
 
   const {
     error,
@@ -204,40 +193,65 @@ export default function App() {
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-[1440px] flex-1 px-5">
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-3">
         {activeTab === 0 && (
           <div className="pb-16">
             {/* hero */}
-            <section className="relative border-b border-paper/10 py-14 sm:py-20">
-              <div className="mb-10 flex items-center justify-end font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/40">
-                <span>{obsConnected ? 'status / conectado' : 'status / disponible'}</span>
+            <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10 py-10 sm:py-14 lg:py-16">
+              <div className="hero-grid" aria-hidden="true" />
+
+              <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em]">
+                <span className="flex items-center gap-3 text-paper/45">
+                  <span className="bg-primary px-2 py-1 font-bold text-ink">01</span>
+                  <span>señal de configuración</span>
+                </span>
+                <span className="flex items-center gap-2 text-paper/45">
+                  <span
+                    aria-hidden="true"
+                    className={`h-1.5 w-1.5 ${obsConnected ? 'animate-pulse-dot bg-primary' : 'bg-paper/30'}`}
+                  />
+                  {obsConnected ? 'sistema / conectado' : 'sistema / listo'}
+                </span>
               </div>
 
-              <h1 className="display-xl select-none text-[clamp(3.4rem,13vw,11.5rem)]">
-                <span className="flex items-center gap-[0.08em] text-paper">
-                  match
-                  <SignalArrow className="h-[0.42em] w-auto shrink-0 text-primary" />
-                </span>
-                <span className="text-outline block">to—obs</span>
-              </h1>
-
-              <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,34rem)_1fr] lg:items-end">
-                <p className="max-w-xl text-base leading-relaxed text-paper/60">
-                  Analiza tu harware y hace el mejor match
-                  de configuración para tu OBS, lista para importar.
+              <div className="relative z-10 py-[clamp(3.5rem,8vw,7.5rem)]">
+                <p className="mb-4 font-mono text-[0.58rem] uppercase tracking-[0.26em] text-primary sm:mb-6">
+                  tu hardware × el mejor perfil de OBS
                 </p>
-                <div className="rule-ticks lg:pb-1" aria-hidden="true">
-                  <span>720p</span>
-                  <span>1080p</span>
-                  <span>1440p</span>
-                  <span>2160p</span>
+                <h1 className="hero-wordmark select-none " aria-label="machtobs">
+                  <span aria-hidden="true" className="hero-wordmark__inner gap-x-6">
+                    <span className="text-paper">macht</span>
+                    <span className="hero-wordmark__obs">
+                      <HeroObsEye animationRun={heroObsAnimationRun} />
+                      <span>bs</span>
+                    </span>
+                  </span>
+                </h1>
+              </div>
+
+              <div className="relative z-10 grid gap-8 border-t border-paper/15 pt-6 lg:grid-cols-[minmax(0,36rem)_1fr] lg:items-end">
+                <div className="flex sm:grid-cols-[8rem_1fr] sm:gap-6">
+                  <p className="max-w-lg text-base leading-relaxed text-paper/65 sm:text-lg">
+                    Analiza tu hardware y encuentra la configuración ideal para OBS,
+                    lista para importar.
+                  </p>
+                </div>
+                <div>
+                  <div className="rule-ticks" aria-hidden="true">
+                    <span>720p</span>
+                    <span>1080p</span>
+                    <span>1440p</span>
+                    <span>2160p</span>
+                  </div>
                 </div>
               </div>
             </section>
 
             {/* conexion — full-bleed dentro del lienzo editorial */}
             <div className="-mx-5 mt-10">
-              <ConnectPanel />
+              <ConnectPanel
+                onStart={() => setHeroObsAnimationRun((currentRun) => currentRun + 1)}
+              />
             </div>
           </div>
         )}
@@ -315,6 +329,7 @@ export default function App() {
         </section>
       )}
 
+      <SiteFooter />
       <StatusBar />
     </div>
   );

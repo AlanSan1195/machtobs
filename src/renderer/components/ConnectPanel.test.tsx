@@ -44,7 +44,8 @@ describe('ConnectPanel', () => {
 
   it('reemplaza el enlace rapido por un unico inicio de la guia', async () => {
     const user = userEvent.setup();
-    render(<ConnectPanel />);
+    const onStart = vi.fn();
+    render(<ConnectPanel onStart={onStart} />);
 
     expect(screen.queryByText('canal de control')).toBeNull();
     expect(screen.queryByText('Abre OBS en esta computadora.')).toBeNull();
@@ -55,6 +56,7 @@ describe('ConnectPanel', () => {
     await user.click(screen.getByRole('button', { name: /empezar/i }));
 
     expect(screen.getByText('abre OBS')).toBeTruthy();
+    expect(onStart).toHaveBeenCalledOnce();
     expect(apiMocks.connectToOBS).not.toHaveBeenCalled();
   });
 

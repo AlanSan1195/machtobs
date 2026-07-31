@@ -5,6 +5,10 @@ import { IconAlert, IconCheck, IconPlug } from './ui';
 
 type ConnectionIssue = 'authentication' | 'unavailable';
 
+interface ConnectPanelProps {
+  onStart?: () => void;
+}
+
 function classifyConnectionIssue(message: string): ConnectionIssue {
   const authenticationFailure =
     /authentication failed|requiere (?:un )?password|rechaz[oó] (?:el )?password|password required/i;
@@ -12,7 +16,7 @@ function classifyConnectionIssue(message: string): ConnectionIssue {
   return authenticationFailure.test(message) ? 'authentication' : 'unavailable';
 }
 
-export function ConnectPanel() {
+export function ConnectPanel({ onStart }: ConnectPanelProps) {
   const [showGuide, setShowGuide] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -49,6 +53,7 @@ export function ConnectPanel() {
 
   const startGuide = () => {
     setConnectionIssue(null);
+    onStart?.();
     setShowGuide(true);
   };
 
