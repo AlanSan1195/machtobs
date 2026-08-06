@@ -32,7 +32,7 @@ manually, and point it at the same device.
 
 ## Current state
 
-Repo: Match-to-obs, a React 19 + Vite + TypeScript web app that configures a
+Repo: Machtobs, a React 19 + Vite + TypeScript web app that configures a
 local OBS Studio via `obs-websocket-js` (`ws://localhost:4455`). pnpm + Vitest.
 Conventions: TypeScript, two-space indent, single quotes, semicolons, named
 exports, colocated `*.test.ts(x)`, Spanish UI strings and code comments (no
@@ -54,7 +54,7 @@ Relevant files and facts:
       'pulse_input_capture',
       'alsa_input_capture',
     ] as const;
-    const managedVoiceInputName = 'Voz · Match-to-obs';
+    const managedVoiceInputName = 'Voz · Machtobs';
     ```
 
   - `obs-manager.ts:1491-1496` (inside `getCaptureCapabilities`) — the existing
@@ -429,7 +429,7 @@ new `describe('OBSManager audio de capturadora')` covering:
    'elgato-audio-uid' }] }`. Call `ensureCaptureAudio({ sceneName: 'Gameplay',
    deviceNameHint: 'Elgato Game Capture 4K X' })`. Expect `success === true`;
    `CreateInput` called with `{ sceneName: 'Gameplay', inputName: 'Audio
-   consola · Match-to-obs', inputKind: 'coreaudio_input_capture' }`;
+   consola · Machtobs', inputKind: 'coreaudio_input_capture' }`;
    `SetInputSettings` called with `{ inputName: 'Audio/Capturadora',
    inputSettings: { device_id: 'elgato-audio-uid' }, overlay: true }`
    (`getAudioDevices` probes `device_id` first).
@@ -500,7 +500,7 @@ Machine-checkable. ALL must hold:
 - [ ] Manual smoke (only if an OBS instance with a capture card is at hand —
   otherwise note it as unverified in the PR): add a console source in the
   wizard, pick the capture card, finish → OBS shows `Audio/Capturadora ·
-  Match-to-obs` in the scene and its meter moves with console audio
+  Machtobs` in the scene and its meter moves with console audio
 
 ## STOP conditions
 

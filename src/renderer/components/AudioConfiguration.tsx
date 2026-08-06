@@ -47,7 +47,7 @@ export function createDefaultAudioConfig(
   };
 }
 
-// Traduce la recomendacion de la IA al formato de filtros que aplica match-to-obs.
+// Traduce la recomendacion de la IA al formato de filtros que aplica machtobs.
 function filtersFromProfile(profile: MicProfileResponse): OBSAudioFilterConfig {
   const f = profile.filters;
   return {
@@ -155,7 +155,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         setDetectionMessage(result.message);
       }
     }).catch(() => {
-      setDetectionMessage('Match-to-obs no pudo leer las entradas de audio desde OBS.');
+      setDetectionMessage('Machtobs no pudo leer las entradas de audio desde OBS.');
     });
   }, [autoDetectTried, obsConnected, obsAudioSnapshot, refreshAudioSnapshot]);
 
@@ -300,8 +300,8 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         <div className="rounded-none border border-border bg-surface/45 p-4">
           <p className="text-sm text-text">
             {obsConnected
-              ? 'Match-to-obs esta buscando un dispositivo Mic/Aux o una fuente Audio Input Capture para aplicar la configuracion de voz.'
-              : 'Conecta OBS para detectar tu microfono y aplicar la configuracion de voz de Match-to-obs.'}
+              ? 'Machtobs esta buscando un dispositivo Mic/Aux o una fuente Audio Input Capture para aplicar la configuracion de voz.'
+              : 'Conecta OBS para detectar tu microfono y aplicar la configuracion de voz de Machtobs.'}
           </p>
           {detectionMessage && (
             <p className="mt-3 text-sm text-warning">{detectionMessage}</p>
@@ -351,7 +351,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           <div>
             <p className="font-semibold text-primary">OBS esta listo para recibir tu microfono.</p>
             <p className="mt-1 text-text-muted">
-              Mic/Aux esta en Ninguno. Elige el microfono que quieres usar; despues Match-to-obs podra agregarlo a la escena activa.
+              Mic/Aux esta en Ninguno. Elige el microfono que quieres usar; despues Machtobs podra agregarlo a la escena activa.
             </p>
           </div>
         </div>
@@ -477,7 +477,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           ) : (
             <>
               <IconMic className="h-5 w-5" />
-              <span><span className="opacity-60">./</span>apply --voice match-to-obs</span>
+              <span><span className="opacity-60">./</span>apply --voice machtobs</span>
             </>
           )}
         </button>
@@ -492,12 +492,12 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
         }}
       >
         {obsAudioSnapshot.requiresInputCreation && (
-          <p>OBS no tiene Mic/Aux configurado. Match-to-obs creara la fuente "{obsAudioSnapshot.inputName}" en la escena activa.</p>
+          <p>OBS no tiene Mic/Aux configurado. Machtobs creara la fuente "{obsAudioSnapshot.inputName}" en la escena activa.</p>
         )}
-        <p>Aplicar configuracion de voz Match-to-obs a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
+        <p>Aplicar configuracion de voz Machtobs a "{selectedDevice?.name ?? obsAudioSnapshot.selectedDeviceName ?? obsAudioSnapshot.inputName}"?</p>
         {usingAi && micProfile && (
           <>
-            <p>Match-to-obs aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
+            <p>Machtobs aplicara la cadena de voz recomendada por la IA para "{micProfile.profile.model}":</p>
             <ul className="list-disc space-y-1 pl-5">
               {aiFilterSummary(micProfile).map((line) => (
                 <li key={line}>{line}</li>

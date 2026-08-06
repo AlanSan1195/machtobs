@@ -80,7 +80,7 @@ const validRecommendation = {
 
 const validBackup = {
   createdAt: '2026-06-10T12:00:00.000Z',
-  appliedByMatchToObs: true,
+  appliedByMachtobs: true,
   snapshot: {
     streamServer: 'rtmp://live.twitch.tv/app',
     baseResolution: '1920x1080',
@@ -294,7 +294,7 @@ describe('validateOBSAudioConfig', () => {
   it('conserva los datos necesarios para crear una entrada de voz en OBS virgen', () => {
     const result = validateOBSAudioConfig({
       ...validAudioConfig,
-      inputName: 'Voz · Match-to-obs',
+      inputName: 'Voz · Machtobs',
       inputKind: 'coreaudio_input_capture',
       devicePropertyName: 'device',
       createInputIfMissing: true,
@@ -303,7 +303,7 @@ describe('validateOBSAudioConfig', () => {
     expect(result).toMatchObject({
       success: true,
       value: {
-        inputName: 'Voz · Match-to-obs',
+        inputName: 'Voz · Machtobs',
         inputKind: 'coreaudio_input_capture',
         devicePropertyName: 'device',
         createInputIfMissing: true,

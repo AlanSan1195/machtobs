@@ -55,7 +55,7 @@ function createApiResponse(response: ServerResponse): ApiResponse {
 
 export function localApiPlugin(): Plugin {
   return {
-    name: 'match-to-obs-local-api',
+    name: 'machtobs-local-api',
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (request, response, next) => {

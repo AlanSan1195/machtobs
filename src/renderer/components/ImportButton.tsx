@@ -124,7 +124,7 @@ export function ImportButton() {
             ))}
           </div>
         ) : (
-          <p>No se detectaron diferencias, pero Match-to-obs volvera a aplicar la configuracion recomendada.</p>
+          <p>No se detectaron diferencias, pero Machtobs volvera a aplicar la configuracion recomendada.</p>
         )}
         <p>Se guardara un respaldo automatico de tu configuracion actual.</p>
       </ConfirmDialog>

@@ -1,20 +1,20 @@
-# Audio en Match-to-obs
+# Audio en Machtobs
 
-Este documento explica la primera etapa de configuracion de audio de Match-to-obs:
+Este documento explica la primera etapa de configuracion de audio de Machtobs:
 que hace, por que se eligieron estos valores y que limitaciones existen al
 controlar OBS mediante WebSocket.
 
-La meta no es convertir Match-to-obs en una consola profesional de audio. La meta es
+La meta no es convertir Machtobs en una consola profesional de audio. La meta es
 darle al usuario una base razonable para que su microfono suene mas estable sin
 tener que entender primero todos los filtros de OBS.
 
 ## Objetivo
 
 Muchos usuarios abren OBS, conectan un microfono y no saben si su voz esta baja,
-si se va a saturar cuando griten, o si necesitan filtros. Match-to-obs busca reducir
+si se va a saturar cuando griten, o si necesitan filtros. Machtobs busca reducir
 ese trabajo inicial.
 
-En esta etapa, Match-to-obs intenta:
+En esta etapa, Machtobs intenta:
 
 - detectar el microfono que OBS esta usando
 - elegir una entrada de microfono razonable
@@ -27,22 +27,22 @@ partes normales, pero saturar cuando el usuario se emociona, habla fuerte o
 grita. La cadena predeterminada intenta levantar la voz, controlar esos picos y
 poner un techo de seguridad.
 
-## Que configura Match-to-obs
+## Que configura Machtobs
 
-Match-to-obs lee OBS mediante OBS WebSocket y busca una entrada de microfono. Puede
+Machtobs lee OBS mediante OBS WebSocket y busca una entrada de microfono. Puede
 usar:
 
 - una entrada global `Mic/Aux`
 - una fuente de tipo `Audio Input Capture`
 
-Cuando encuentra una entrada compatible, Match-to-obs puede crear o actualizar estos
+Cuando encuentra una entrada compatible, Machtobs puede crear o actualizar estos
 filtros en esa fuente:
 
-- `Match-to-obs - Gain`
-- `Match-to-obs - Compressor`
-- `Match-to-obs - Limiter`
+- `Machtobs - Gain`
+- `Machtobs - Compressor`
+- `Machtobs - Limiter`
 
-Los filtros son idempotentes: si ya existen con esos nombres, Match-to-obs intenta
+Los filtros son idempotentes: si ya existen con esos nombres, Machtobs intenta
 actualizarlos en lugar de duplicarlos.
 
 ## Cadena predeterminada
@@ -51,9 +51,9 @@ La configuracion inicial elegida es:
 
 | Filtro | Tipo OBS | Valor |
 | --- | --- | --- |
-| `Match-to-obs - Gain` | `gain_filter` | `+10 dB` |
-| `Match-to-obs - Compressor` | `compressor_filter` | ratio `4:1`, threshold `-10 dB`, attack `6 ms`, release `60 ms`, output gain `0 dB` |
-| `Match-to-obs - Limiter` | `limiter_filter` | threshold `-1 dB`, release `60 ms` |
+| `Machtobs - Gain` | `gain_filter` | `+10 dB` |
+| `Machtobs - Compressor` | `compressor_filter` | ratio `4:1`, threshold `-10 dB`, attack `6 ms`, release `60 ms`, output gain `0 dB` |
+| `Machtobs - Limiter` | `limiter_filter` | threshold `-1 dB`, release `60 ms` |
 
 El orden esperado es:
 
@@ -68,7 +68,7 @@ un limite para evitar picos demasiado fuertes.
 
 ### Gain
 
-`Match-to-obs - Gain` sube el volumen de entrada del microfono en `+10 dB`.
+`Machtobs - Gain` sube el volumen de entrada del microfono en `+10 dB`.
 
 Esto ayuda cuando el microfono suena bajo aunque el usuario este hablando cerca
 del micro. Es una forma rapida de levantar la voz antes de procesarla.
@@ -79,7 +79,7 @@ como default inicial, pero no debe entenderse como una solucion universal.
 
 ### Compressor
 
-`Match-to-obs - Compressor` reduce la diferencia entre partes suaves y partes muy
+`Machtobs - Compressor` reduce la diferencia entre partes suaves y partes muy
 fuertes de la voz.
 
 Con ratio `4:1`, cuando la voz pasa el umbral configurado, OBS baja esa energia
@@ -91,7 +91,7 @@ quien escucha.
 
 ### Limiter
 
-`Match-to-obs - Limiter` pone un techo final en `-1 dB`.
+`Machtobs - Limiter` pone un techo final en `-1 dB`.
 
 Su trabajo es proteger contra picos fuertes. Si el usuario grita o golpea el
 microfono con una consonante explosiva, el limitador intenta evitar que la senal
@@ -108,7 +108,7 @@ Con esta cadena predeterminada buscamos:
 - que la voz no cambie tanto entre hablar normal y hablar fuerte
 - que los gritos o picos no rompan tanto el audio
 - que el usuario tenga una base lista sin configurar filtros manualmente
-- que Match-to-obs se diferencie del asistente nativo de OBS explicando el cambio
+- que Machtobs se diferencie del asistente nativo de OBS explicando el cambio
 
 La configuracion esta pensada para creadores que quieren empezar rapido y no
 quieren abrir cinco ventanas de OBS para entender filtros, umbrales y ratios.
@@ -147,17 +147,17 @@ OBS tiene una opcion de Mono en `Propiedades avanzadas de audio`. Esa opcion es
 util cuando un microfono entra solo por un canal o cuando queremos que la voz
 quede centrada.
 
-Match-to-obs intenta detectar si el input expone una configuracion como `mono` o
-`force_mono`. Si OBS WebSocket la expone para esa entrada, Match-to-obs puede
+Machtobs intenta detectar si el input expone una configuracion como `mono` o
+`force_mono`. Si OBS WebSocket la expone para esa entrada, Machtobs puede
 aplicarla.
 
 Pero OBS WebSocket no siempre expone la casilla Mono de `Propiedades avanzadas
-de audio`. Cuando eso pasa, Match-to-obs no debe prometer que la activo. En la app se
+de audio`. Cuando eso pasa, Machtobs no debe prometer que la activo. En la app se
 muestra como paso manual:
 
 `OBS > Propiedades avanzadas de audio > buscar el microfono > marcar Mono`
 
-Esta limitacion no viene de la interfaz de Match-to-obs, sino de lo que OBS WebSocket
+Esta limitacion no viene de la interfaz de Machtobs, sino de lo que OBS WebSocket
 permite controlar de forma automatica.
 
 ## Limitaciones
@@ -214,7 +214,7 @@ Siguientes pasos recomendados:
 - detectar si los filtros ya existen con valores distintos y explicar la
   diferencia
 
-El objetivo final es que Match-to-obs no solo aplique ajustes, sino que ayude al
+El objetivo final es que Machtobs no solo aplique ajustes, sino que ayude al
 usuario a entender por que esos ajustes existen.
 
 ## Etapa 2
@@ -224,7 +224,7 @@ tiene una base de voz funcionando y quiere pulir el audio para directo.
 
 ### Supresion de ruido
 
-Match-to-obs puede agregar `Match-to-obs - Noise Suppression`, un filtro
+Machtobs puede agregar `Machtobs - Noise Suppression`, un filtro
 `noise_suppress_filter` con metodo `rnnoise`.
 
 RNNoise ayuda a limpiar estatica, ventiladores, zumbidos suaves y ruido de
@@ -237,7 +237,7 @@ demasiado procesada.
 
 ### Monitoreo
 
-Match-to-obs ahora puede escribir el tipo de monitoreo de la entrada de microfono:
+Machtobs ahora puede escribir el tipo de monitoreo de la entrada de microfono:
 
 - sin monitoreo
 - solo monitoreo
@@ -257,12 +257,12 @@ OBS. La UI incluye una ayuda simple:
 Por ejemplo, si la voz llega 3 cuadros tarde a 60 fps, el ajuste aproximado es
 `3 x (1000 / 60) = 50 ms`.
 
-Match-to-obs no mide automaticamente el desfase; el usuario introduce el valor tras
+Machtobs no mide automaticamente el desfase; el usuario introduce el valor tras
 hacer una prueba visual o una grabacion corta.
 
 ### Ducking
 
-Match-to-obs puede agregar `Match-to-obs - Ducking` al audio de escritorio. Es un compresor
+Machtobs puede agregar `Machtobs - Ducking` al audio de escritorio. Es un compresor
 con sidechain que usa el microfono como fuente de control: cuando el usuario
 habla, el audio de escritorio baja y luego vuelve de forma suave.
 
@@ -284,6 +284,6 @@ la plataforma:
 - macOS: normalmente se necesita un driver virtual como BlackHole o Loopback y
   enrutar la app hacia ese dispositivo.
 
-Cuando esa fuente ya existe en OBS, Match-to-obs puede trabajar sobre el audio que OBS
+Cuando esa fuente ya existe en OBS, Machtobs puede trabajar sobre el audio que OBS
 expone, pero no intenta crear ni enrutar capturas por aplicacion de forma
 automatica.

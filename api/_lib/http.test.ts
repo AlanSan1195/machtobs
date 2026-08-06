@@ -60,7 +60,7 @@ describe('JSON request boundary', () => {
   });
 
   test('allows JSON parameters and exact configured origins', () => {
-    vi.stubEnv('MATCH_TO_OBS_ALLOWED_ORIGINS', 'https://preview.example.com,not a URL,https://ignored.example/path');
+    vi.stubEnv('MACHTOBS_ALLOWED_ORIGINS', 'https://preview.example.com,not a URL,https://ignored.example/path');
 
     expect(requireJsonPost(request({
       'content-type': 'Application/JSON; Charset=UTF-8',

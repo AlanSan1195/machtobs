@@ -292,7 +292,7 @@ export function OBSManualGuide({
                 ? 'Valores copiados al portapapeles.'
                 : copyState === 'failed'
                   ? 'No se pudo copiar; los valores siguen visibles arriba.'
-                  : 'Sin complemento, Match-to-obs no puede verificar estos valores automáticamente.'}
+                  : 'Sin complemento, Machtobs no puede verificar estos valores automáticamente.'}
             </p>
             <div className="flex flex-wrap gap-2">
               <button

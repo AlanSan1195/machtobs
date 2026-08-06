@@ -19,7 +19,7 @@ vi.mock('../hooks/useAppAPI', () => ({
 }));
 
 const unconfiguredSnapshot: OBSAudioSettingsSnapshot = {
-  inputName: 'Voz · Match-to-obs',
+  inputName: 'Voz · Machtobs',
   inputKind: 'coreaudio_input_capture',
   devicePropertyName: 'device',
   requiresInputCreation: true,
@@ -45,10 +45,10 @@ const unconfiguredSnapshot: OBSAudioSettingsSnapshot = {
   syncOffsetMs: 0,
   duckingTargets: [],
   filters: [],
-  matchToObsFiltersConfigured: false,
+  machtobsFiltersConfigured: false,
   monoConfigured: false,
   monoSupported: false,
-  warnings: ['OBS tiene Mic/Aux en Ninguno. Match-to-obs creara una entrada de voz al aplicar.'],
+  warnings: ['OBS tiene Mic/Aux en Ninguno. Machtobs creara una entrada de voz al aplicar.'],
 };
 
 describe('AudioConfiguration con OBS virgen', () => {
@@ -100,7 +100,7 @@ describe('AudioConfiguration con OBS virgen', () => {
     expect(screen.getByText('02 / seleccion requerida')).toBeTruthy();
     expect(screen.getByRole('option', { name: 'Recomendado - Shure MV7 USB' })).toBeTruthy();
     expect((screen.getByRole('option', { name: 'Selecciona un microfono' }) as HTMLOptionElement).selected).toBe(true);
-    expect(screen.queryByRole('button', { name: /apply --voice match-to-obs/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /apply --voice machtobs/i })).toBeNull();
     expect(screen.getByRole('status').textContent).toContain('Selecciona un microfono');
 
     await user.selectOptions(
@@ -108,13 +108,13 @@ describe('AudioConfiguration con OBS virgen', () => {
       'shure-mv7',
     );
 
-    await user.click(screen.getByRole('button', { name: /apply --voice match-to-obs/i }));
+    await user.click(screen.getByRole('button', { name: /apply --voice machtobs/i }));
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByText(/creara la fuente "Voz · Match-to-obs"/i)).toBeTruthy();
+    expect(within(dialog).getByText(/creara la fuente "Voz · Machtobs"/i)).toBeTruthy();
     await user.click(within(dialog).getByRole('button', { name: 'Aplicar audio' }));
 
     expect(apiMocks.applyAudioConfig).toHaveBeenCalledWith(expect.objectContaining({
-      inputName: 'Voz · Match-to-obs',
+      inputName: 'Voz · Machtobs',
       inputKind: 'coreaudio_input_capture',
       devicePropertyName: 'device',
       createInputIfMissing: true,

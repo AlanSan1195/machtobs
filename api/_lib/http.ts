@@ -45,7 +45,7 @@ function normalizeOrigin(value: string): string | null {
 }
 
 function getAllowedOrigins(): Set<string> {
-  const configured = (process.env.MATCH_TO_OBS_ALLOWED_ORIGINS ?? '')
+  const configured = (process.env.MACHTOBS_ALLOWED_ORIGINS ?? '')
     .split(',')
     .map(normalizeOrigin)
     .filter((origin): origin is string => origin !== null);

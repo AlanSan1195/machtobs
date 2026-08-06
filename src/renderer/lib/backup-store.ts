@@ -1,7 +1,7 @@
 import type { OBSBackup, OBSSettingsSnapshot } from '../../shared/types';
 import { validateOBSBackup } from '../../shared/validation';
 
-const BACKUP_KEY = 'match-to-obs-backup';
+const BACKUP_KEY = 'machtobs-backup';
 
 function sanitizeAdvancedControl(
   advancedControl: OBSSettingsSnapshot['advancedControl'],
@@ -45,7 +45,7 @@ function sanitizeSnapshot(snapshot: OBSSettingsSnapshot): OBSSettingsSnapshot {
 export async function saveBackup(snapshot: OBSSettingsSnapshot): Promise<void> {
   const backup: OBSBackup = {
     createdAt: new Date().toISOString(),
-    appliedByMatchToObs: true,
+    appliedByMachtobs: true,
     snapshot: sanitizeSnapshot(snapshot),
   };
 

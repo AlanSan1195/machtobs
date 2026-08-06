@@ -349,7 +349,7 @@ describe('OBSManager con salida avanzada', () => {
     ]) => request === 'CallVendorRequest' && data?.requestType === 'ApplyAdvancedOutputConfig');
 
     expect(restoreCall?.[1]).toMatchObject({
-      vendorName: 'match-to-obs',
+      vendorName: 'machtobs',
       requestData: {
         stream: {
           bitrate: 8000,
@@ -376,7 +376,7 @@ describe('OBSManager con salida avanzada', () => {
         return { streamServiceSettings: { server: 'rtmps://live-upload.youtube.com/live2', key: 'preservada' } };
       }
       if (request === 'CallVendorRequest') {
-        if (data?.vendorName === 'match-to-obs') {
+        if (data?.vendorName === 'machtobs') {
           throw new Error('No vendor was found by that name.');
         }
         return { responseData: advancedControlResponse };
@@ -437,7 +437,7 @@ describe('OBSManager con salida avanzada', () => {
       },
     });
     expect(vendorApplyCalls.map(([, data]) => data?.vendorName)).toEqual([
-      'match-to-obs',
+      'machtobs',
       'obsee',
     ]);
     expect(result).toMatchObject({
@@ -688,7 +688,7 @@ describe('OBSManager con audio de OBS virgen', () => {
       success: true,
       message: 'Microfono recomendado: Shure MV7 USB',
       snapshot: {
-        inputName: 'Voz · Match-to-obs',
+        inputName: 'Voz · Machtobs',
         inputKind: 'coreaudio_input_capture',
         devicePropertyName: 'device_id',
         requiresInputCreation: true,
@@ -702,12 +702,12 @@ describe('OBSManager con audio de OBS virgen', () => {
     expect(result.snapshot?.devices.find((device) => device.id === 'shure-mv7')?.isRecommended).toBe(true);
     expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
       sceneName: 'Escena',
-      inputName: 'match-to-obs · deteccion temporal',
+      inputName: 'machtobs · deteccion temporal',
       inputKind: 'coreaudio_input_capture',
       sceneItemEnabled: false,
     });
     expect(obsMock.call).toHaveBeenCalledWith('RemoveInput', {
-      inputName: 'match-to-obs · deteccion temporal',
+      inputName: 'machtobs · deteccion temporal',
     });
   });
 
@@ -740,7 +740,7 @@ describe('OBSManager con audio de OBS virgen', () => {
     });
 
     const result = await manager.configureAudio({
-      inputName: 'Voz · Match-to-obs',
+      inputName: 'Voz · Machtobs',
       inputKind: 'coreaudio_input_capture',
       devicePropertyName: 'device',
       createInputIfMissing: true,
@@ -762,15 +762,15 @@ describe('OBSManager con audio de OBS virgen', () => {
     expect(result).toMatchObject({
       success: true,
     });
-    expect(result.message).toContain('Microfono "Voz · Match-to-obs" agregado y configurado en OBS');
+    expect(result.message).toContain('Microfono "Voz · Machtobs" agregado y configurado en OBS');
     expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {
       sceneName: 'Escena',
-      inputName: 'Voz · Match-to-obs',
+      inputName: 'Voz · Machtobs',
       inputKind: 'coreaudio_input_capture',
       inputSettings: { device: 'shure-mv7' },
     });
     expect(obsMock.call).toHaveBeenCalledWith('SetInputSettings', {
-      inputName: 'Voz · Match-to-obs',
+      inputName: 'Voz · Machtobs',
       inputSettings: { device: 'shure-mv7' },
       overlay: true,
     });

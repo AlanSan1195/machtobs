@@ -20,7 +20,7 @@ export async function postToRemoteAI(pathname: string, body: unknown): Promise<u
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Match-to-obs-Install-Id': installId,
+      'X-Machtobs-Install-Id': installId,
     },
     body: JSON.stringify(body),
   });

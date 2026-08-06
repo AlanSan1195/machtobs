@@ -55,7 +55,7 @@ function getUpstashConfig(): { url: string; token: string } | null {
 
 function canUseMemoryRateLimit(): boolean {
   const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
-  return !isProduction && process.env.MATCH_TO_OBS_ALLOW_MEMORY_RATE_LIMIT?.trim().toLowerCase() === 'true';
+  return !isProduction && process.env.MACHTOBS_ALLOW_MEMORY_RATE_LIMIT?.trim().toLowerCase() === 'true';
 }
 
 async function incrementWithUpstash(
@@ -116,14 +116,14 @@ export async function checkRateLimit(request: ApiRequest): Promise<RateLimitResu
     return { allowed: true, remaining: Number.MAX_SAFE_INTEGER };
   }
 
-  const dailyLimit = parseDailyLimit(process.env.MATCH_TO_OBS_AI_DAILY_LIMIT);
-  const installId = normalizeInstallId(getHeader(request, 'x-match-to-obs-install-id'));
+  const dailyLimit = parseDailyLimit(process.env.MACHTOBS_AI_DAILY_LIMIT);
+  const installId = normalizeInstallId(getHeader(request, 'x-machtobs-install-id'));
   const ip = normalizeClientIp(getClientIp(request));
   const ttlSeconds = secondsUntilTomorrow();
   const dayKey = getDayKey();
   const keys = [
-    `match-to-obs-ai:${dayKey}:install:${installId}`,
-    `match-to-obs-ai:${dayKey}:ip:${ip}`,
+    `machtobs-ai:${dayKey}:install:${installId}`,
+    `machtobs-ai:${dayKey}:ip:${ip}`,
   ];
 
   try {
@@ -133,7 +133,7 @@ export async function checkRateLimit(request: ApiRequest): Promise<RateLimitResu
     if (maxCount > dailyLimit) {
       return {
         allowed: false,
-        message: `Limite diario de IA integrada alcanzado (${dailyLimit} solicitudes). match-to-obs usara la recomendacion local hasta manana.`,
+        message: `Limite diario de IA integrada alcanzado (${dailyLimit} solicitudes). machtobs usara la recomendacion local hasta manana.`,
         retryAfterSeconds: ttlSeconds,
       };
     }
@@ -145,7 +145,7 @@ export async function checkRateLimit(request: ApiRequest): Promise<RateLimitResu
   } catch {
     return {
       allowed: false,
-      message: 'La IA integrada no pudo verificar el limite de uso. match-to-obs usara la recomendacion local para proteger costos.',
+      message: 'La IA integrada no pudo verificar el limite de uso. machtobs usara la recomendacion local para proteger costos.',
       retryAfterSeconds: ttlSeconds,
     };
   }

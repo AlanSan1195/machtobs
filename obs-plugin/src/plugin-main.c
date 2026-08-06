@@ -1,5 +1,5 @@
 /*
- * Match-to-obs Advanced Output Control
+ * Machtobs Advanced Output Control
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
@@ -13,9 +13,9 @@
 
 #include "obs-websocket-vendor.h"
 
-#define PLUGIN_NAME "match-to-obs-advanced-control"
+#define PLUGIN_NAME "machtobs-advanced-control"
 #define PLUGIN_VERSION "0.1.0"
-#define VENDOR_NAME "match-to-obs"
+#define VENDOR_NAME "machtobs"
 #define STREAM_ENCODER_FILE "streamEncoder.json"
 #define RECORD_ENCODER_FILE "recordEncoder.json"
 
@@ -26,7 +26,7 @@ static obs_websocket_vendor vendor;
 
 MODULE_EXPORT const char *obs_module_description(void)
 {
-  return "Reads and safely applies OBS Advanced Output encoder settings for Match-to-obs.";
+  return "Reads and safely applies OBS Advanced Output encoder settings for Machtobs.";
 }
 
 static char *profile_file_path(const char *file_name)
@@ -237,7 +237,7 @@ static bool persist_and_update(
   }
 
   char *path = profile_file_path(file_name);
-  if (!path || !obs_data_save_json_safe(persisted, path, "tmp", "match-to-obs-backup")) {
+  if (!path || !obs_data_save_json_safe(persisted, path, "tmp", "machtobs-backup")) {
     snprintf(error, error_size, "Could not save %s", file_name);
     bfree(path);
     obs_data_release(persisted);

@@ -111,7 +111,7 @@ describe('detectHardwareHints', () => {
 
 describe('hardware overrides', () => {
   it('descarta RAM ambigua de la version anterior y conserva el modelo', () => {
-    localStorage.setItem('match-to-obs-hardware', JSON.stringify({
+    localStorage.setItem('machtobs-hardware', JSON.stringify({
       cpuModel: ' Apple M4 ',
       ramGb: 16,
     }));
@@ -131,7 +131,7 @@ describe('hardware overrides', () => {
       cpuCores: 10,
       ramGb: 16,
     });
-    expect(JSON.parse(localStorage.getItem('match-to-obs-hardware') ?? '{}')).toMatchObject({
+    expect(JSON.parse(localStorage.getItem('machtobs-hardware') ?? '{}')).toMatchObject({
       version: 2,
       cpuCores: 10,
       ramGb: 16,
@@ -139,10 +139,10 @@ describe('hardware overrides', () => {
   });
 
   it('rechaza JSON roto y conteos de CPU invalidos', () => {
-    localStorage.setItem('match-to-obs-hardware', '{');
+    localStorage.setItem('machtobs-hardware', '{');
     expect(loadHardwareOverrides()).toEqual({});
 
-    localStorage.setItem('match-to-obs-hardware', JSON.stringify({
+    localStorage.setItem('machtobs-hardware', JSON.stringify({
       version: 2,
       cpuModel: 'Apple M4',
       cpuCores: 10.5,

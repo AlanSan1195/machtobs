@@ -47,7 +47,7 @@
 }
 
 :root {
-  /* Match-to-obs — editorial signal system: ink, paper, OBS blue */
+  /* Machtobs — editorial signal system: ink, paper, OBS blue */
   --background-rgb: 9 10 10;         /* #090a0a ink */
   --surface-rgb: 19 20 19;           /* lifted ink */
   --surface-hover-rgb: 31 33 30;

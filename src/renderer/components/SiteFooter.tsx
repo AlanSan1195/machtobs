@@ -18,7 +18,7 @@ export function SiteFooter() {
             }`}
           />
         </span>
-        <span className="hidden text-paper/40 sm:inline">match-to-obs</span>
+        <span className="hidden text-paper/40 sm:inline">machtobs</span>
         <span className="truncate text-paper/60 normal-case tracking-normal">{obsMessage}</span>
 
         <span className="mx-2 text-paper/20" aria-hidden="true">·</span>

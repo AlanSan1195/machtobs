@@ -1,6 +1,6 @@
 import type { SystemInfo } from '../../shared/types';
 
-const HARDWARE_KEY = 'match-to-obs-hardware';
+const HARDWARE_KEY = 'machtobs-hardware';
 const HARDWARE_SCHEMA_VERSION = 2;
 
 export interface HardwareOverrides {

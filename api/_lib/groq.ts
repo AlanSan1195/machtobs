@@ -86,9 +86,9 @@ Configuracion que OBS ya tiene (definida en el asistente inicial de OBS segun el
 Objetivo descrito por el usuario:
 - Peticion original: ${goal.description}
 - Fuente: ${goal.source ?? 'no indicada'}
-- Stream deseado: ${goal.streamResolution ?? 'dejar que Match-to-obs decida'}
-- Grabacion deseada: ${goal.recordingResolution ?? 'dejar que Match-to-obs decida'}
-- FPS deseados: ${goal.fps ?? 'dejar que Match-to-obs decida'}
+- Stream deseado: ${goal.streamResolution ?? 'dejar que Machtobs decida'}
+- Grabacion deseada: ${goal.recordingResolution ?? 'dejar que Machtobs decida'}
+- FPS deseados: ${goal.fps ?? 'dejar que Machtobs decida'}
 - Contexto de dispositivos: ${goal.deviceNotes ?? 'no indicado'}
 
 Trata estas preferencias como el resultado deseado, pero reduce valores que el hardware no pueda sostener y explica cualquier limite.

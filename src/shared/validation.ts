@@ -703,7 +703,7 @@ function parseBackupAdvancedControl(
 }
 
 export function validateOBSBackup(value: unknown): ValidationResult<OBSBackup> {
-  if (!isRecord(value) || !isNonEmptyString(value.createdAt) || value.appliedByMatchToObs !== true || !isRecord(value.snapshot)) {
+  if (!isRecord(value) || !isNonEmptyString(value.createdAt) || value.appliedByMachtobs !== true || !isRecord(value.snapshot)) {
     return { success: false, message: 'OBS backup is incomplete.' };
   }
 
@@ -766,7 +766,7 @@ export function validateOBSBackup(value: unknown): ValidationResult<OBSBackup> {
     success: true,
     value: {
       createdAt: value.createdAt.trim(),
-      appliedByMatchToObs: true,
+      appliedByMachtobs: true,
       snapshot: backupSnapshot,
     },
   };

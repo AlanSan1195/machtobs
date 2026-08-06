@@ -650,7 +650,7 @@ export function OBSComparison() {
       {recommendation.source === 'local' && (
         <div className="mb-4 flex items-start gap-3 border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
           <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>La IA integrada no respondio o alcanzo su limite. Esta comparacion usa una recomendacion local de respaldo generada por Match-to-obs.</span>
+          <span>La IA integrada no respondio o alcanzo su limite. Esta comparacion usa una recomendacion local de respaldo generada por Machtobs.</span>
         </div>
       )}
       <div className="mb-4 grid gap-2 border border-border bg-surface/45 p-3 text-xs text-text-muted sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-4">
@@ -669,7 +669,7 @@ export function OBSComparison() {
                 complemento avanzado no detectado
               </span>
               <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-paper/70">
-                Match-to-obs aplicara lo compatible. Estos {manualCount} ajustes internos necesitan
+                Machtobs aplicara lo compatible. Estos {manualCount} ajustes internos necesitan
                 que los confirmes directamente en OBS.
               </p>
             </div>
@@ -786,7 +786,7 @@ export function OBSComparison() {
         onConfirm={handleRestore}
       >
         <p>Restaurar la configuracion guardada el {readableBackupDate}?</p>
-        <p>Match-to-obs volvera a aplicar los valores de video, salida y servidor guardados en el ultimo respaldo.</p>
+        <p>Machtobs volvera a aplicar los valores de video, salida y servidor guardados en el ultimo respaldo.</p>
       </ConfirmDialog>
     </Section>
   );

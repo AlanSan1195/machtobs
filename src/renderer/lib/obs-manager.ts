@@ -30,7 +30,7 @@ import {
   type OBSAdvancedApplyRequest,
 } from './obs-advanced-control';
 import {
-  areMatchToObsFiltersConfigured,
+  areMachtobsFiltersConfigured,
   collectDuckingInputCandidates,
   getBooleanValue,
   getDuckingFilter,
@@ -46,7 +46,7 @@ import {
   getStringValue,
   isAudioInputKind,
   isRecord,
-  matchToObsFilterNames,
+  machtobsFilterNames,
   scoreAudioDevice,
   scoreAudioInput,
   type OBSJsonSettings,
@@ -76,7 +76,7 @@ const audioInputKindCandidates = [
   'pulse_input_capture',
   'alsa_input_capture',
 ] as const;
-const managedVoiceInputName = 'Voz · Match-to-obs';
+const managedVoiceInputName = 'Voz · Machtobs';
 // Nombres tipicos de capturadoras vistas como dispositivo (video o audio).
 const CAPTURE_DEVICE_NAME_PATTERN = /capture|hdmi|elgato|avermedia|ugreen|macro|cam link|live gamer|ripsaw/i;
 const managedCaptureAudioInputName = 'Audio/Capturadora';
@@ -84,7 +84,7 @@ const managedCaptureAudioInputName = 'Audio/Capturadora';
 // `obsee` fue el nombre publicado por la primera version del complemento.
 // Conservamos compatibilidad para que las instalaciones existentes puedan
 // aplicar bitrates avanzados sin obligar al usuario a reemplazar el bundle.
-const advancedOutputVendorNames = ['match-to-obs', 'obsee'] as const;
+const advancedOutputVendorNames = ['machtobs', 'obsee'] as const;
 
 // Parsea items de resolucion que OBS devuelve para una capturadora ("1920x1080",
 // "1920x1080 @ 60fps", etc.). Devuelve resolucion normalizada + fps si viene.
@@ -179,7 +179,7 @@ export class OBSManager {
       if (!isRecord(responseData)) {
         return {
           success: false,
-          message: 'El complemento de Match-to-obs devolvio una respuesta invalida.',
+          message: 'El complemento de Machtobs devolvio una respuesta invalida.',
         };
       }
       if (responseData.success !== true) {
@@ -187,19 +187,19 @@ export class OBSManager {
           success: false,
           message: typeof responseData.error === 'string'
             ? responseData.error
-            : 'El complemento de Match-to-obs rechazó los ajustes avanzados.',
+            : 'El complemento de Machtobs rechazó los ajustes avanzados.',
         };
       }
 
       return {
         success: true,
-        message: 'Ajustes avanzados aplicados por el complemento de Match-to-obs',
+        message: 'Ajustes avanzados aplicados por el complemento de Machtobs',
         control: parseAdvancedOutputControl(responseData),
       };
     } catch {
       return {
         success: false,
-        message: 'El complemento nativo de Match-to-obs no está instalado o no respondió.',
+        message: 'El complemento nativo de Machtobs no está instalado o no respondió.',
       };
     }
   }
@@ -465,7 +465,7 @@ export class OBSManager {
       const primaryDuckingTarget = duckingTargets[0];
 
       if (!monoSupported) {
-        warnings.push('OBS WebSocket no expone la casilla Mono de Propiedades avanzadas de audio para esta entrada. Match-to-obs puede aplicar filtros automaticamente, pero Mono debe activarse manualmente en OBS.');
+        warnings.push('OBS WebSocket no expone la casilla Mono de Propiedades avanzadas de audio para esta entrada. Machtobs puede aplicar filtros automaticamente, pero Mono debe activarse manualmente en OBS.');
       }
 
       return {
@@ -492,7 +492,7 @@ export class OBSManager {
             : undefined,
           duckingTargets,
           filters,
-          matchToObsFiltersConfigured: areMatchToObsFiltersConfigured(filters),
+          machtobsFiltersConfigured: areMachtobsFiltersConfigured(filters),
           monoConfigured,
           monoSupported,
           warnings,
@@ -1051,7 +1051,7 @@ export class OBSManager {
         };
       }
 
-      temporaryInputName = buildUniqueInputName('match-to-obs · deteccion temporal', existingNames);
+      temporaryInputName = buildUniqueInputName('machtobs · deteccion temporal', existingNames);
       await this.obs.call('CreateInput', {
         sceneName,
         inputName: temporaryInputName,
@@ -1069,7 +1069,7 @@ export class OBSManager {
       const duckingTargets = await this.getDuckingTargets();
       const primaryDuckingTarget = duckingTargets[0];
       const warnings = [
-        'OBS tiene Mic/Aux en Ninguno. Match-to-obs creara una entrada de voz al aplicar.',
+        'OBS tiene Mic/Aux en Ninguno. Machtobs creara una entrada de voz al aplicar.',
       ];
       if (devices.length === 0) {
         warnings.push('OBS no expuso una lista de microfonos; se usara el dispositivo predeterminado al aplicar.');
@@ -1099,7 +1099,7 @@ export class OBSManager {
             : undefined,
           duckingTargets,
           filters: [],
-          matchToObsFiltersConfigured: false,
+          machtobsFiltersConfigured: false,
           monoConfigured: false,
           monoSupported: false,
           warnings,
@@ -1131,7 +1131,7 @@ export class OBSManager {
       const filters = await this.getAudioFilters(candidate.inputName);
       return {
         ...candidate,
-        duckingConfigured: filters.some((filter) => filter.name === matchToObsFilterNames.ducking && filter.enabled),
+        duckingConfigured: filters.some((filter) => filter.name === machtobsFilterNames.ducking && filter.enabled),
       };
     }));
   }
@@ -1193,18 +1193,18 @@ export class OBSManager {
 
     if (config.ducking?.enabled === false) {
       const existingFilters = await this.getAudioFilters(desktopInputName);
-      const existingFilter = existingFilters.find((filter) => filter.name === matchToObsFilterNames.ducking);
+      const existingFilter = existingFilters.find((filter) => filter.name === machtobsFilterNames.ducking);
       if (!existingFilter) return;
 
       try {
         await this.obs.call('SetSourceFilterEnabled', {
           sourceName: desktopInputName,
-          filterName: matchToObsFilterNames.ducking,
+          filterName: machtobsFilterNames.ducking,
           filterEnabled: false,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        warnings.push(`${matchToObsFilterNames.ducking}: ${errorMessage}`);
+        warnings.push(`${machtobsFilterNames.ducking}: ${errorMessage}`);
       }
     }
   }
@@ -1213,7 +1213,7 @@ export class OBSManager {
     sourceName: string,
     expectedFilters: Record<string, { kind: string; settings: OBSJsonSettings }>,
     warnings: string[],
-    // Nombres de filtros gestionados por match-to-obs que deben eliminarse si ya no
+    // Nombres de filtros gestionados por machtobs que deben eliminarse si ya no
     // estan en el set esperado (honra "omitir"). Acotado para no tocar filtros
     // del usuario ni el ducking.
     removableManagedNames: string[] = [],
@@ -1483,7 +1483,7 @@ export class OBSManager {
       }
 
       const existing = await this.getExistingInputNames();
-      tempInputName = buildUniqueInputName('match-to-obs captura temporal', existing);
+      tempInputName = buildUniqueInputName('machtobs captura temporal', existing);
       await this.obs.call('CreateInput', {
         sceneName,
         inputName: tempInputName,

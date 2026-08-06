@@ -104,7 +104,7 @@ export default function App() {
             href="#"
             onClick={(e) => e.preventDefault()}
             className="flex items-center gap-x-1 sm:gapx-2"
-            aria-label="Match-to-obs"
+            aria-label="Machtobs"
           >
             <span className="relative flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center">
               <span className="absolute inset-[0.9px] rounded-full bg-[#3a9bdc] " />
