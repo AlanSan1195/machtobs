@@ -57,11 +57,13 @@
   --accent-dim-rgb: 38 125 183;      /* #267db7 */
   --secondary-rgb: 241 239 232;      /* paper */
   --warning-rgb: 242 184 75;
+  --manual-rgb: 45 212 191;
   --danger-rgb: 255 92 92;
   --accent: rgb(var(--accent-rgb));
   --accent-dim: rgb(var(--accent-dim-rgb));
   --secondary: rgb(var(--secondary-rgb));
   --warning: rgb(var(--warning-rgb));
+  --manual: rgb(var(--manual-rgb));
   --danger: rgb(var(--danger-rgb));
 
   --paper: 241 239 232;

@@ -744,7 +744,7 @@ export function OBSComparison() {
                     aria-expanded={manualGuideOpen}
                     aria-controls={manualGuideId}
                     onClick={() => setManualGuideOpen(true)}
-                    className="inline-flex items-center gap-1.5 border border-warning/40 bg-warning/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-warning transition-colors hover:bg-warning/20"
+                    className="inline-flex items-center gap-1.5 border border-manual/40 bg-manual/10 px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-manual transition-colors hover:bg-manual/20"
                   >
                     Manual
                   </button>

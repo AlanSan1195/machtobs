@@ -23,6 +23,7 @@ module.exports = {
         secondary: 'rgb(var(--secondary-rgb) / <alpha-value>)',
         obs: 'rgb(var(--obs-rgb) / <alpha-value>)',
         warning: 'rgb(var(--warning-rgb) / <alpha-value>)',
+        manual: 'rgb(var(--manual-rgb) / <alpha-value>)',
         danger: 'rgb(var(--danger-rgb) / <alpha-value>)',
         glow: 'rgb(var(--accent-rgb) / <alpha-value>)',
         paper: 'rgb(var(--paper) / <alpha-value>)',
