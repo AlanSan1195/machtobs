@@ -83,10 +83,7 @@ export function ConsoleReport() {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2 rounded-none border border-secondary/35 bg-secondary/10 px-4 py-3 text-sm text-secondary">
-        <IconCheck className="h-4 w-4 shrink-0" />
-        <span>Captura recomendada: <strong>{profile.captureResolution}</strong> a <strong>{profile.captureFps}fps</strong></span>
-      </div>
+     
 
       <div className={`mt-3 flex items-start gap-2 rounded-none border px-4 py-3 text-sm ${researchStatus === 'verified'
         ? 'border-secondary/35 bg-secondary/10 text-secondary'
@@ -99,7 +96,7 @@ export function ConsoleReport() {
           <span className="block font-semibold">Investigacion de hardware</span>
           <span className="mt-0.5 block opacity-90">
             {researchStatus === 'verified'
-              ? `Especificaciones contrastadas con ${sourceCount} fuente${sourceCount === 1 ? '' : 's'} web mediante ${profile.research?.provider === 'ai_search' ? 'busqueda IA' : 'Tavily'}.`
+              ? `Especificaciones contrastadas con ${sourceCount} fuente${sourceCount === 1 ? '' : 's'} oficiales ${profile.research?.provider === 'ai_search' ? 'busqueda IA' : ''}.`
               : researchStatus === 'no_results'
                 ? 'La busqueda web se ejecuto, pero no encontro fuentes suficientemente relevantes. Se usaron las capacidades leidas por OBS y el perfil local.'
                 : 'La busqueda web no estuvo configurada para este analisis. Se usaron las capacidades leidas por OBS y el perfil local.'}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { type ReactNode, useEffect, useState } from 'react';
 import { useAppStore } from './store';
 import { ModeSelector } from './components/ModeSelector';
 import { PlatformSelector } from './components/PlatformSelector';
@@ -13,6 +13,7 @@ import { AudioConfiguration } from './components/AudioConfiguration';
 import { ScenesPanel } from './components/ScenesPanel';
 import { ConnectPanel } from './components/ConnectPanel';
 import { ImportButton } from './components/ImportButton';
+import { NetworkDetectionSummary } from './components/NetworkDetectionSummary';
 import { HeroObsEye } from './components/HeroObsEye';
 import obsEyeSvg from './assets/obs-eye.svg';
 import { SiteFooter } from './components/SiteFooter';
@@ -36,12 +37,23 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StepHeader({ word, outline = false }: { word: string; outline?: boolean }) {
+function StepHeader({
+  word,
+  outline = false,
+  aside,
+}: {
+  word: string;
+  outline?: boolean;
+  aside?: ReactNode;
+}) {
   return (
-    <div className="border-b border-paper/10 pb-5">
+    <div className={`grid items-end gap-5 border-b border-paper/10 pb-5 ${
+      aside ? 'xl:grid-cols-[minmax(0,1fr)_minmax(32rem,16rem)]' : ''
+    }`}>
       <h2 className={`display-xl text-[clamp(2.6rem,7vw,5.5rem)] ${outline ? 'text-outline' : 'text-paper'}`}>
         {word}
       </h2>
+      {aside ? <div className="min-w-0">{aside}</div> : null}
     </div>
   );
 }
@@ -200,10 +212,10 @@ export default function App() {
         {activeTab === 0 && (
           <div className="pb-16">
             {/* hero */}
-            <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10 py-10 sm:py-14 lg:py-16 ">
+            <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10">
 
               <div className="relative z-10 py-[clamp(3.5rem,8vw,7.5rem)]">
-               <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em] py-5 ">
+               <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em] py-5  ">
                 <span className="flex items-center gap-3 text-paper/45">
                   <span className="bg-primary px-2 font-bold text-ink h-5 w-6"></span>
                   <span> tu hardware × el mejor perfil de OBS</span>
@@ -250,7 +262,7 @@ export default function App() {
         )}
 
         {activeTab === 1 && (
-          <div className="space-y-8 py-10">
+          <div className="space-y-8 py-10 ">
             <StepHeader word="ajustes" />
             <div className="grid gap-5 lg:grid-cols-2">
               <ModeSelector />
@@ -269,10 +281,10 @@ export default function App() {
         )}
 
         {activeTab === 2 && (
-          <div className="space-y-8 py-10">
-            <StepHeader word="deteccion" outline />
+          <div className="space-y-8 py-10 ">
+            <StepHeader word="deteccion" outline aside={<NetworkDetectionSummary />} />
             <ConsoleReport />
-            <OBSComparison />
+            <OBSComparison outputAction={<ImportButton />} />
             <AudioConfiguration onApplySuccess={() => setActiveTab(3)} />
           </div>
         )}
@@ -281,7 +293,6 @@ export default function App() {
           <div className="space-y-8 py-10">
             <StepHeader word="escenas" />
             <ScenesPanel />
-            <ImportButton />
             <div className="border-t border-paper/10 pt-6">
               <button
                 type="button"

@@ -443,12 +443,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
 
 
 
-      {obsAudioSnapshot.warnings.length > 0 && (
-        <div className="mb-4 flex items-start gap-3 rounded-none border border-warning/35 bg-warning/[0.06] p-4 text-sm text-warning">
-          <IconAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <p>{obsAudioSnapshot.warnings.join(' ')}</p>
-        </div>
-      )}
+
 
       {awaitingMicrophoneSelection ? (
         <div
@@ -477,7 +472,7 @@ export function AudioConfiguration({ onApplySuccess }: AudioConfigurationProps =
           ) : (
             <>
               <IconMic className="h-5 w-5" />
-              <span><span className="opacity-60">./</span>apply --voice machtobs</span>
+              <span><span className="opacity-60">./</span>applicar --MicRO</span>
             </>
           )}
         </button>

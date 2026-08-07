@@ -254,13 +254,17 @@ describe('columna Recomendado editable', () => {
   });
 
   it('concentra recomendacion y comparacion en una sola seccion', () => {
-    render(<OBSComparison />);
+    render(<OBSComparison outputAction={<button type="button">apply --output obs</button>} />);
 
     expect(screen.getByText('obs.comparar')).not.toBeNull();
     expect(screen.queryByText('config.recomendada')).toBeNull();
-    expect(screen.getByText('Recomendado por Recomendacion local')).not.toBeNull();
+    expect(screen.queryByText('Recomendado por Recomendacion local')).toBeNull();
     expect(screen.getByText(/Esta comparacion usa una recomendacion local de respaldo/i)).not.toBeNull();
-    expect(screen.getByText(/Privacidad: solo se usa informacion tecnica/i)).not.toBeNull();
+    expect(screen.queryByText(/Privacidad/i)).toBeNull();
+    expect(screen.getByText('Por que recomendamos esta configuracion')).not.toBeNull();
+    expect(screen.getByText('Analisis local')).not.toBeNull();
+    expect(screen.getByText('test')).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'apply --output obs' })).not.toBeNull();
   });
 
   it('permite cambiar un valor con select y conserva el baseline original', async () => {

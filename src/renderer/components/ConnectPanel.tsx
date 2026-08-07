@@ -60,7 +60,7 @@ export function ConnectPanel({ onStart }: ConnectPanelProps) {
   return (
     <section
       aria-label="Conectar con OBS"
-      className="relative border-y border-paper/15 bg-background/55"
+      className="relative border-y border-paper/15 bg-background/55  "
     >
       <header className="border-b border-paper/10">
         <div className="flex min-w-0 items-center gap-3 px-5 py-3">
@@ -69,7 +69,7 @@ export function ConnectPanel({ onStart }: ConnectPanelProps) {
         </div>
       </header>
 
-      <footer className="grid border-b border-warning/25 bg-warning/[0.035] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+      <footer className="grid border-b border-warning/25 bg-warning/[0.035] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center ">
         <span className="border-b border-warning/20 px-5 py-3 font-mono text-[0.56rem] font-bold uppercase tracking-[0.16em] text-warning sm:border-b-0 sm:border-r">
           beta / 01
         </span>

@@ -162,7 +162,29 @@ describe('flujo de deteccion y aplicacion de recomendaciones en OBS', () => {
     expect(useAppStore.getState().platform).toBe('twitch');
     expect(apiMocks.getSettingsSnapshot).toHaveBeenCalledTimes(1);
 
-    await user.click(screen.getByRole('button', { name: /importar --a obs/i }));
+    // La salida puede aplicarse aunque el audio ya haya sido detectado: este
+    // boton nunca debe elegir ni modificar el microfono por cuenta propia.
+    act(() => {
+      useAppStore.setState({
+        obsAudioSnapshot: {
+          inputName: 'Mic/Aux',
+          inputKind: 'coreaudio_input_capture',
+          devices: [],
+          muted: false,
+          volumeDb: 0,
+          monitorType: 'OBS_MONITORING_TYPE_NONE',
+          syncOffsetMs: 0,
+          duckingTargets: [],
+          filters: [],
+          machtobsFiltersConfigured: false,
+          monoConfigured: false,
+          monoSupported: true,
+          warnings: [],
+        },
+      });
+    });
+
+    await user.click(screen.getByRole('button', { name: /apply --output obs/i }));
 
     const dialog = screen.getByRole('dialog');
     const canvasChange = within(dialog).getByText('Lienzo base').parentElement;

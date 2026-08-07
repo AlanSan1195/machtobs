@@ -90,7 +90,7 @@ assertExactDirective(directives, 'script-src', ["'self'", ...jsonLdHashes]);
 assertExactDirective(directives, 'style-src', ["'self'", "'unsafe-inline'"]);
 assertExactDirective(directives, 'img-src', ["'self'", 'data:']);
 assertExactDirective(directives, 'font-src', ["'self'"]);
-assertExactDirective(directives, 'connect-src', ["'self'", 'ws://localhost:*', 'ws://127.0.0.1:*']);
+assertExactDirective(directives, 'connect-src', ["'self'", 'https://speed.cloudflare.com', 'ws://localhost:*', 'ws://127.0.0.1:*']);
 assertExactDirective(directives, 'object-src', ["'none'"]);
 assertExactDirective(directives, 'base-uri', ["'none'"]);
 assertExactDirective(directives, 'form-action', ["'self'"]);

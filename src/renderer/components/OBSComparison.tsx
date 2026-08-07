@@ -74,10 +74,6 @@ function isUsableRecommendation(settings: AIRecommendationSettings): boolean {
   );
 }
 
-function getSourceLabel(source: AIRecommendation['source']): string {
-  return source === 'ai' ? 'IA integrada' : 'Recomendacion local';
-}
-
 export function normalizeEncoder(value: string): string {
   const normalized = normalize(value).replace(/[_-]/g, ' ');
 
@@ -449,7 +445,11 @@ function RecommendedEditor({ row, onChange }: RecommendedEditorProps) {
   }
 }
 
-export function OBSComparison() {
+type OBSComparisonProps = {
+  outputAction?: React.ReactNode;
+};
+
+export function OBSComparison({ outputAction }: OBSComparisonProps = {}) {
   const {
     mode,
     platform,
@@ -487,6 +487,8 @@ export function OBSComparison() {
 
     const originalRecommendations = recommendation.originalRecommendations ?? recommendation.recommendations;
     const changedFields = getChangedFields(originalRecommendations, recommendation.recommendations);
+    const requestId = explanationRequestIdRef.current + 1;
+    explanationRequestIdRef.current = requestId;
     if (changedFields.length === 0 || !isUsableRecommendation(recommendation.recommendations)) {
       setIsExplaining(false);
       setExplanationSource(null);
@@ -503,8 +505,6 @@ export function OBSComparison() {
       return undefined;
     }
 
-    const requestId = explanationRequestIdRef.current + 1;
-    explanationRequestIdRef.current = requestId;
     setIsExplaining(true);
 
     const request = {
@@ -638,9 +638,7 @@ export function OBSComparison() {
                 : 'border-warning/40 bg-warning/10 text-warning'
             }`}
           >
-            {obsSettingsSnapshot.advancedControl?.available
-              ? `Complemento ${obsSettingsSnapshot.advancedControl.pluginVersion} · `
-              : ''}
+
             {changeCount === 0
               ? 'Sin cambios'
               : `${automaticCount} automatico${automaticCount === 1 ? '' : 's'}`}
@@ -655,14 +653,6 @@ export function OBSComparison() {
           <span>La IA integrada no respondio o alcanzo su limite. Esta comparacion usa una recomendacion local de respaldo generada por Machtobs.</span>
         </div>
       )}
-      <div className="mb-4 grid gap-2 border border-border bg-surface/45 p-3 text-xs text-text-muted sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-4">
-        <span className="font-mono font-semibold uppercase tracking-[0.16em] text-primary">
-          Recomendado por {getSourceLabel(recommendation.source)}
-        </span>
-        <span className="sm:text-right">
-          Privacidad: solo se usa informacion tecnica del equipo, modo y plataforma; nunca archivos ni claves de OBS.
-        </span>
-      </div>
       {manualCount > 0 && (
         <div className="mb-4 border border-warning/35 bg-warning/[0.045]">
           <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -760,26 +750,29 @@ export function OBSComparison() {
           );
         })}
       </div>
-      {hasUserChanges && (
-        <div className="mt-4 border border-primary/30 bg-primary/[0.06] p-4 sm:p-5">
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <span className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-primary">
-              Impacto de tus cambios
-            </span>
-            <span className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-primary">
-              {isExplaining && <Spinner className="h-3 w-3" />}
-              {isExplaining
-                ? 'IA recalculando'
-                : explanationSource === 'local'
+      <div className="mt-4 border border-primary/30 bg-primary/[0.06] p-4 sm:p-5">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-primary">
+            {hasUserChanges ? 'Impacto de tus cambios' : 'Por que recomendamos esta configuracion'}
+          </span>
+          <span className="inline-flex items-center gap-2 border border-primary/30 bg-primary/10 px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-primary">
+            {isExplaining ? <Spinner className="h-3 w-3" /> : null}
+            {isExplaining
+              ? 'IA recalculando'
+              : hasUserChanges
+                ? explanationSource === 'local'
                   ? 'Analisis verificado'
-                  : 'IA integrada actualizada'}
-            </span>
-          </div>
-          <p aria-live="polite" className="text-sm leading-relaxed text-text">
-            <InlineEmphasis text={recommendation.reasoning} />
-          </p>
+                  : 'IA integrada actualizada'
+                : recommendation.source === 'local'
+                  ? 'Analisis local'
+                  : 'IA integrada'}
+          </span>
         </div>
-      )}
+        <p aria-live="polite" className="text-sm leading-relaxed text-text">
+          <InlineEmphasis text={recommendation.reasoning} />
+        </p>
+      </div>
+      {outputAction ? <div className="mt-4">{outputAction}</div> : null}
       <ConfirmDialog
         open={restoreDialogOpen}
         title="Restaurar configuracion anterior"

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
-import { createDefaultAudioConfig } from './AudioConfiguration';
 import { buildComparisonRows, isSameValue } from './OBSComparison';
 import { ConfirmDialog } from './ConfirmDialog';
-import { IconUpload, Spinner } from './ui';
+import { IconCheck, IconUpload, Spinner } from './ui';
 
 export function ImportButton() {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -12,7 +11,6 @@ export function ImportButton() {
     mode,
     platform,
     recommendation,
-    obsAudioSnapshot,
     obsSettingsSnapshot,
     obsConnected,
     setObsMessage,
@@ -25,6 +23,7 @@ export function ImportButton() {
   const changedRows = recommendation && obsSettingsSnapshot
     ? buildComparisonRows(obsSettingsSnapshot, recommendation.recommendations, mode).filter((row) => !isSameValue(row))
     : [];
+  const hasChanges = changedRows.length > 0;
 
   const handleImport = async () => {
     if (!canImport || !recommendation) return;
@@ -45,12 +44,8 @@ export function ImportButton() {
         audioBitrate: recommendation.recommendations.audio_bitrate,
         recordingFormat: recommendation.recommendations.recording_format,
         recordingQuality: recommendation.recommendations.recording_quality,
-        audio: obsAudioSnapshot
-          ? createDefaultAudioConfig(
-            obsAudioSnapshot,
-            obsAudioSnapshot.recommendedDevice ?? obsAudioSnapshot.devices.find((device) => device.id === obsAudioSnapshot.selectedDeviceId),
-          )
-          : undefined,
+        // La configuracion de voz tiene su propio flujo y confirmacion.
+        audio: undefined,
       });
 
       if (result.success) {
@@ -79,13 +74,14 @@ export function ImportButton() {
   }
 
   return (
-    <div>
+    <div className="">
+      
       <button
         type="button"
         onClick={handleImportClick}
-        disabled={!canImport || isApplying}
+        disabled={!canImport || !hasChanges || isApplying}
         className={`group flex w-full items-center justify-center gap-3 rounded-none px-6 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-200 ${
-          canImport && !isApplying
+          canImport && hasChanges && !isApplying
             ? 'bg-primary text-background glow-primary hover:bg-primary-hover active:scale-[0.99]'
             : 'cursor-not-allowed border border-border bg-surface/45 text-text-muted'
         }`}
@@ -95,16 +91,21 @@ export function ImportButton() {
             <Spinner className="h-5 w-5 border-background/80 border-t-transparent" />
             <span>aplicando...</span>
           </>
+        ) : !hasChanges ? (
+          <>
+            <IconCheck className="h-5 w-5" />
+            <span>configuracion aplicada</span>
+          </>
         ) : (
           <>
             <IconUpload className="h-5 w-5" />
-            <span><span className="opacity-60">./</span>importar --a obs</span>
+            <span><span className="opacity-60">./</span>aplicar --</span>
           </>
         )}
       </button>
       <ConfirmDialog
         open={confirmOpen}
-        title="Confirmar cambios en OBS"
+        title="Aplicar salida en OBS"
         confirmLabel="Aplicar cambios"
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
@@ -126,7 +127,7 @@ export function ImportButton() {
         ) : (
           <p>No se detectaron diferencias, pero Machtobs volvera a aplicar la configuracion recomendada.</p>
         )}
-        <p>Se guardara un respaldo automatico de tu configuracion actual.</p>
+        <p>Se guardara un respaldo automatico. Esta accion no cambia el microfono ni sus filtros.</p>
       </ConfirmDialog>
     </div>
   );

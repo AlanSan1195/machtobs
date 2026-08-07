@@ -19,11 +19,12 @@ export function AnalyzeButton() {
     selectedMonitor,
     captureCapabilities,
     isAnalyzingConsole,
+    isMeasuringUpload,
   } = useAppStore();
-  const { getSystemInfo, getAIRecommendation, profileConsole } = useAppAPI();
+  const { getSystemInfo, getAIRecommendation, measureNetworkUpload, profileConsole } = useAppAPI();
 
   const isConsole = analysisTarget === 'console';
-  const busy = isAnalyzing || isAnalyzingConsole;
+  const busy = isAnalyzing || isAnalyzingConsole || isMeasuringUpload;
   const missingBase = !mode || !platform;
   const isDisabled = busy || missingBase || (isConsole && !consoleModel);
 
@@ -34,7 +35,11 @@ export function AnalyzeButton() {
     if (isConsole) {
       if (!consoleModel) return;
       try {
-        const systemInfo = await getSystemInfo();
+        const [systemInfo, network] = await Promise.all([
+          getSystemInfo(),
+          measureNetworkUpload(),
+        ]);
+        if (!network) return;
         const matchedDisplay = peripherals?.displays.find((display) => display.model === selectedMonitor);
         await profileConsole({
           console: consoleModel,
@@ -46,6 +51,7 @@ export function AnalyzeButton() {
           platform,
           mode,
           systemInfo,
+          network,
         });
       } catch (error) {
         console.error('Console analysis failed:', error);
@@ -55,9 +61,19 @@ export function AnalyzeButton() {
 
     setIsAnalyzing(true);
     try {
-      const systemInfo = await getSystemInfo();
+      const [systemInfo, network] = await Promise.all([
+        getSystemInfo(),
+        measureNetworkUpload(),
+      ]);
+      if (!network) return;
       const currentSettings = obsSettingsSnapshot ? extractObsBaseline(obsSettingsSnapshot) : undefined;
-      await getAIRecommendation({ systemInfo, mode, platform, currentSettings });
+      await getAIRecommendation({
+        systemInfo,
+        mode,
+        platform,
+        currentSettings,
+        network,
+      });
     } catch (error) {
       console.error('Analysis failed:', error);
     } finally {
@@ -66,7 +82,9 @@ export function AnalyzeButton() {
   };
 
   const label = busy
-    ? (isConsole ? 'analizando consola...' : 'analizando sistema...')
+    ? isMeasuringUpload
+      ? 'midiendo subida...'
+      : isConsole ? 'analizando consola...' : 'analizando sistema...'
     : missingBase
       ? 'selecciona modo y plataforma'
       : isConsole && !consoleModel

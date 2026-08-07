@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AIRecommendation, CaptureCapabilities, ConsoleModel, ConsoleProfileResponse, MicProfileResponse, OBSAudioSettingsSnapshot, OBSConnectionSettings, OBSMode, OBSPlatform, OBSSettingsSnapshot, PeripheralsSnapshot, ResolvedSourceKind, Scene, SceneItemSummary, SystemInfo } from '../shared/types';
+import type { AIRecommendation, CaptureCapabilities, ConsoleModel, ConsoleProfileResponse, MicProfileResponse, OBSAudioSettingsSnapshot, OBSConnectionSettings, OBSMode, OBSPlatform, OBSSettingsSnapshot, PeripheralsSnapshot, ResolvedSourceKind, Scene, SceneItemSummary, SystemInfo, UploadSpeedMeasurement } from '../shared/types';
 
 export type AnalysisTarget = 'pc' | 'console';
 
@@ -31,6 +31,8 @@ interface AppState {
   captureCapabilities: CaptureCapabilities | null;
   consoleProfile: ConsoleProfileResponse | null;
   isAnalyzingConsole: boolean;
+  uploadSpeed: UploadSpeedMeasurement | null;
+  isMeasuringUpload: boolean;
 
   setMode: (mode: OBSMode) => void;
   setPlatform: (platform: OBSPlatform) => void;
@@ -59,6 +61,8 @@ interface AppState {
   setCaptureCapabilities: (caps: CaptureCapabilities | null) => void;
   setConsoleProfile: (profile: ConsoleProfileResponse | null) => void;
   setIsAnalyzingConsole: (value: boolean) => void;
+  setUploadSpeed: (measurement: UploadSpeedMeasurement | null) => void;
+  setIsMeasuringUpload: (value: boolean) => void;
   reset: () => void;
 }
 
@@ -94,6 +98,8 @@ export const useAppStore = create<AppState>((set) => ({
   captureCapabilities: null,
   consoleProfile: null,
   isAnalyzingConsole: false,
+  uploadSpeed: null,
+  isMeasuringUpload: false,
 
   setMode: (mode) => set({ mode }),
   setPlatform: (platform) => set({ platform }),
@@ -127,6 +133,8 @@ export const useAppStore = create<AppState>((set) => ({
   setCaptureCapabilities: (captureCapabilities) => set({ captureCapabilities }),
   setConsoleProfile: (consoleProfile) => set({ consoleProfile }),
   setIsAnalyzingConsole: (isAnalyzingConsole) => set({ isAnalyzingConsole }),
+  setUploadSpeed: (uploadSpeed) => set({ uploadSpeed }),
+  setIsMeasuringUpload: (isMeasuringUpload) => set({ isMeasuringUpload }),
   reset: () => set({
     mode: null,
     platform: null,
@@ -145,6 +153,8 @@ export const useAppStore = create<AppState>((set) => ({
     analysisTarget: 'pc',
     consoleProfile: null,
     isAnalyzingConsole: false,
+    uploadSpeed: null,
+    isMeasuringUpload: false,
     peripherals: null,
     selectedCaptureCard: '',
     selectedMonitor: '',
