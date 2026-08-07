@@ -137,11 +137,11 @@ describe('buildComparisonRows', () => {
     }, recommendations);
 
     expect(rows.find((row) => row.label === 'Bitrate del stream')).toMatchObject({
-      current: 'No disponible por WebSocket',
+      current: 'Complemento de Machtobs no detectado',
       applyMethod: 'manual',
     });
     expect(rows.find((row) => row.label === 'Bitrate de grabacion')).toMatchObject({
-      current: 'No disponible por WebSocket',
+      current: 'Complemento de Machtobs no detectado',
       applyMethod: 'manual',
     });
     expect(rows.find((row) => row.label === 'Bitrate de audio')?.current).toBe('320');

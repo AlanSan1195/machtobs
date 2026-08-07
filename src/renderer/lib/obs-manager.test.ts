@@ -370,7 +370,7 @@ describe('OBSManager con salida avanzada', () => {
     });
   });
 
-  it('aplica automáticamente stream y grabación con el vendor heredado obsee', async () => {
+  it('aplica automáticamente stream y grabación con el vendor anterior match-to-obs', async () => {
     obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
       if (request === 'GetStreamServiceSettings') {
         return { streamServiceSettings: { server: 'rtmps://live-upload.youtube.com/live2', key: 'preservada' } };
@@ -413,10 +413,10 @@ describe('OBSManager con salida avanzada', () => {
       request,
       data,
     ]) => request === 'CallVendorRequest' && data?.requestType === 'ApplyAdvancedOutputConfig');
-    const vendorApply = vendorApplyCalls.find(([, data]) => data?.vendorName === 'obsee');
+    const vendorApply = vendorApplyCalls.find(([, data]) => data?.vendorName === 'match-to-obs');
 
     expect(vendorApply?.[1]).toMatchObject({
-      vendorName: 'obsee',
+      vendorName: 'match-to-obs',
       requestData: {
         stream: {
           rate_control: 'CBR',
@@ -438,13 +438,61 @@ describe('OBSManager con salida avanzada', () => {
     });
     expect(vendorApplyCalls.map(([, data]) => data?.vendorName)).toEqual([
       'machtobs',
-      'obsee',
+      'match-to-obs',
     ]);
     expect(result).toMatchObject({
       success: true,
       requiresManualConfirmation: false,
     });
     expect(result.message).toBe('Configuracion aplicada en OBS');
+  });
+
+  it('mantiene compatibilidad con el primer vendor obsee', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
+      if (request === 'GetStreamServiceSettings') {
+        return { streamServiceSettings: { server: 'rtmps://live-upload.youtube.com/live2', key: 'preservada' } };
+      }
+      if (request === 'CallVendorRequest') {
+        if (data?.vendorName !== 'obsee') {
+          throw new Error('No vendor was found by that name.');
+        }
+        return { responseData: advancedControlResponse };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    vi.spyOn(manager, 'getSettingsSnapshot').mockResolvedValue({
+      success: true,
+      message: 'Configuracion cargada',
+      snapshot: advancedSnapshot,
+    });
+
+    const result = await manager.configure({
+      mode: 'stream_record',
+      platform: 'youtube',
+      resolution: '1920x1080',
+      canvasResolution: '1920x1080',
+      streamResolution: '1920x1080',
+      recordingResolution: '1920x1080',
+      fps: 60,
+      encoder: 'apple vt h264',
+      bitrate: 9000,
+      recordingEncoder: 'apple vt hevc',
+      recordingBitrate: 12000,
+      audioBitrate: 320,
+      recordingFormat: 'mkv',
+      recordingQuality: 'high',
+    });
+
+    const vendorNames = obsMock.call.mock.calls
+      .filter(([request, data]) => request === 'CallVendorRequest'
+        && data?.requestType === 'ApplyAdvancedOutputConfig')
+      .map(([, data]) => data?.vendorName);
+
+    expect(vendorNames).toEqual(['machtobs', 'match-to-obs', 'obsee']);
+    expect(result).toMatchObject({ success: true, requiresManualConfirmation: false });
   });
 });
 

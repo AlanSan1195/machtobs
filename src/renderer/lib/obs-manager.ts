@@ -81,10 +81,10 @@ const managedVoiceInputName = 'Voz · Machtobs';
 const CAPTURE_DEVICE_NAME_PATTERN = /capture|hdmi|elgato|avermedia|ugreen|macro|cam link|live gamer|ripsaw/i;
 const managedCaptureAudioInputName = 'Audio/Capturadora';
 
-// `obsee` fue el nombre publicado por la primera version del complemento.
-// Conservamos compatibilidad para que las instalaciones existentes puedan
-// aplicar bitrates avanzados sin obligar al usuario a reemplazar el bundle.
-const advancedOutputVendorNames = ['machtobs', 'obsee'] as const;
+// El complemento se publico como `obsee`, despues como `match-to-obs` y ahora
+// como `machtobs`. Conservamos los tres vendors para que cualquier bundle ya
+// instalado pueda aplicar bitrates avanzados sin obligar a reinstalarlo.
+const advancedOutputVendorNames = ['machtobs', 'match-to-obs', 'obsee'] as const;
 
 // Parsea items de resolucion que OBS devuelve para una capturadora ("1920x1080",
 // "1920x1080 @ 60fps", etc.). Devuelve resolucion normalizada + fps si viene.

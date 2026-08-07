@@ -31,6 +31,8 @@ const recommendationFields: AIRecommendationField[] = [
   'recording_quality',
 ];
 
+const advancedPluginUnavailable = 'Complemento de Machtobs no detectado';
+
 export type ComparisonRow = {
   label: string;
   /** Explicacion breve de que hace el ajuste, para ensenar al usuario. */
@@ -121,7 +123,7 @@ function normalizeRecordingQuality(value: string): string {
 
 export function isSameValue(row: ComparisonRow): boolean {
   const { current, recommended } = row;
-  if (current === '0' || current === 'Desconocido' || current === 'No disponible por WebSocket') return false;
+  if (current === '0' || current === 'Desconocido' || current === advancedPluginUnavailable) return false;
 
   if (row.type === 'encoder') {
     return normalizeEncoder(current) === normalizeEncoder(recommended);
@@ -189,7 +191,7 @@ export function buildComparisonRows(
     {
       label: 'Bitrate del stream',
       description: 'Datos que envias por segundo; lo limitan tu subida y la plataforma.',
-      current: snapshot.bitrate > 0 ? String(snapshot.bitrate) : 'No disponible por WebSocket',
+      current: snapshot.bitrate > 0 ? String(snapshot.bitrate) : advancedPluginUnavailable,
       recommended: String(recommendations.bitrate),
       applyMethod: advancedStreamNeeded && !advancedAutomatic ? 'manual' : 'automatic',
       field: 'bitrate',
@@ -208,7 +210,7 @@ export function buildComparisonRows(
       current: advancedOutputNeeded
         ? snapshot.recordingBitrate && snapshot.recordingBitrate > 0
           ? String(snapshot.recordingBitrate)
-          : 'No disponible por WebSocket'
+          : advancedPluginUnavailable
         : 'No independiente',
       recommended: String(recommendations.recording_bitrate),
       applyMethod: advancedRecordingNeeded && !advancedAutomatic ? 'manual' : 'automatic',
@@ -669,8 +671,8 @@ export function OBSComparison() {
                 complemento avanzado no detectado
               </span>
               <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-paper/70">
-                Machtobs aplicara lo compatible. Estos {manualCount} ajustes internos necesitan
-                que los confirmes directamente en OBS.
+                OBS WebSocket no expone estos valores por si solo. Instala o activa el complemento
+                de Machtobs y vuelve a conectar para detectar y aplicar el bitrate automaticamente.
               </p>
             </div>
             <button
