@@ -7,6 +7,7 @@ import {
   getRecordingBitrate,
   getStreamBitrate,
 } from './localRecommendation';
+import { getNetworkStabilityReason, getReliableUploadMbps } from './networkMeasurement';
 import { parseResolution, validateConsoleProfileResponse } from './validation';
 
 // Respaldo offline del analisis de consola: sin IA ni web, infiere capacidades a
@@ -100,7 +101,12 @@ export function normalizeConsoleProfileForRequest(
       ? `OBS verifico que la capturadora fija el techo de captura en ${verifiedCaptureResolution} a ${verifiedCaptureFps}fps. El monitor solo afecta el passthrough y no reduce la grabacion de OBS.`
       : `OBS verifico captura hasta ${verifiedCaptureResolution} a ${verifiedCaptureFps}fps sin un limite inferior al de la consola. El monitor solo afecta el passthrough.`
     : response.profile.bottleneck;
-  const finalStreamBitrate = getStreamBitrate(request.platform, streamResolution, finalFps);
+  const finalStreamBitrate = getStreamBitrate(
+    request.platform,
+    streamResolution,
+    finalFps,
+    getReliableUploadMbps(request.network),
+  );
   const captureMatch = hasVerifiedCaptureCaps
     ? `La **${consoleInfo.name}** y la capturadora hacen match en **${verifiedCaptureResolution} a ${verifiedCaptureFps} FPS**, capacidad comprobada directamente por OBS.`
     : `La **${consoleInfo.name}** y la capturadora se ajustaron al techo seguro de **${verifiedCaptureResolution} a ${verifiedCaptureFps} FPS**.`;
@@ -112,8 +118,11 @@ export function normalizeConsoleProfileForRequest(
       ? `La **grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${recordingBitrate} kbps** reserva margen para emitir y grabar al mismo tiempo sin sobrecargar el equipo.`
       : `La **grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${recordingBitrate} kbps** conserva mas detalle en el archivo local sin atarla al limite del stream.`
     : '';
+  const networkMatch = request.mode !== 'record_only' && request.network
+    ? `${getNetworkStabilityReason(request.network) || `La subida medida fue de **${request.network.uploadMbps.toFixed(1)} Mbps**.`} El bitrate de emision conserva 30% de margen.`
+    : '';
   const encoderMatch = `El **encoder ${preferredEncoder.toUpperCase()}** aprovecha ${request.systemInfo.gpu.model}; los **${finalFps} FPS** mantienen fluido el movimiento.`;
-  const reasoning = [captureMatch, streamMatch, recordingMatch, encoderMatch].filter(Boolean).join(' ');
+  const reasoning = [captureMatch, streamMatch, recordingMatch, networkMatch, encoderMatch].filter(Boolean).join(' ');
   const monitorIsKnown = isKnownMonitorName(request.monitor ?? '');
 
   return {
@@ -266,6 +275,7 @@ export function getLocalConsoleProfile(request: ConsoleProfileRequest): ConsoleP
     mode: request.mode,
     platform: request.platform,
     goal: request.goal,
+    network: request.network,
   }).recommendations;
   const streamResolution = minResolution(
     request.goal?.streamResolution ?? base.resolution,
@@ -323,6 +333,9 @@ export function getLocalConsoleProfile(request: ConsoleProfileRequest): ConsoleP
     maxResolution: monitorInfer.caps.resolution,
     maxFps: monitorInfer.caps.fps,
   };
+  const networkReasoning = request.mode !== 'record_only' && request.network
+    ? ` ${getNetworkStabilityReason(request.network) || `Subida medida: **${request.network.uploadMbps.toFixed(1)} Mbps**.`} Se conserva 30% de margen.`
+    : '';
 
   return {
     source: 'local',
@@ -340,6 +353,6 @@ export function getLocalConsoleProfile(request: ConsoleProfileRequest): ConsoleP
       ],
     },
     recommendations,
-    reasoning: `Perfil de consola generado localmente (la IA no estuvo disponible). ${bottleneck} Stream ${recommendations.resolution} con ${recommendations.encoder} a ${recommendations.bitrate}kbps; grabacion ${recommendations.recording_resolution} con ${recommendations.recording_encoder} a ${recommendations.recording_bitrate}kbps.`,
+    reasoning: `Perfil de consola generado localmente (la IA no estuvo disponible). ${bottleneck} Stream ${recommendations.resolution} con ${recommendations.encoder} a ${recommendations.bitrate}kbps; grabacion ${recommendations.recording_resolution} con ${recommendations.recording_encoder} a ${recommendations.recording_bitrate}kbps.${networkReasoning}`,
   };
 }

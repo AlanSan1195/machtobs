@@ -408,7 +408,51 @@ export function validateAIRecommendationRequest(value: unknown): ValidationResul
       platform: value.platform as OBSPlatform,
       goal: parseOptionalGoal(value.goal),
       currentSettings: parseOptionalObsBaseline(value.currentSettings),
+      network: parseOptionalUploadSpeed(value.network),
     },
+  };
+}
+
+function parseOptionalUploadSpeed(value: unknown): AIRecommendationRequest['network'] {
+  if (!isRecord(value) || !isPositiveNumber(value.uploadMbps) || value.uploadMbps > 100000) {
+    return undefined;
+  }
+
+  const measuredAt = isNonEmptyString(value.measuredAt)
+    && Number.isFinite(Date.parse(value.measuredAt))
+    ? new Date(value.measuredAt).toISOString()
+    : undefined;
+  if (!measuredAt) return undefined;
+
+  const sustainedUploadMbps = isPositiveNumber(value.sustainedUploadMbps)
+    && value.sustainedUploadMbps <= value.uploadMbps
+    ? Math.round(value.sustainedUploadMbps * 10) / 10
+    : undefined;
+  const stability = sustainedUploadMbps !== undefined
+    && ['stable', 'variable', 'unstable'].includes(String(value.stability))
+    ? value.stability as NonNullable<AIRecommendationRequest['network']>['stability']
+    : undefined;
+  const variationPercent = sustainedUploadMbps !== undefined
+    && isFiniteNumber(value.variationPercent)
+    && value.variationPercent >= 0
+    && value.variationPercent <= 100
+    ? Math.round(value.variationPercent)
+    : undefined;
+  const sampleCount = sustainedUploadMbps !== undefined
+    && isFiniteNumber(value.sampleCount)
+    && Number.isInteger(value.sampleCount)
+    && value.sampleCount >= 1
+    && value.sampleCount <= 100
+    ? value.sampleCount
+    : undefined;
+
+  return {
+    uploadMbps: Math.round(value.uploadMbps * 10) / 10,
+    ...(sustainedUploadMbps !== undefined ? { sustainedUploadMbps } : {}),
+    ...(stability ? { stability } : {}),
+    ...(variationPercent !== undefined ? { variationPercent } : {}),
+    ...(sampleCount !== undefined ? { sampleCount } : {}),
+    measuredAt,
   };
 }
 
@@ -1110,6 +1154,7 @@ export function validateConsoleProfileRequest(value: unknown): ValidationResult<
       mode: value.mode as OBSMode,
       goal: parseOptionalGoal(value.goal),
       systemInfo: systemInfo.value,
+      network: parseOptionalUploadSpeed(value.network),
       captureCard: isNonEmptyString(value.captureCard) ? value.captureCard.trim().slice(0, 128) : undefined,
       monitor: isNonEmptyString(value.monitor) ? value.monitor.trim().slice(0, 128) : undefined,
       monitorRefreshRate: isFiniteNumber(value.monitorRefreshRate) ? Math.round(value.monitorRefreshRate) : undefined,

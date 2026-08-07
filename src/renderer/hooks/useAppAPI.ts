@@ -23,6 +23,8 @@ export function useAppAPI() {
   const setConsoleProfile = useAppStore((state) => state.setConsoleProfile);
   const setIsAnalyzingConsole = useAppStore((state) => state.setIsAnalyzingConsole);
   const setCaptureCapabilities = useAppStore((state) => state.setCaptureCapabilities);
+  const setUploadSpeed = useAppStore((state) => state.setUploadSpeed);
+  const setIsMeasuringUpload = useAppStore((state) => state.setIsMeasuringUpload);
 
   const getSystemInfo = async () => {
     try {
@@ -32,6 +34,25 @@ export function useAppAPI() {
     } catch (error) {
       setError(error instanceof Error ? error.message : 'No se pudo leer la informacion del sistema');
       throw error;
+    }
+  };
+
+  const measureNetworkUpload = async () => {
+    setIsMeasuringUpload(true);
+    setError(null);
+    try {
+      const measurement = await appAPI.system.measureUploadSpeed();
+      setUploadSpeed(measurement);
+      // Una recomendacion anterior no incorpora esta nueva medicion. Se invalida
+      // para que el siguiente analisis vuelva a combinar red, plataforma y hardware.
+      setRecommendation(null);
+      setConsoleProfile(null);
+      return measurement;
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'No se pudo medir la velocidad de subida');
+      return null;
+    } finally {
+      setIsMeasuringUpload(false);
     }
   };
 
@@ -411,6 +432,7 @@ export function useAppAPI() {
 
   return {
     getSystemInfo,
+    measureNetworkUpload,
     getAIRecommendation,
     explainAIRecommendation,
     connectToOBS,

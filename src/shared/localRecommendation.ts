@@ -1,4 +1,5 @@
 import type { AIRecommendation, AIRecommendationExplanation, AIRecommendationExplanationRequest, AIRecommendationField, AIRecommendationRequest, AIRecommendationSettings, SystemInfo } from './types';
+import { getNetworkStabilityReason, getReliableUploadMbps } from './networkMeasurement';
 
 export function getPreferredEncoder(systemInfo: SystemInfo): string {
   const vendor = systemInfo.gpu.vendor.toLowerCase();
@@ -106,14 +107,31 @@ function clampGoalResolution(
   return resolutionPixels(requested) <= resolutionPixels(maximum) ? requested : maximum;
 }
 
-export function getStreamBitrate(platform: AIRecommendationRequest['platform'], resolution: string, fps: number): number {
+export function capStreamBitrateForUpload(bitrate: number, uploadMbps?: number): number {
+  if (!uploadMbps || !Number.isFinite(uploadMbps) || uploadMbps <= 0) return bitrate;
+
+  // Reserva 30% para audio, variaciones del enlace y el resto del trafico. Los
+  // saltos de 500 kbps evitan una falsa precision en una medicion de navegador.
+  const safeKbps = Math.max(500, Math.floor((uploadMbps * 1000 * 0.7) / 500) * 500);
+  return Math.min(bitrate, safeKbps);
+}
+
+export function getStreamBitrate(
+  platform: AIRecommendationRequest['platform'],
+  resolution: string,
+  fps: number,
+  uploadMbps?: number,
+): number {
   const pixels = resolutionPixels(resolution);
   const highFrameRate = fps >= 50;
 
-  if (pixels >= 3840 * 2160) return platform === 'youtube' ? (highFrameRate ? 45000 : 30000) : 8000;
-  if (pixels >= 2560 * 1440) return platform === 'youtube' ? (highFrameRate ? 18000 : 12000) : 8000;
-  if (pixels >= 1920 * 1080) return platform === 'youtube' ? (highFrameRate ? 9000 : 6000) : 6000;
-  return platform === 'youtube' ? 4500 : 3500;
+  let platformBitrate: number;
+  if (pixels >= 3840 * 2160) platformBitrate = platform === 'youtube' ? (highFrameRate ? 45000 : 30000) : 8000;
+  else if (pixels >= 2560 * 1440) platformBitrate = platform === 'youtube' ? (highFrameRate ? 18000 : 12000) : 8000;
+  else if (pixels >= 1920 * 1080) platformBitrate = platform === 'youtube' ? (highFrameRate ? 9000 : 6000) : 6000;
+  else platformBitrate = platform === 'youtube' ? 4500 : 3500;
+
+  return capStreamBitrateForUpload(platformBitrate, uploadMbps);
 }
 
 function getHardwareVideoProfile(request: AIRecommendationRequest, encoder: string) {
@@ -196,9 +214,10 @@ export function getLocalRecommendation(request: AIRecommendationRequest): AIReco
     || request.goal?.recordingResolution
     || request.goal?.fps,
   );
+  const reliableUploadMbps = getReliableUploadMbps(request.network);
   const streamBitrate = videoProfile.usedBaseline && !hasExplicitGoal
-    ? videoProfile.bitrate
-    : getStreamBitrate(request.platform, streamResolution, fps);
+    ? capStreamBitrateForUpload(videoProfile.bitrate, reliableUploadMbps)
+    : getStreamBitrate(request.platform, streamResolution, fps, reliableUploadMbps);
   const recordingQuality = request.mode === 'stream_only' ? 'stream' : 'high';
   const recordingBitrate = request.mode === 'stream_only'
     ? streamBitrate
@@ -224,7 +243,10 @@ export function getLocalRecommendation(request: AIRecommendationRequest): AIReco
     : request.mode === 'record_only'
       ? `La **grabacion ${recordingResolution} a ${fps} FPS y ${recordingBitrate} kbps** conserva detalle y fluidez en el archivo local.`
       : `El **stream ${streamResolution} a ${streamBitrate} kbps** prioriza estabilidad en ${request.platform}; la **grabacion ${recordingResolution} a ${recordingBitrate} kbps** conserva mas calidad en el archivo local.`;
-  const reasoning = `${hardwareMatch} ${baselineMatch} ${outputMatch}`;
+  const networkMatch = request.mode !== 'record_only' && request.network
+    ? `${getNetworkStabilityReason(request.network) || `La subida medida fue de **${request.network.uploadMbps.toFixed(1)} Mbps**.`} El bitrate reserva 30% de margen para evitar cortes.`
+    : '';
+  const reasoning = `${hardwareMatch} ${baselineMatch} ${outputMatch} ${networkMatch}`.trim();
 
   return {
     source: 'local',

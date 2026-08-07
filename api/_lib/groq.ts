@@ -6,6 +6,7 @@ import {
   UNTRUSTED_WEB_EVIDENCE_INSTRUCTION,
 } from './web-sources';
 import type { AIRecommendationExplanationRequest, AIRecommendationRequest, ConsoleProfileRequest, MicProfileRequest } from '../../src/shared/types';
+import { getNetworkStabilityReason, getReliableUploadMbps } from '../../src/shared/networkMeasurement';
 
 function formatGpuMemory(systemInfo: AIRecommendationRequest['systemInfo']): string {
   if (systemInfo.gpu.vram !== undefined && systemInfo.gpu.vram > 0) {
@@ -69,7 +70,7 @@ async function searchWeb(
 }
 
 export async function getRecommendationFromGroq(request: AIRecommendationRequest): Promise<unknown> {
-  const { systemInfo, mode, platform, currentSettings, goal } = request;
+  const { systemInfo, mode, platform, currentSettings, goal, network } = request;
   const baselineSection = currentSettings
     ? `
 Configuracion que OBS ya tiene (definida en el asistente inicial de OBS segun el hardware y la red del usuario; usala como base y solo cambiala si hay una mejora clara):
@@ -94,6 +95,9 @@ Objetivo descrito por el usuario:
 Trata estas preferencias como el resultado deseado, pero reduce valores que el hardware no pueda sostener y explica cualquier limite.
 `
     : '';
+  const networkSection = network
+    ? `\nRed medida desde el navegador:\n- Capacidad observada: ${network.uploadMbps.toFixed(1)} Mbps\n- Subida sostenida para calcular el stream: ${getReliableUploadMbps(network)?.toFixed(1)} Mbps\n- ${getNetworkStabilityReason(network) || 'Estabilidad no evaluada.'}\n- Reserva al menos 30% para variaciones, audio y otro trafico.\n`
+    : '\nRed: no medida; usa un valor conservador para la plataforma.\n';
   const prompt = `Eres un experto en configuracion de OBS para streaming y grabacion.
 Analiza el hardware del usuario y recomienda la mejor configuracion posible.
 
@@ -109,6 +113,7 @@ Hardware disponible:
 - Hardware NVENC disponible: ${systemInfo.gpu.hasNvenc ? 'Si' : 'No'}
 ${goalSection}
 ${baselineSection}
+${networkSection}
 Campos de resolucion:
 - "canvas_resolution": lienzo base donde se acomodan las fuentes.
 - "resolution": resolucion exclusiva del stream.
@@ -399,10 +404,14 @@ function buildConsoleContext(request: ConsoleProfileRequest): string {
   const realCaps = request.captureMaxResolution
     ? `\nIMPORTANTE: OBS leyo las capacidades REALES de la capturadora: captura hasta ${request.captureMaxResolution}${request.captureMaxFps ? ` a ${request.captureMaxFps}fps` : ''}. Usa esto como techo de captura verificado (no lo superes); este dato es mas confiable que el nombre.`
     : '';
+  const network = request.network
+    ? `Subida observada: ${request.network.uploadMbps.toFixed(1)} Mbps. Subida sostenida para el stream: ${getReliableUploadMbps(request.network)?.toFixed(1)} Mbps. ${getNetworkStabilityReason(request.network)} Reserva 30% de margen.`
+    : 'Subida no medida; usa el limite conservador de la plataforma.';
   return `Consola: ${CONSOLE_LABELS[request.console] ?? request.console}.
 Capturadora detectada: "${request.captureCard ?? 'desconocida'}".
 Monitor detectado: "${request.monitor ?? 'desconocido'}"${request.monitorRefreshRate ? ` a ${request.monitorRefreshRate}Hz` : ''}.
 PC que corre OBS: CPU ${c.model} (${c.cores} nucleos), GPU ${g.model} (vendor ${g.vendor}, NVENC ${g.hasNvenc ? 'si' : 'no'}), ${request.systemInfo.ram.total}GB RAM, OS ${request.os ?? request.systemInfo.os.distro}.
+${network}
 Uso: ${request.mode} en ${request.platform}.
 Objetivo del usuario: ${request.goal?.description ?? 'No especificado'}.
 Stream deseado: ${request.goal?.streamResolution ?? 'decidir segun plataforma'}.

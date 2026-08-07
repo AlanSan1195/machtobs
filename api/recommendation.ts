@@ -10,6 +10,7 @@ import {
   getRecordingBitrate,
   getStreamBitrate,
 } from '../src/shared/localRecommendation';
+import { getNetworkStabilityReason, getReliableUploadMbps } from '../src/shared/networkMeasurement';
 
 export default async function handler(request: ApiRequest, response: ApiResponse) {
   response.setHeader('Cache-Control', 'no-store');
@@ -58,6 +59,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         validation.value.platform,
         recommendation.value.recommendations.resolution,
         recommendation.value.recommendations.fps,
+        getReliableUploadMbps(validation.value.network),
       ),
       recording_resolution: recordingResolution,
       recording_encoder: preferredRecordingEncoder,
@@ -69,14 +71,18 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         )
         : recommendation.value.recommendations.bitrate,
     };
+    const normalizedReasoning = recordingWasLimited
+      ? `El stream ${normalizedRecommendations.resolution} a ${normalizedRecommendations.bitrate} kbps prioriza estabilidad en ${validation.value.platform}. La grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${normalizedRecommendations.recording_bitrate} kbps reserva margen para emitir y grabar al mismo tiempo. Los ${normalizedRecommendations.fps} FPS conservan fluidez.`
+      : recommendation.value.reasoning;
+    const networkReasoning = validation.value.mode !== 'record_only' && validation.value.network
+      ? `${getNetworkStabilityReason(validation.value.network) || `La subida medida fue de ${validation.value.network.uploadMbps.toFixed(1)} Mbps.`} El bitrate de emision conserva 30% de margen.`
+      : '';
 
     response.setHeader('X-RateLimit-Remaining', String(rateLimit.remaining));
     return sendJson(response, 200, {
       ...recommendation.value,
       recommendations: normalizedRecommendations,
-      reasoning: recordingWasLimited
-        ? `El stream ${normalizedRecommendations.resolution} a ${normalizedRecommendations.bitrate} kbps prioriza estabilidad en ${validation.value.platform}. La grabacion ${recordingResolution} con ${preferredRecordingEncoder.toUpperCase()} a ${normalizedRecommendations.recording_bitrate} kbps reserva margen para emitir y grabar al mismo tiempo. Los ${normalizedRecommendations.fps} FPS conservan fluidez.`
-        : recommendation.value.reasoning,
+      reasoning: `${normalizedReasoning} ${networkReasoning}`.trim(),
       source: 'ai',
     });
   } catch (error) {

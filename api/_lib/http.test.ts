@@ -146,6 +146,7 @@ describe('JSON request boundary', () => {
         },
         mode: 'stream_record',
         platform: 'twitch',
+        network: { uploadMbps: 5, measuredAt: '2026-08-07T02:00:00.000Z' },
       },
     }, result.response);
 
@@ -156,11 +157,13 @@ describe('JSON request boundary', () => {
         resolution: '1920x1080',
         recording_resolution: '2560x1440',
         fps: 60,
+        bitrate: 3500,
         recording_encoder: 'apple vt hevc',
         recording_bitrate: 20000,
       },
     });
     expect((result.getBody() as { reasoning: string }).reasoning).toContain('reserva margen');
+    expect((result.getBody() as { reasoning: string }).reasoning).toContain('5.0 Mbps');
     expect((result.getBody() as { reasoning: string }).reasoning).not.toContain('funcionan a 4K60');
   });
 

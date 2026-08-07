@@ -78,6 +78,25 @@ describe('getLocalRecommendation', () => {
     expect(result.bitrate).toBe(9000);
   });
 
+  it('limita solo el stream con la subida medida y conserva la grabacion local', () => {
+    const withoutMeasurement = getLocalRecommendation(makeRequest()).recommendations;
+    const measured = getLocalRecommendation(makeRequest({
+      network: {
+        uploadMbps: 83.1,
+        sustainedUploadMbps: 5,
+        stability: 'unstable',
+        variationPercent: 94,
+        measuredAt: '2026-08-07T02:00:00.000Z',
+      },
+    }));
+
+    expect(measured.recommendations.bitrate).toBe(3500);
+    expect(measured.recommendations.recording_bitrate).toBe(withoutMeasurement.recording_bitrate);
+    expect(measured.reasoning).toContain('subida sostenida de 5.0 Mbps');
+    expect(measured.reasoning).toContain('inestable');
+    expect(measured.reasoning).toContain('30% de margen');
+  });
+
   it('baja a 720p30 en CPU o RAM limitada', () => {
     const cpuLimited = getLocalRecommendation(makeRequest({
       systemInfo: {

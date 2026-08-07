@@ -607,6 +607,42 @@ describe('validateAIRecommendationRequest currentSettings', () => {
       expect(result.value.currentSettings).toBeUndefined();
     }
   });
+
+  it('normaliza una medicion valida de subida', () => {
+    const result = validateAIRecommendationRequest({
+      ...baseRequest,
+      network: {
+        uploadMbps: 12.36,
+        sustainedUploadMbps: 7.84,
+        stability: 'variable',
+        variationPercent: 36.4,
+        sampleCount: 5,
+        measuredAt: '2026-08-07T02:00:00Z',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.value.network).toEqual({
+      uploadMbps: 12.4,
+      sustainedUploadMbps: 7.8,
+      stability: 'variable',
+      variationPercent: 36,
+      sampleCount: 5,
+      measuredAt: '2026-08-07T02:00:00.000Z',
+    });
+  });
+
+  it('ignora una medicion de subida malformada', () => {
+    const result = validateAIRecommendationRequest({
+      ...baseRequest,
+      network: { uploadMbps: -2, measuredAt: 'ayer' },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.value.network).toBeUndefined();
+  });
 });
 
 describe('validateEnsureCaptureAudioInput', () => {
@@ -858,6 +894,17 @@ describe('validateConsoleProfileRequest', () => {
     expect(result.value.console).toBe('ps5');
     expect(result.value.captureCard).toBe('Elgato HD60 X');
     expect(result.value.monitorRefreshRate).toBe(120);
+  });
+
+  it('conserva una medicion valida de subida', () => {
+    const result = validateConsoleProfileRequest({
+      console: 'ps5', platform: 'twitch', mode: 'stream_record', systemInfo: validConsoleSystemInfo,
+      network: { uploadMbps: 8.04, measuredAt: '2026-08-07T02:00:00.000Z' },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.value.network?.uploadMbps).toBe(8);
   });
 
   it('rechaza consola invalida o systemInfo incompleto', () => {

@@ -14,6 +14,7 @@ import { getLocalRecommendation, getLocalRecommendationExplanation } from '../..
 import { getLocalMicProfile } from '../../shared/localMicProfile';
 import { applyEvidenceBasedMicFilterPolicy } from '../../shared/micFilterPolicy';
 import { getLocalConsoleProfile } from '../../shared/localConsoleProfile';
+import { measureUploadSpeed } from './upload-speed';
 import {
   validateAIRecommendationExplanationRequest,
   validateAIRecommendationRequest,
@@ -233,6 +234,7 @@ export const appAPI = {
   system: {
     getInfo: async () => getSystemInfo(),
     getPeripherals: async () => getPeripherals(),
+    measureUploadSpeed: async () => measureUploadSpeed(),
   },
   ai: {
     getRecommendation: async (rawRequest: AIRecommendationRequest) => {

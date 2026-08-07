@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-Machtobs (package `machtobs`) is a web app for OBS configuration guidance, deployed on Vercel. The React/Vite frontend lives in `src/renderer/`, with UI components in `src/renderer/components/`, hooks in `src/renderer/hooks/`, browser-side services (OBS WebSocket manager, hardware detection, localStorage stores, AI client) in `src/renderer/lib/`, and Tailwind styles in `src/renderer/styles/`. Shared types, validation, and local recommendation logic live in `src/shared/`. Serverless API functions (Groq-backed AI, Tavily web search, rate limiting) live in `api/`. Tests are colocated as `*.test.ts` or `*.test.tsx`. Production build output goes to `dist/`.
+Machtobs (package `machtobs`) is a web app for OBS configuration guidance, deployed on Vercel. The React/Vite frontend lives in `src/renderer/`, with UI components in `src/renderer/components/`, hooks in `src/renderer/hooks/`, browser-side services (t manager, hardware detection, localStorage stores, AI client) in `src/renderer/lib/`, and Tailwind styles in `src/renderer/styles/`. Shared types, validation, and local recommendation logic live in `src/shared/`. Serverless API functions (Groq-backed AI, Tavily web search, rate limiting) live in `api/`. Tests are colocated as `*.test.ts` or `*.test.tsx`. Production build output goes to `dist/`.
 
 ## Build, Test, and Development Commands
 

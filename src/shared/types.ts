@@ -271,6 +271,17 @@ export interface ObsBaselineSettings {
   hasStreamService: boolean;
 }
 
+export interface UploadSpeedMeasurement {
+  /** Capacidad alta observada desde este navegador hacia Cloudflare. */
+  uploadMbps: number;
+  /** Percentil 25 de las muestras grandes; se usa para limitar el stream. */
+  sustainedUploadMbps?: number;
+  stability?: 'stable' | 'variable' | 'unstable';
+  variationPercent?: number;
+  sampleCount?: number;
+  measuredAt: string;
+}
+
 export interface AIRecommendationRequest {
   systemInfo: SystemInfo;
   mode: OBSMode;
@@ -278,6 +289,7 @@ export interface AIRecommendationRequest {
   goal?: OBSGoalPreferences;
   // Opcional para mantener compatibilidad con backends anteriores.
   currentSettings?: ObsBaselineSettings;
+  network?: UploadSpeedMeasurement;
 }
 
 export interface OBSGoalPreferences {
@@ -372,6 +384,7 @@ export interface ConsoleProfileRequest {
   goal?: OBSGoalPreferences;
   // Hardware de la PC que corre OBS (para elegir encoder/bitrate).
   systemInfo: SystemInfo;
+  network?: UploadSpeedMeasurement;
   os?: string;
 }
 
