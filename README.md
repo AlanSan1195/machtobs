@@ -34,7 +34,7 @@ Para probar deliberadamente contra la API desplegada usa `pnpm run dev:remote`; 
 
 ### Seguridad de la API desplegada
 
-Los endpoints de IA aceptan únicamente `POST` con `Content-Type: application/json`. Los navegadores también deben enviar un `Origin` permitido. `https://matchtoobs.vercel.app`, `http://localhost:5173` y `http://127.0.0.1:5173` están incluidos; previews o dominios propios se agregan como orígenes exactos, separados por comas, en `MACHTOBS_ALLOWED_ORIGINS`. No se admiten comodines.
+Los endpoints de IA aceptan únicamente `POST` con `Content-Type: application/json`. Los navegadores también deben enviar un `Origin` permitido. `https://machtobs.vercel.app`, `http://localhost:5173` y `http://127.0.0.1:5173` están incluidos; previews o dominios propios se agregan como orígenes exactos, separados por comas, en `MACHTOBS_ALLOWED_ORIGINS`. No se admiten comodines.
 
 Toda implementación de producción con Groq/Tavily requiere `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. Si cualquiera falta o Upstash no responde, la IA remota falla de forma segura y la aplicación utiliza su recomendación local. `MACHTOBS_ALLOW_MEMORY_RATE_LIMIT=true` sólo habilita un contador temporal durante desarrollo local; Vercel y `NODE_ENV=production` siempre ignoran esa opción. `MACHTOBS_AI_DAILY_LIMIT` acepta enteros de 1 a 1000 y vuelve al valor seguro 20 si la configuración no es válida.
 

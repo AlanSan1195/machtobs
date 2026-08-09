@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://matchtoobs.vercel.app/sitemap.xml
+Sitemap: https://machtobs.vercel.app/sitemap.xml
