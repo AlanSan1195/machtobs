@@ -11,6 +11,7 @@ import { AnalyzeButton } from './AnalyzeButton';
 const mocks = vi.hoisted(() => ({
   getSystemInfo: vi.fn(),
   getAIRecommendation: vi.fn(),
+  getPeripherals: vi.fn(),
   measureNetworkUpload: vi.fn(),
   profileConsole: vi.fn(),
 }));
@@ -43,6 +44,10 @@ describe('AnalyzeButton', () => {
     useAppStore.getState().reset();
     useAppStore.setState({ mode: 'stream_record', platform: 'twitch' });
     mocks.getSystemInfo.mockResolvedValue(systemInfo);
+    mocks.getPeripherals.mockResolvedValue({
+      displays: [{ model: 'Monitor actual', main: true, width: 3840, height: 2160, refreshRate: 0 }],
+      captureDevices: [],
+    });
     mocks.measureNetworkUpload.mockResolvedValue(network);
     mocks.getAIRecommendation.mockResolvedValue(null);
   });
@@ -59,6 +64,11 @@ describe('AnalyzeButton', () => {
         systemInfo,
         mode: 'stream_record',
         platform: 'twitch',
+        goal: {
+          description: 'Transmitir o grabar el contenido del PC donde se ejecuta OBS.',
+          source: 'computer',
+          sourceResolution: '3840x2160',
+        },
         currentSettings: undefined,
         network,
       });

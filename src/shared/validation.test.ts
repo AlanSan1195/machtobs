@@ -148,6 +148,23 @@ describe('validateSystemInfo through recommendation requests', () => {
       platform: 'twitch',
     }).success).toBe(false);
   });
+
+  it('conserva la resolucion util detectada para una fuente de PC', () => {
+    const result = validateAIRecommendationRequest({
+      systemInfo: validSystemInfo,
+      mode: 'stream_record',
+      platform: 'twitch',
+      goal: {
+        description: 'Usar el maximo potencial util del equipo.',
+        source: 'computer',
+        sourceResolution: '3840x2160',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.value.goal?.sourceResolution).toBe('3840x2160');
+  });
 });
 
 describe('parseResolution', () => {

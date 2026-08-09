@@ -4,6 +4,14 @@ import { useAppAPI } from '../hooks/useAppAPI';
 import { extractObsBaseline } from '../../shared/obsUsage';
 import { IconSparkles, Spinner } from './ui';
 
+function getDisplayCaptureResolution(width: number, height: number): string | undefined {
+  if (width >= 3840 && height >= 2160) return '3840x2160';
+  if (width >= 2560 && height >= 1440) return '2560x1440';
+  if (width >= 1920 && height >= 1080) return '1920x1080';
+  if (width >= 1280 && height >= 720) return '1280x720';
+  return undefined;
+}
+
 export function AnalyzeButton() {
   const {
     mode,
@@ -21,7 +29,7 @@ export function AnalyzeButton() {
     isAnalyzingConsole,
     isMeasuringUpload,
   } = useAppStore();
-  const { getSystemInfo, getAIRecommendation, measureNetworkUpload, profileConsole } = useAppAPI();
+  const { getSystemInfo, getAIRecommendation, getPeripherals, measureNetworkUpload, profileConsole } = useAppAPI();
 
   const isConsole = analysisTarget === 'console';
   const busy = isAnalyzing || isAnalyzingConsole || isMeasuringUpload;
@@ -61,16 +69,27 @@ export function AnalyzeButton() {
 
     setIsAnalyzing(true);
     try {
-      const [systemInfo, network] = await Promise.all([
+      const [systemInfo, network, detectedPeripherals] = await Promise.all([
         getSystemInfo(),
         measureNetworkUpload(),
+        getPeripherals(),
       ]);
       if (!network) return;
       const currentSettings = obsSettingsSnapshot ? extractObsBaseline(obsSettingsSnapshot) : undefined;
+      const mainDisplay = detectedPeripherals?.displays.find((display) => display.main)
+        ?? detectedPeripherals?.displays[0];
+      const sourceResolution = mainDisplay
+        ? getDisplayCaptureResolution(mainDisplay.width, mainDisplay.height)
+        : undefined;
       await getAIRecommendation({
         systemInfo,
         mode,
         platform,
+        goal: {
+          description: 'Transmitir o grabar el contenido del PC donde se ejecuta OBS.',
+          source: 'computer',
+          sourceResolution,
+        },
         currentSettings,
         network,
       });

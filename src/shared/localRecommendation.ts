@@ -58,6 +58,12 @@ function isAppleSilicon(systemInfo: SystemInfo): boolean {
   return vendor.includes('apple') || model.includes('apple');
 }
 
+function isAppleM4OrNewer(systemInfo: SystemInfo): boolean {
+  const chipName = `${systemInfo.cpu.model} ${systemInfo.gpu.model}`;
+  const generation = /\bm(\d+)\b/i.exec(chipName);
+  return isAppleSilicon(systemInfo) && Number(generation?.[1] ?? 0) >= 4;
+}
+
 export function getRecordingResolutionCeiling(
   request: AIRecommendationRequest,
   fps: number,
@@ -71,15 +77,15 @@ export function getRecordingResolutionCeiling(
     return getHardwareVideoProfile(request, encoder).resolution;
   }
 
-  // En Apple Silicon la RAM tambien alimenta GPU, escalado y encoders. La
-  // captura 4K60 puede funcionar por separado, pero dos salidas simultaneas
-  // (H.264 para stream + HEVC para grabacion) dejan poco margen con 16 GB.
-  // 1440p60 conserva una mejora clara sobre 1080p sin saturar esa configuracion.
+  // Los M4 incorporan codificacion H.264/HEVC por hardware y suficiente ancho
+  // de banda para conservar 4K como techo de grabacion. En generaciones Apple
+  // anteriores con 16 GB se mantiene 1440p60 como perfil simultaneo prudente.
   if (
     request.mode === 'stream_record'
     && fps >= 50
     && isAppleSilicon(request.systemInfo)
     && request.systemInfo.ram.total <= 16
+    && !isAppleM4OrNewer(request.systemInfo)
   ) {
     return '2560x1440';
   }
@@ -96,6 +102,29 @@ export function clampRecordingResolutionForHardware(
   return resolutionPixels(requestedResolution) <= resolutionPixels(ceiling)
     ? requestedResolution
     : ceiling;
+}
+
+export function getRecommendedRecordingResolution(
+  request: AIRecommendationRequest,
+  requestedResolution: string,
+  fps: number,
+): string {
+  const explicitGoal = request.goal?.recordingResolution;
+  const usefulSource = request.goal?.source === 'computer'
+    ? request.goal.sourceResolution
+    : undefined;
+  const target = explicitGoal
+    ?? (usefulSource && resolutionPixels(usefulSource) > resolutionPixels(requestedResolution)
+      ? usefulSource
+      : requestedResolution);
+
+  return clampRecordingResolutionForHardware(request, target, fps);
+}
+
+export function getCanvasResolution(streamResolution: string, recordingResolution: string): string {
+  return resolutionPixels(recordingResolution) > resolutionPixels(streamResolution)
+    ? recordingResolution
+    : streamResolution;
 }
 
 function clampGoalResolution(
@@ -208,7 +237,11 @@ export function getLocalRecommendation(request: AIRecommendationRequest): AIReco
     : clampGoalResolution(request.goal?.streamResolution, videoProfile.resolution, streamMaximum);
   const recordingResolution = request.mode === 'stream_only'
     ? streamResolution
-    : clampGoalResolution(request.goal?.recordingResolution, videoProfile.resolution, recordingMaximum);
+    : getRecommendedRecordingResolution(
+      request,
+      clampGoalResolution(request.goal?.recordingResolution, videoProfile.resolution, recordingMaximum),
+      fps,
+    );
   const hasExplicitGoal = Boolean(
     request.goal?.streamResolution
     || request.goal?.recordingResolution
@@ -222,9 +255,7 @@ export function getLocalRecommendation(request: AIRecommendationRequest): AIReco
   const recordingBitrate = request.mode === 'stream_only'
     ? streamBitrate
     : getRecordingBitrate(recordingResolution, fps, recordingEncoder);
-  const canvasResolution = resolutionPixels(recordingResolution) > resolutionPixels(streamResolution)
-    ? recordingResolution
-    : streamResolution;
+  const canvasResolution = getCanvasResolution(streamResolution, recordingResolution);
 
   const hardwareMatch = encoder === 'x264'
     ? `El **encoder ${encoder.toUpperCase()}** usa los ${request.systemInfo.cpu.cores} nucleos del CPU porque no se detecto un encoder de video dedicado.`

@@ -294,6 +294,8 @@ export interface AIRecommendationRequest {
 
 export interface OBSGoalPreferences {
   description: string;
+  /** Resolucion util de la pantalla o fuente antes de reescalar en OBS. */
+  sourceResolution?: string;
   streamResolution?: string;
   recordingResolution?: string;
   fps?: number;

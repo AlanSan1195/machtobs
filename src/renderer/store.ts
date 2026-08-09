@@ -125,7 +125,19 @@ export const useAppStore = create<AppState>((set) => ({
   setAvailableSourceKinds: (availableSourceKinds) => set({ availableSourceKinds }),
   setMicProfile: (micProfile) => set({ micProfile }),
   setIsProfilingMic: (isProfilingMic) => set({ isProfilingMic }),
-  setAnalysisTarget: (analysisTarget) => set({ analysisTarget }),
+  setAnalysisTarget: (analysisTarget) => set((state) => {
+    if (state.analysisTarget === analysisTarget) return state;
+
+    // La recomendacion depende del origen de video. Al cambiar entre PC y
+    // consola se obliga a ejecutar un analisis nuevo para no reutilizar un
+    // perfil calculado para una cadena de captura distinta.
+    return {
+      analysisTarget,
+      recommendation: null,
+      consoleProfile: null,
+      error: null,
+    };
+  }),
   setConsoleModel: (consoleModel) => set({ consoleModel }),
   setPeripherals: (peripherals) => set({ peripherals }),
   setSelectedCaptureCard: (selectedCaptureCard) => set({ selectedCaptureCard }),

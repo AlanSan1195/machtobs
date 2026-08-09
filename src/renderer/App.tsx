@@ -7,6 +7,7 @@ import { SourceTargetSelector } from './components/SourceTargetSelector';
 import { ConsoleSelector } from './components/ConsoleSelector';
 import { ConsoleDetection } from './components/ConsoleDetection';
 import { ConsoleReport } from './components/ConsoleReport';
+import { ComputerReport } from './components/ComputerReport';
 import { HardwareForm } from './components/HardwareForm';
 import { OBSComparison } from './components/OBSComparison';
 import { AudioConfiguration } from './components/AudioConfiguration';
@@ -284,6 +285,7 @@ export default function App() {
           <div className="space-y-8 py-10 ">
             <StepHeader word="deteccion" outline aside={<NetworkDetectionSummary />} />
             <ConsoleReport />
+            <ComputerReport onConfigure={() => setActiveTab(1)} />
             <OBSComparison outputAction={<ImportButton />} />
             <AudioConfiguration onApplySuccess={() => setActiveTab(3)} />
           </div>

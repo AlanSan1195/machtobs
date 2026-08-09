@@ -224,7 +224,7 @@ describe('getLocalRecommendation', () => {
     expect(streamOnly.recording_bitrate).toBe(streamOnly.bitrate);
   });
 
-  it('limita la grabacion simultanea a 1440p60 en Apple Silicon con 16GB', () => {
+  it('usa 4K60 para grabar mientras un M4 de 16GB transmite a 1080p', () => {
     const result = getLocalRecommendation(makeRequest({
       platform: 'youtube',
       goal: {
@@ -241,12 +241,58 @@ describe('getLocalRecommendation', () => {
     })).recommendations;
 
     expect(result).toMatchObject({
-      canvas_resolution: '2560x1440',
+      canvas_resolution: '3840x2160',
       resolution: '1920x1080',
-      recording_resolution: '2560x1440',
+      recording_resolution: '3840x2160',
       fps: 60,
       bitrate: 9000,
       recording_encoder: 'apple vt hevc',
+      recording_bitrate: 40000,
+    });
+  });
+
+  it('eleva la grabacion de un M4 hasta la resolucion 4K util de su pantalla', () => {
+    const result = getLocalRecommendation(makeRequest({
+      goal: {
+        description: 'Usar el maximo potencial util del equipo.',
+        source: 'computer',
+        sourceResolution: '3840x2160',
+      },
+      systemInfo: {
+        cpu: { model: 'Apple M4', cores: 10 },
+        gpu: { vendor: 'Apple', model: 'Apple M4', hasNvenc: false },
+        ram: { total: 16 },
+      },
+    })).recommendations;
+
+    expect(result).toMatchObject({
+      canvas_resolution: '3840x2160',
+      resolution: '1920x1080',
+      recording_resolution: '3840x2160',
+      recording_encoder: 'apple vt hevc',
+      recording_bitrate: 40000,
+    });
+  });
+
+  it('mantiene 1440p60 como techo simultaneo en un Apple M3 con 16GB', () => {
+    const result = getLocalRecommendation(makeRequest({
+      goal: {
+        description: 'Transmitir a 1080p y grabar a 4K60.',
+        streamResolution: '1920x1080',
+        recordingResolution: '3840x2160',
+        fps: 60,
+      },
+      systemInfo: {
+        cpu: { model: 'Apple M3', cores: 8 },
+        gpu: { vendor: 'Apple', model: 'Apple M3', hasNvenc: false },
+        ram: { total: 16 },
+      },
+    })).recommendations;
+
+    expect(result).toMatchObject({
+      canvas_resolution: '2560x1440',
+      resolution: '1920x1080',
+      recording_resolution: '2560x1440',
       recording_bitrate: 20000,
     });
   });

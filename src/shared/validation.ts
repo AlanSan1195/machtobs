@@ -459,6 +459,10 @@ function parseOptionalUploadSpeed(value: unknown): AIRecommendationRequest['netw
 function parseOptionalGoal(value: unknown): AIRecommendationRequest['goal'] {
   if (!isRecord(value) || !isNonEmptyString(value.description)) return undefined;
 
+  const sourceResolution = isNonEmptyString(value.sourceResolution)
+    && parseResolution(value.sourceResolution).success
+    ? value.sourceResolution.trim()
+    : undefined;
   const streamResolution = isNonEmptyString(value.streamResolution)
     && parseResolution(value.streamResolution).success
     ? value.streamResolution.trim()
@@ -476,6 +480,7 @@ function parseOptionalGoal(value: unknown): AIRecommendationRequest['goal'] {
 
   return {
     description: value.description.trim().slice(0, 2000),
+    sourceResolution,
     streamResolution,
     recordingResolution,
     fps,

@@ -87,6 +87,7 @@ Configuracion que OBS ya tiene (definida en el asistente inicial de OBS segun el
 Objetivo descrito por el usuario:
 - Peticion original: ${goal.description}
 - Fuente: ${goal.source ?? 'no indicada'}
+- Resolucion util detectada en la fuente: ${goal.sourceResolution ?? 'no detectada'}
 - Stream deseado: ${goal.streamResolution ?? 'dejar que Machtobs decida'}
 - Grabacion deseada: ${goal.recordingResolution ?? 'dejar que Machtobs decida'}
 - FPS deseados: ${goal.fps ?? 'dejar que Machtobs decida'}
@@ -118,6 +119,8 @@ Campos de resolucion:
 - "canvas_resolution": lienzo base donde se acomodan las fuentes.
 - "resolution": resolucion exclusiva del stream.
 - "recording_resolution": resolucion del archivo grabado.
+- No aumentes "recording_resolution" por encima de la resolucion util de la fuente: eso solo crearia un reescalado sin detalle nuevo.
+- Cuando la fuente y el hardware lo permitan, usa la mayor resolucion util para grabar aunque el stream de Twitch permanezca en 1920x1080.
 - Si el modo incluye stream y grabacion, separa ambas salidas cuando ayude a conservar calidad de grabacion sin exceder la plataforma de streaming.
 - "encoder" y "bitrate" pertenecen exclusivamente al stream.
 - "recording_encoder" y "recording_bitrate" pertenecen exclusivamente al archivo local. No reutilices el bitrate limitado del stream para grabar.
