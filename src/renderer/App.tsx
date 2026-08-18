@@ -16,6 +16,7 @@ import { ConnectPanel } from './components/ConnectPanel';
 import { ImportButton } from './components/ImportButton';
 import { NetworkDetectionSummary } from './components/NetworkDetectionSummary';
 import { HeroObsEye } from './components/HeroObsEye';
+import { HeroParticleCanvas } from './components/HeroParticleCanvas';
 import obsEyeSvg from './assets/obs-eye.svg';
 import { SiteFooter } from './components/SiteFooter';
 import { appAPI } from './lib/app-api';
@@ -214,6 +215,7 @@ export default function App() {
           <div className="pb-16">
             {/* hero */}
             <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10">
+              <HeroParticleCanvas />
 
               <div className="relative z-10 py-[clamp(3.5rem,8vw,7.5rem)]">
                <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em] py-5  ">

@@ -231,19 +231,13 @@ input[type='checkbox'] {
   }
 
   /* ---- machtobs hero wordmark ---- */
-  .hero-shell::before {
-    content: '';
+  .hero-particle-field {
     position: absolute;
     top: 19%;
     right: -10%;
     width: min(42rem, 62vw);
     aspect-ratio: 1;
-    border: 1px solid rgb(var(--accent-rgb) / 0.12);
     border-radius: 50%;
-    background:
-      radial-gradient(circle, transparent 52%, rgb(var(--accent-rgb) / 0.05) 52.2%, transparent 52.7%),
-      radial-gradient(circle, rgb(var(--accent-rgb) / 0.14) 0 1px, transparent 1.5px);
-    background-size: 100% 100%, 18px 18px;
     transform: translateY(-50%);
     pointer-events: none;
   }
@@ -415,7 +409,7 @@ input[type='checkbox'] {
       -webkit-text-stroke-width: 1.2px;
     }
 
-    .hero-shell::before {
+    .hero-particle-field {
       top: 36%;
       right: -38%;
       width: 26rem;
