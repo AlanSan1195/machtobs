@@ -1,26 +1,27 @@
-import React, { type ReactNode, useEffect, useState } from 'react';
+import React, { Suspense, lazy, type ReactNode, useEffect, useState } from 'react';
 import { useAppStore } from './store';
-import { ModeSelector } from './components/ModeSelector';
-import { PlatformSelector } from './components/PlatformSelector';
-import { AnalyzeButton } from './components/AnalyzeButton';
-import { SourceTargetSelector } from './components/SourceTargetSelector';
-import { ConsoleSelector } from './components/ConsoleSelector';
-import { ConsoleDetection } from './components/ConsoleDetection';
-import { ConsoleReport } from './components/ConsoleReport';
-import { ComputerReport } from './components/ComputerReport';
-import { HardwareForm } from './components/HardwareForm';
-import { OBSComparison } from './components/OBSComparison';
-import { AudioConfiguration } from './components/AudioConfiguration';
-import { ScenesPanel } from './components/ScenesPanel';
 import { ConnectPanel } from './components/ConnectPanel';
-import { ImportButton } from './components/ImportButton';
-import { NetworkDetectionSummary } from './components/NetworkDetectionSummary';
-import { HeroObsEye } from './components/HeroObsEye';
-import { HeroParticleCanvas } from './components/HeroParticleCanvas';
 import obsEyeSvg from './assets/obs-eye.svg';
 import { SiteFooter } from './components/SiteFooter';
 import { appAPI } from './lib/app-api';
 import { IconAlert, IconX } from './components/ui';
+
+
+
+const ModeSelector = lazy(() => import('./components/ModeSelector').then((module) => ({ default: module.ModeSelector })));
+const PlatformSelector = lazy(() => import('./components/PlatformSelector').then((module) => ({ default: module.PlatformSelector })));
+const AnalyzeButton = lazy(() => import('./components/AnalyzeButton').then((module) => ({ default: module.AnalyzeButton })));
+const SourceTargetSelector = lazy(() => import('./components/SourceTargetSelector').then((module) => ({ default: module.SourceTargetSelector })));
+const ConsoleSelector = lazy(() => import('./components/ConsoleSelector').then((module) => ({ default: module.ConsoleSelector })));
+const ConsoleDetection = lazy(() => import('./components/ConsoleDetection').then((module) => ({ default: module.ConsoleDetection })));
+const ConsoleReport = lazy(() => import('./components/ConsoleReport').then((module) => ({ default: module.ConsoleReport })));
+const ComputerReport = lazy(() => import('./components/ComputerReport').then((module) => ({ default: module.ComputerReport })));
+const HardwareForm = lazy(() => import('./components/HardwareForm').then((module) => ({ default: module.HardwareForm })));
+const OBSComparison = lazy(() => import('./components/OBSComparison').then((module) => ({ default: module.OBSComparison })));
+const AudioConfiguration = lazy(() => import('./components/AudioConfiguration').then((module) => ({ default: module.AudioConfiguration })));
+const ScenesPanel = lazy(() => import('./components/ScenesPanel').then((module) => ({ default: module.ScenesPanel })));
+const ImportButton = lazy(() => import('./components/ImportButton').then((module) => ({ default: module.ImportButton })));
+const NetworkDetectionSummary = lazy(() => import('./components/NetworkDetectionSummary').then((module) => ({ default: module.NetworkDetectionSummary })));
 
 type TabIndex = 0 | 1 | 2 | 3;
 
@@ -33,7 +34,7 @@ const modeLabels: Record<string, string> = {
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <span className="flex items-baseline gap-2 whitespace-nowrap">
-      <span className="text-paper/40">{label} /</span>
+      <span className="text-paper/60">{label} /</span>
       <span className="text-paper">{value}</span>
     </span>
   );
@@ -60,9 +61,16 @@ function StepHeader({
   );
 }
 
+function StepLoading() {
+  return (
+    <div role="status" className="my-10 border border-paper/15 px-5 py-8 font-mono text-[0.62rem] uppercase tracking-[0.16em] text-paper/60">
+      cargando módulo del configurador…
+    </div>
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabIndex>(0);
-  const [heroObsAnimationRun, setHeroObsAnimationRun] = useState(0);
 
   const {
     error,
@@ -111,14 +119,14 @@ export default function App() {
     <div className="relative flex min-h-screen flex-col font-sans">
       <div className="app-backdrop" aria-hidden="true" />
 
+
       {/* top bar */}
       <header className="sticky top-0 z-30 border-b border-paper/10 bg-background/95">
         <div className="mx-auto flex h-14 w-full max-w-[1440px] items-center justify-between gap-4 px-5">
           <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
+            href="/"
             className="flex items-center gap-x-1 sm:gapx-2"
-            aria-label="Machtobs"
+            aria-label="Ir al inicio de Machtobs"
           >
             <span className="relative flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center">
               <span className="absolute inset-[0.9px] rounded-full bg-[#3a9bdc] " />
@@ -164,7 +172,7 @@ export default function App() {
               aria-hidden="true"
               className={`inline-block h-1.5 w-1.5 ${obsConnected ? 'animate-pulse-dot bg-primary' : 'bg-paper/30'}`}
             />
-            <span className={`hidden sm:inline ${obsConnected ? 'text-paper' : 'text-paper/40'}`}>
+            <span className={`hidden sm:inline ${obsConnected ? 'text-paper' : 'text-paper/60'}`}>
               {obsConnected ? 'OBS / conectado' : 'OBS / sin conexion'}
             </span>
           </div>
@@ -173,7 +181,7 @@ export default function App() {
         {/* meta strip */}
         <div className="border-t border-paper/10">
           <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-2 font-mono text-[0.6rem] uppercase tracking-[0.18em]">
-            <span className="text-paper/40">
+            <span className="text-paper/60">
               00—{String(activeTab + 1).padStart(2, '0')} <span className="text-paper">/ {tabs[activeTab].label}</span>
             </span>
             <span className="flex items-center gap-5">
@@ -210,60 +218,25 @@ export default function App() {
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-[1440px] flex-1 px-3">
+      <main id="configurador" className="mx-auto w-full max-w-[1440px] flex-1 scroll-mt-20 px-3">
         {activeTab === 0 && (
-          <div className="pb-16">
-            {/* hero */}
-            <section className="hero-shell relative isolate overflow-hidden border-b border-paper/10">
-              <HeroParticleCanvas />
-
-              <div className="relative z-10 py-[clamp(3.5rem,8vw,7.5rem)]">
-               <div className="relative z-10 flex items-center justify-between gap-6 font-mono text-[0.6rem] uppercase tracking-[0.18em] py-5  ">
-                <span className="flex items-center gap-3 text-paper/45">
-                  <span className="bg-primary px-2 font-bold text-ink h-5 w-6"></span>
-                  <span> tu hardware × el mejor perfil de OBS</span>
-                </span>
-                
-              </div>
-               
-                <h1 className="hero-wordmark select-none " aria-label="machtobs">
-                  <span aria-hidden="true" className="hero-wordmark__inner gap-x-6">
-                    <span className="text-paper">macht</span>
-                    <span className="hero-wordmark__obs">
-                      <HeroObsEye animationRun={heroObsAnimationRun} />
-                      <span>bs</span>
-                    </span>
-                  </span>
-                </h1>
-              </div>
-
-              <div className="relative z-10 grid gap-8 border-t border-paper/15 pt-6 lg:grid-cols-[minmax(0,36rem)_1fr] lg:items-end">
-                <div className="flex sm:grid-cols-[8rem_1fr] sm:gap-6">
-                  <p className="max-w-lg text-base leading-relaxed text-paper/65 sm:text-lg">
-                    Analiza tu hardware y encuentra la configuración ideal para OBS,
-                    lista para importar.
-                  </p>
-                </div>
-                <div>
-                  <div className="rule-ticks" aria-hidden="true">
-                    <span>720p</span>
-                    <span>1080p</span>
-                    <span>1440p</span>
-                    <span>2160p</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* conexion — full-bleed dentro del lienzo editorial */}
-            <div className="-mx-5 mt-10">
-              <ConnectPanel
-                onStart={() => setHeroObsAnimationRun((currentRun) => currentRun + 1)}
-              />
+          <div className="mx-auto w-full max-w-[1440PX] py-10 sm:py-16">
+            <header className="mb-8 border-b border-paper/15 pb-7">
+              <p className="font-mono text-[0.58rem] font-bold uppercase tracking-[0.16em] text-primary">/ conexión local</p>
+              <h1 className="mt-4 font-display text-[clamp(2.8rem,8vw,7rem)] font-black uppercase leading-[0.84] tracking-[-0.055em] text-paper">
+                Conecta OBS
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-7 text-paper/70">
+                Abre OBS Studio y sigue los cuatro pasos para iniciar la detección.
+              </p>
+            </header>
+            <div className="-mx-3 sm:mx-0">
+              <ConnectPanel showStepsInitially />
             </div>
           </div>
         )}
 
+        <Suspense fallback={<StepLoading />}>
         {activeTab === 1 && (
           <div className="space-y-8 py-10 ">
             <StepHeader word="ajustes" />
@@ -309,33 +282,12 @@ export default function App() {
                 ↺ nueva configuracion
               </button>
             </div>
+
           </div>
         )}
-      </main>
+        </Suspense>
 
-      {/* signal moment: OBS conectado en el hero */}
-      {obsConnected && activeTab === 0 && (
-        <section className="bg-primary text-ink">
-          <div className="mx-auto flex w-full max-w-[1440px] flex-col items-start justify-between gap-4 px-5 py-6 sm:flex-row sm:items-center">
-            <div>
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink/60">
-                señal establecida
-              </p>
-              <p className="font-display text-2xl font-black uppercase tracking-tight" style={{ fontStretch: '125%' }}>
-                OBS conectado ✓
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab(1)}
-              className="group flex items-center gap-3 border border-ink/70 px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] transition-colors hover:bg-ink hover:text-primary"
-            >
-              02 / ajustes
-              <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span>
-            </button>
-          </div>
-        </section>
-      )}
+      </main>
 
       <SiteFooter />
     </div>

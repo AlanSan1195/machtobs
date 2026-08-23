@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), useLocalApi && localApiPlugin()],
     root: '.',
-    base: './',
+    base: '/',
     build: {
       outDir: 'dist',
       emptyOutDir: true,

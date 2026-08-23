@@ -16,6 +16,6 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/renderer/**/*", "src/shared/**/*"],
+  "include": ["src/renderer/**/*", "src/shared/**/*", "src/seo/**/*"],
   "exclude": ["node_modules", "dist"]
 }

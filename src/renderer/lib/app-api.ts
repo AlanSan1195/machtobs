@@ -1,4 +1,3 @@
-import { obsManager } from './obs-manager';
 import { loadBackup } from './backup-store';
 import { getSystemInfo, getOsPlatform } from './system-info';
 import { getPeripherals } from './peripherals';
@@ -48,8 +47,32 @@ import type {
   SetCameraFrameInput,
 } from '../../shared/types';
 
-// Fachada única para OBS, hardware e IA desde el navegador.
-void obsManager.initialize();
+type OBSStatusListener = (status: { connected: boolean; message: string }) => void;
+type OBSManagerInstance = import('./obs-manager').OBSManager;
+
+let obsManagerPromise: Promise<OBSManagerInstance> | null = null;
+let activeObsManager: OBSManagerInstance | null = null;
+let obsStatusListener: OBSStatusListener | null = null;
+
+// OBS WebSocket es la dependencia más pesada del cliente y sólo es necesaria
+// cuando la persona intenta conectar. Mantenerla fuera del bundle inicial
+// también permite prerenderizar la portada en Node sin APIs del navegador.
+async function getObsManager(): Promise<OBSManagerInstance> {
+  if (typeof window === 'undefined') {
+    throw new Error('La conexión con OBS sólo está disponible en el navegador.');
+  }
+
+  if (!obsManagerPromise) {
+    obsManagerPromise = import('./obs-manager').then(async ({ obsManager }) => {
+      await obsManager.initialize();
+      activeObsManager = obsManager;
+      if (obsStatusListener) obsManager.onStatusChange(obsStatusListener);
+      return obsManager;
+    });
+  }
+
+  return obsManagerPromise;
+}
 
 async function searchWeb(query: string): Promise<string[]> {
   try {
@@ -70,12 +93,13 @@ export const appAPI = {
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
+      const obsManager = await getObsManager();
       return obsManager.connect(validation.value);
     },
-    disconnect: async () => obsManager.disconnect(),
-    getStatus: async () => obsManager.getStatus(),
-    getSettingsSnapshot: async () => obsManager.getSettingsSnapshot(),
-    getAudioSnapshot: async () => obsManager.getAudioSnapshot(),
+    disconnect: async () => (await getObsManager()).disconnect(),
+    getStatus: async () => (await getObsManager()).getStatus(),
+    getSettingsSnapshot: async () => (await getObsManager()).getSettingsSnapshot(),
+    getAudioSnapshot: async () => (await getObsManager()).getAudioSnapshot(),
     getLastBackup: async () => {
       const backup = await loadBackup();
       return backup
@@ -87,107 +111,107 @@ export const appAPI = {
       if (!backup) {
         return { success: false, message: 'No hay respaldo guardado', warnings: [] as string[] };
       }
-      return obsManager.restoreSnapshot(backup.snapshot);
+      return (await getObsManager()).restoreSnapshot(backup.snapshot);
     },
     configure: async (config: OBSConfig) => {
       const validation = validateOBSConfig(config);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.configure(validation.value);
+      return (await getObsManager()).configure(validation.value);
     },
     configureAudio: async (config: OBSAudioConfig) => {
       const validation = validateOBSAudioConfig(config);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.configureAudio(validation.value);
+      return (await getObsManager()).configureAudio(validation.value);
     },
-    getScenes: async () => obsManager.getScenesSnapshot(),
+    getScenes: async () => (await getObsManager()).getScenesSnapshot(),
     createScene: async (name: string) => {
       const validation = validateSceneName(name);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.createScene(validation.value);
+      return (await getObsManager()).createScene(validation.value);
     },
     setCurrentScene: async (name: string) => {
       const validation = validateSceneName(name);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.setCurrentScene(validation.value);
+      return (await getObsManager()).setCurrentScene(validation.value);
     },
     removeScene: async (name: string) => {
       const validation = validateSceneName(name);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.removeScene(validation.value);
+      return (await getObsManager()).removeScene(validation.value);
     },
-    getSourceKinds: async () => obsManager.getAvailableSourceKinds(),
+    getSourceKinds: async () => (await getObsManager()).getAvailableSourceKinds(),
     getSceneSources: async (name: string) => {
       const validation = validateSceneName(name);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.getSceneSources(validation.value);
+      return (await getObsManager()).getSceneSources(validation.value);
     },
     beginGuidedSource: async (arg: BeginGuidedSourceInput) => {
       const validation = validateBeginGuidedSource(arg);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.beginGuidedSource(validation.value.sceneName, validation.value.friendly);
+      return (await getObsManager()).beginGuidedSource(validation.value.sceneName, validation.value.friendly);
     },
     applyGuidedSourceDevice: async (arg: ApplyGuidedSourceDeviceInput) => {
       const validation = validateApplyGuidedSourceDevice(arg);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.applyGuidedSourceDevice(validation.value);
+      return (await getObsManager()).applyGuidedSourceDevice(validation.value);
     },
     ensureCaptureAudio: async (arg: EnsureCaptureAudioInput) => {
       const validation = validateEnsureCaptureAudioInput(arg);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.ensureCaptureAudio(validation.value);
+      return (await getObsManager()).ensureCaptureAudio(validation.value);
     },
     cancelGuidedSource: async (name: string) => {
       const validation = validateInputName(name);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.cancelGuidedSource(validation.value);
+      return (await getObsManager()).cancelGuidedSource(validation.value);
     },
     createGuidedSource: async (config: CreateGuidedSourceConfig) => {
       const validation = validateCreateGuidedSourceConfig(config);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.createGuidedSource(validation.value);
+      return (await getObsManager()).createGuidedSource(validation.value);
     },
     removeSource: async (name: string) => {
       const validation = validateInputName(name);
       if (!validation.success) {
         return { success: false, message: validation.message };
       }
-      return obsManager.removeInput(validation.value);
+      return (await getObsManager()).removeInput(validation.value);
     },
     setCameraLayout: async (arg: SetCameraLayoutInput) => {
       const validation = validateSetCameraLayout(arg);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.setCameraLayout(validation.value.sceneName, validation.value.sceneItemId, validation.value.layout);
+      return (await getObsManager()).setCameraLayout(validation.value.sceneName, validation.value.sceneItemId, validation.value.layout);
     },
     setCameraFrame: async (arg: SetCameraFrameInput) => {
       const validation = validateSetCameraFrame(arg);
       if (!validation.success) {
         return { success: false, message: validation.message, warnings: [] as string[] };
       }
-      return obsManager.setCameraFrame(validation.value);
+      return (await getObsManager()).setCameraFrame(validation.value);
     },
     createCameraScene: async (arg: { sceneName: string; inputName: string; deviceId: string; propertyName: string }) => {
       const sceneName = validateSceneName(arg.sceneName);
@@ -200,34 +224,36 @@ export const appAPI = {
       if (arg.propertyName.trim().length === 0) {
         return { success: false, message: 'Falta la propiedad del dispositivo.', warnings: [] as string[] };
       }
-      return obsManager.createCameraScene(sceneName.value, inputName.value, arg.deviceId.trim(), arg.propertyName.trim());
+      return (await getObsManager()).createCameraScene(sceneName.value, inputName.value, arg.deviceId.trim(), arg.propertyName.trim());
     },
     setSourceToBottom: async (arg: { sceneName: string; sceneItemId: number }) => {
-      return obsManager.setSourceToBottom(arg.sceneName, arg.sceneItemId);
+      return (await getObsManager()).setSourceToBottom(arg.sceneName, arg.sceneItemId);
     },
     renameSource: async (arg: { inputName: string; newInputName: string }) => {
       const current = validateInputName(arg.inputName);
       if (!current.success) return { success: false, message: current.message };
       const next = validateInputName(arg.newInputName);
       if (!next.success) return { success: false, message: next.message };
-      return obsManager.renameInput(current.value, next.value);
+      return (await getObsManager()).renameInput(current.value, next.value);
     },
     setSourceEnabled: async (arg: { sceneName: string; sceneItemId: number; enabled: boolean }) => {
-      return obsManager.setSceneItemEnabled(arg.sceneName, arg.sceneItemId, arg.enabled);
+      return (await getObsManager()).setSceneItemEnabled(arg.sceneName, arg.sceneItemId, arg.enabled);
     },
     sourceScreenshot: async (arg: { sourceName: string; maxWidth?: number }) => {
       if (arg.sourceName.trim().length === 0) {
         return { success: false, message: 'Falta el nombre de la fuente.' };
       }
-      return obsManager.getSourceScreenshot(arg.sourceName, arg.maxWidth);
+      return (await getObsManager()).getSourceScreenshot(arg.sourceName, arg.maxWidth);
     },
     getCaptureCapabilities: async (arg: { deviceName?: string }) => {
-      return obsManager.getCaptureCapabilities(arg.deviceName);
+      return (await getObsManager()).getCaptureCapabilities(arg.deviceName);
     },
     onConnectionChanged: (callback: (status: { connected: boolean; message: string }) => void) => {
-      obsManager.onStatusChange(callback);
+      obsStatusListener = callback;
+      activeObsManager?.onStatusChange(callback);
       return () => {
-        obsManager.onStatusChange(() => undefined);
+        if (obsStatusListener === callback) obsStatusListener = null;
+        activeObsManager?.onStatusChange(() => undefined);
       };
     },
   },

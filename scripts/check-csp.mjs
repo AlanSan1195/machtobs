@@ -1,11 +1,11 @@
 /* global console, process */
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const htmlPath = path.resolve(repositoryRoot, process.argv[2] || 'index.html');
+const htmlTarget = path.resolve(repositoryRoot, process.argv[2] || 'dist');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -54,16 +54,35 @@ function readInlineScripts(html) {
   return scripts;
 }
 
-const [html, vercelSource] = await Promise.all([
-  readFile(htmlPath, 'utf8'),
+async function collectHtmlFiles(target) {
+  const targetStat = await stat(target);
+  if (targetStat.isFile()) return [target];
+
+  const entries = await readdir(target, { withFileTypes: true });
+  const nested = await Promise.all(entries.map((entry) => {
+    const entryPath = path.join(target, entry.name);
+    if (entry.isDirectory()) return collectHtmlFiles(entryPath);
+    return entry.isFile() && entry.name.endsWith('.html') ? [entryPath] : [];
+  }));
+  return nested.flat();
+}
+
+const [htmlFiles, vercelSource] = await Promise.all([
+  collectHtmlFiles(htmlTarget),
   readFile(path.join(repositoryRoot, 'vercel.json'), 'utf8'),
 ]);
 const vercel = JSON.parse(vercelSource);
+const htmlDocuments = await Promise.all(htmlFiles.map(async (htmlPath) => ({
+  htmlPath,
+  html: await readFile(htmlPath, 'utf8'),
+})));
 
-assert(
-  !/<meta\b[^>]*http-equiv\s*=\s*["']Content-Security-Policy["']/i.test(html),
-  `${path.relative(repositoryRoot, htmlPath)} must not contain a meta CSP.`,
-);
+for (const { htmlPath, html } of htmlDocuments) {
+  assert(
+    !/<meta\b[^>]*http-equiv\s*=\s*["']Content-Security-Policy["']/i.test(html),
+    `${path.relative(repositoryRoot, htmlPath)} must not contain a meta CSP.`,
+  );
+}
 
 const cspHeaders = (vercel.headers ?? []).flatMap((rule) => (
   (rule.headers ?? []).filter((header) => header.key?.toLowerCase() === 'content-security-policy')
@@ -71,19 +90,21 @@ const cspHeaders = (vercel.headers ?? []).flatMap((rule) => (
 assert(cspHeaders.length === 1, 'vercel.json must define exactly one Content-Security-Policy header.');
 
 const directives = parseDirectives(cspHeaders[0].value);
-const inlineScripts = readInlineScripts(html);
-assert(inlineScripts.length > 0, 'Expected the SEO JSON-LD inline script.');
+const inlineScripts = htmlDocuments.flatMap(({ htmlPath, html }) => (
+  readInlineScripts(html).map((script) => ({ ...script, htmlPath }))
+));
+assert(inlineScripts.length > 0, 'Expected SEO JSON-LD inline scripts.');
 assert(
   inlineScripts.every((script) => script.type === 'application/ld+json'),
   'Unexpected inline executable script found.',
 );
 
-const jsonLdHashes = inlineScripts.map((script) => {
+const jsonLdHashes = [...new Set(inlineScripts.map((script) => {
   const parsed = JSON.parse(script.body);
-  assert(parsed['@context'] === 'https://schema.org', 'JSON-LD must retain its schema.org context.');
-  assert(parsed['@type'] === 'WebApplication', 'JSON-LD must retain the WebApplication type.');
+  assert(parsed['@context'] === 'https://schema.org', `${path.relative(repositoryRoot, script.htmlPath)} must retain schema.org context.`);
+  assert(Array.isArray(parsed['@graph']) && parsed['@graph'].length > 0, `${path.relative(repositoryRoot, script.htmlPath)} must contain a JSON-LD graph.`);
   return `'${sha256(script.body)}'`;
-});
+}))];
 
 assertExactDirective(directives, 'default-src', ["'self'"]);
 assertExactDirective(directives, 'script-src', ["'self'", ...jsonLdHashes]);
@@ -105,4 +126,4 @@ for (const script of inlineScripts) {
   assert(!scriptSources.includes(changedHash), 'CSP negative drift self-check did not detect changed JSON-LD.');
 }
 
-console.log(`CSP verified for ${path.relative(repositoryRoot, htmlPath)} (${jsonLdHashes.join(', ')}).`);
+console.log(`CSP verified for ${htmlFiles.length} HTML files and ${jsonLdHashes.length} JSON-LD hashes.`);

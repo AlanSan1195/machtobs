@@ -15,7 +15,7 @@ type StatProps = {
 
 function Stat({ label, value, detail }: StatProps) {
   return (
-    <div className="border border-paper/12 bg-paper/[0.018] p-4">
+    <div className="border-[1.5px] border-paper/10 bg-paper/[0.018] p-4">
       <span className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-paper/35">{label}</span>
       <p className="mt-2 break-words font-display text-lg font-black uppercase leading-tight text-paper">{value}</p>
       <p className="mt-2 text-xs leading-relaxed text-paper/45">{detail}</p>

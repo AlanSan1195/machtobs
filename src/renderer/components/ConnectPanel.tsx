@@ -7,6 +7,7 @@ type ConnectionIssue = 'authentication' | 'unavailable';
 
 interface ConnectPanelProps {
   onStart?: () => void;
+  showStepsInitially?: boolean;
 }
 
 function classifyConnectionIssue(message: string): ConnectionIssue {
@@ -16,8 +17,8 @@ function classifyConnectionIssue(message: string): ConnectionIssue {
   return authenticationFailure.test(message) ? 'authentication' : 'unavailable';
 }
 
-export function ConnectPanel({ onStart }: ConnectPanelProps) {
-  const [showGuide, setShowGuide] = useState(false);
+export function ConnectPanel({ onStart, showStepsInitially = false }: ConnectPanelProps) {
+  const [showGuide, setShowGuide] = useState(showStepsInitially);
   const [showPassword, setShowPassword] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionIssue, setConnectionIssue] = useState<ConnectionIssue | null>(null);
@@ -71,14 +72,12 @@ export function ConnectPanel({ onStart }: ConnectPanelProps) {
 
       <footer className="grid border-b border-warning/25 bg-warning/[0.035] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center ">
         <span className="border-b border-warning/20 px-5 py-3 font-mono text-[0.56rem] font-bold uppercase tracking-[0.16em] text-warning sm:border-b-0 sm:border-r">
-          beta / 01
+          atencion
         </span>
-        <span className="px-5 py-3 text-xs leading-relaxed text-paper/45">
-          Versión en prueba: revisa en OBS los ajustes aplicados antes de un directo importante.
+        <span className="px-5 py-3 text-xs leading-relaxed text-paper/65">
+          Revisa en OBS los ajustes aplicados antes de un directo importante.
         </span>
-        <span className="hidden border-l border-warning/20 px-5 py-3 font-mono text-[0.52rem] uppercase tracking-[0.14em] text-warning/45 sm:block">
-          revisión / manual
-        </span>
+
       </footer>
 
       <form id="obs-connect-form" onSubmit={handleConnect}>
@@ -86,11 +85,10 @@ export function ConnectPanel({ onStart }: ConnectPanelProps) {
           <button
             type="button"
             onClick={startGuide}
-            aria-controls="obs-first-steps"
             className="group relative left-1/2 block w-screen -translate-x-1/2 bg-primary text-left text-ink transition-colors duration-300 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-paper focus-visible:ring-inset"
           >
             <span className="mx-auto grid min-h-16 w-full max-w-[1440px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] px-5 sm:min-h-[4.75rem]">
-              <span className="flex min-w-0 items-center gap-2 border-r border-ink/20 pr-4 font-mono text-[0.48rem] uppercase tracking-[0.14em] text-ink/60 sm:gap-3 sm:pr-8 sm:text-[0.55rem]">
+              <span className="flex min-w-0 items-center gap-2 border-r border-ink/20 pr-4 font-mono text-[0.48rem] uppercase tracking-[0.14em] text-ink/90 sm:gap-3 sm:pr-8 sm:text-[0.55rem]">
                 <IconPlug className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                 <span className="truncate">configurar enlace</span>
               </span>
