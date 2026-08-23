@@ -62,6 +62,10 @@ assert(!configurator.includes('guía / 4 pasos'), '/configurador no debe mostrar
 const home = await readFile(path.join(distDirectory, 'index.html'), 'utf8');
 assert(home.includes('href="/configurador"'), 'La landing debe enlazar al configurador.');
 assert(home.includes('Empezar'), 'La landing debe usar Empezar como llamada principal.');
+assert(
+  home.includes('<meta name="google-site-verification" content="Zjz9nhYz1hWfVGW-RE3JdWQNXUVdjCbYpX050ys0oro"'),
+  'La landing debe conservar la verificación de Google Search Console.',
+);
 assert(!home.includes('aria-label="Conectar con OBS"'), 'La landing no debe contener el sistema de conexión.');
 
 const notFound = await readFile(path.join(distDirectory, '404.html'), 'utf8');
