@@ -7,14 +7,6 @@ const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url))
 const distDirectory = path.join(repositoryRoot, 'dist');
 const expectedPaths = [
   '/',
-  '/guias',
-  '/guias/configurar-obs',
-  '/guias/obs-para-principiantes',
-  '/guias/configuracion-obs-streaming',
-  '/guias/primer-stream-con-obs',
-  '/guias/configurar-audio-obs',
-  '/guias/configurar-obs-para-grabar',
-  '/como-funciona-machtobs',
 ];
 
 function assert(condition, message) {
@@ -46,11 +38,7 @@ for (const route of expectedPaths) {
   JSON.parse(jsonLd);
   assert(!/name="keywords"/i.test(html), `${route}: meta keywords no debe existir.`);
   assert(/<div id="root">(?!\s*<\/div>)/i.test(html), `${route}: root no contiene HTML prerenderizado.`);
-  if (route === '/') {
-    assert(/<script\b[^>]*type="module"/i.test(html), 'La portada debe conservar el cliente interactivo.');
-  } else {
-    assert(!/<script\b[^>]*type="module"/i.test(html), `${route}: una guía estática no debe cargar el configurador.`);
-  }
+  assert(/<script\b[^>]*type="module"/i.test(html), 'La portada debe conservar el cliente interactivo.');
 
   titles.add(title);
   descriptions.add(description);
@@ -60,6 +48,7 @@ const sitemap = await readFile(path.join(distDirectory, 'sitemap.xml'), 'utf8');
 for (const route of expectedPaths) {
   assert(sitemap.includes(`<loc>https://machtobs.vercel.app${route}</loc>`), `${route}: falta en sitemap.xml.`);
 }
+assert((sitemap.match(/<url>/g) ?? []).length === 1, 'El sitemap solo debe incluir la landing indexable.');
 
 const configurator = await readFile(path.join(distDirectory, 'configurador.html'), 'utf8');
 assert(configurator.includes('noindex, follow'), '/configurador debe incluir noindex, follow.');

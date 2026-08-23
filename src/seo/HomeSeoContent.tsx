@@ -12,7 +12,7 @@ const HOME_FAQS: HomeFaq[] = [
   },
   {
     question: '¿Puedo usar Machtobs si nunca he hecho stream?',
-    answer: 'Sí. El flujo explica cómo activar WebSocket, elegir el objetivo, revisar la recomendación y preparar escenas. Las guías complementarias explican los conceptos básicos sin asumir experiencia previa.',
+    answer: 'Sí. El flujo explica cómo conectar OBS, qué cambia, por qué conviene y cómo afecta la calidad, el rendimiento y la estabilidad antes de aplicar cada ajuste.',
   },
   {
     question: '¿Machtobs envía mi contraseña o mis escenas a internet?',

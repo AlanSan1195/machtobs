@@ -10,7 +10,6 @@ const entryPath = path.join(ssrDirectory, 'entry-server.mjs');
 
 const {
   DEFAULT_SOCIAL_IMAGE,
-  STATIC_SEO_PAGES,
   buildSitemap,
   renderConfiguratorPage,
   renderNotFoundPage,
@@ -104,13 +103,9 @@ const configuratorHtml = injectMarkup(
 );
 await writeFile(path.join(distDirectory, 'configurador.html'), configuratorHtml, 'utf8');
 
-for (const page of STATIC_SEO_PAGES) {
-  await writePage(renderSeoPage(page.path), false);
-}
-
 const notFoundHtml = template
   .replace(/<title>[\s\S]*?<\/title>/i, '<title>Página no encontrada | Machtobs</title>')
-  .replace(/<meta name="description"[^>]*>/i, '<meta name="description" content="La página solicitada no existe. Vuelve al configurador Machtobs o consulta las guías de OBS Studio." />')
+  .replace(/<meta name="description"[^>]*>/i, '<meta name="description" content="La página solicitada no existe. Vuelve al inicio de Machtobs o abre el configurador de OBS." />')
   .replace(/<meta name="robots"[^>]*>/i, '<meta name="robots" content="noindex, follow" />')
   .replace(/<link rel="canonical"[^>]*>/i, '<link rel="canonical" href="https://machtobs.vercel.app/404" />')
   .replace('<meta name="seo-head" content="prerender" />', '')
@@ -120,4 +115,4 @@ await writeFile(path.join(distDirectory, '404.html'), removeClientScripts(notFou
 await writeFile(path.join(distDirectory, 'sitemap.xml'), buildSitemap(), 'utf8');
 await rm(ssrDirectory, { recursive: true, force: true });
 
-console.log(`Prerendered ${STATIC_SEO_PAGES.length + 1} indexable pages, the configurator and a custom 404.`);
+console.log('Prerendered the indexable landing, the configurator and a custom 404.');

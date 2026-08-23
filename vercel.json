@@ -22,7 +22,7 @@
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'sha256-jfBre+JglW/vkDsEtNluO/J7dKxFK2sz4G24wWiUlRk=' 'sha256-IKnKMdqiYkv5pCS3YZFIWptiVx3+MDzd+xPTwH2PYxs=' 'sha256-QrM+kyl8UjNwpM4D+fausHDXZIu4TMyrIekeHFOQGqg=' 'sha256-SIqqUcRN91Lp9TKwet7jZIJSoSH5SATqeLCxy/73sLs=' 'sha256-p8CLGhSLH55PdX457lTCdS6SN9h8DFg2VVrEbrDboUU=' 'sha256-4+54I9sCSmBznS6SR08tCWpYcg3JIL3cHyncK7cD4AU=' 'sha256-IgBEYwnUv3Zog9px2LEYKs2Myggc69h7V74hbwXZQF0=' 'sha256-8D5wpdmzgAR0AsS/0fwpPfpXwHEjAQPRDamOW+nHfFI=' 'sha256-H3NfkMLt5+jCPPYSD5+fF5oiWC3GaiB8aZEn+vGPWqw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://speed.cloudflare.com ws://localhost:* ws://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'sha256-HC/MaE6totfPcS2muX4pR0q3mfiQ9ZvnT3uhWsbQa9o='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://speed.cloudflare.com ws://localhost:* ws://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'" }
       ]
     },
     {

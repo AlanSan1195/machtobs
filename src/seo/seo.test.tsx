@@ -3,12 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import App from '../renderer/App';
 import { LandingPage } from '../renderer/LandingPage';
-import { StaticSeoPage } from './SeoPages';
 import {
   SEO_PAGES,
-  STATIC_SEO_PAGES,
   SITE_URL,
-  getSeoPage,
 } from './content';
 import { buildSitemap, buildStructuredData } from './structuredData';
 
@@ -38,12 +35,8 @@ describe('registro SEO', () => {
     }
   });
 
-  it('no contiene enlaces relacionados rotos', () => {
-    for (const page of SEO_PAGES) {
-      for (const relatedPath of page.relatedPaths) {
-        expect(getSeoPage(relatedPath), `${page.path} enlaza a ${relatedPath}`).toBeDefined();
-      }
-    }
+  it('solo registra la landing como página indexable', () => {
+    expect(SEO_PAGES.map((page) => page.path)).toEqual(['/']);
   });
 
   it('genera JSON-LD válido y específico para cada página', () => {
@@ -72,20 +65,6 @@ describe('HTML indexable', () => {
     const html = renderToStaticMarkup(<LandingPage />);
     expect(countTag(html, 'h1')).toBe(1);
     expect(html).toContain('href="/configurador"');
-  });
-
-  it('renderiza un solo H1 y enlaces internos en cada página estática', () => {
-    const allHtml = STATIC_SEO_PAGES.map((page) => {
-      const html = renderToStaticMarkup(<StaticSeoPage page={page} />);
-      expect(countTag(html, 'h1'), page.path).toBe(1);
-      expect(countTag(html, 'h2'), page.path).toBeGreaterThan(0);
-      expect(html).toContain('/configurador');
-      return html;
-    }).join('\n');
-
-    for (const page of STATIC_SEO_PAGES) {
-      expect(allHtml).toContain(`href="${page.path}"`);
-    }
   });
 
   it('separa la landing del sistema de detección', () => {
