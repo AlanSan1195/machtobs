@@ -46,6 +46,10 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: clip;
+}
+
 :root {
   /* Machtobs — editorial signal system: ink, paper, OBS blue */
   --background-rgb: 9 10 10;         /* #090a0a ink */
@@ -121,6 +125,31 @@ body {
 ::selection {
   background: rgb(var(--accent-rgb));
   color: rgb(var(--ink));
+}
+
+.text-outline-thin {
+  color: transparent;
+  -webkit-text-stroke: 0.8px rgb(var(--paper));
+}
+
+.seo-deferred,
+.seo-article-section {
+  content-visibility: auto;
+}
+
+.seo-deferred {
+  contain-intrinsic-size: 1px 3600px;
+}
+
+.seo-article-section {
+  contain-intrinsic-size: 1px 720px;
+}
+
+@media print {
+  .seo-deferred,
+  .seo-article-section {
+    content-visibility: visible;
+  }
 }
 
 :focus-visible {
@@ -235,7 +264,7 @@ input[type='checkbox'] {
     position: absolute;
     top: 19%;
     right: -10%;
-    width: min(42rem, 62vw);
+    width: min(52rem, 62vw);
     aspect-ratio: 1;
     border-radius: 50%;
     transform: translateY(-50%);
@@ -441,7 +470,7 @@ input[type='checkbox'] {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 0.5625rem;
     letter-spacing: 0.1em;
-    color: rgb(var(--paper) / 0.4);
+    color: rgb(var(--paper) / 0.65);
   }
   .rule-ticks > span {
     display: flex;
