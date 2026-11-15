@@ -8,6 +8,8 @@ async function renderCurrentRoute() {
   const normalizedPath = window.location.pathname.replace(/\/+$/, '') || '/';
   const Page = normalizedPath === '/configurador'
     ? (await import('./App')).default
+    : normalizedPath === '/como-configurar-obs'
+      ? (await import('../seo/ObsBeginnerGuide')).ObsBeginnerGuide
     : (await import('./LandingPage')).LandingPage;
   const page = (
     <React.StrictMode>

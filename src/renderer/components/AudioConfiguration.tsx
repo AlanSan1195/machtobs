@@ -4,7 +4,7 @@ import { useAppAPI } from '../hooks/useAppAPI';
 import type { MicProfileResponse, OBSAudioConfig, OBSAudioDevice, OBSAudioFilterConfig, OBSAudioSettingsSnapshot } from '../../shared/types';
 import { resolveMicrophoneName } from '../lib/microphone-device';
 import { ConfirmDialog } from './ConfirmDialog';
-import { IconAlert, IconCheck, IconMic, IconRefresh, IconSparkles, IconX, Section, Spinner } from './ui';
+import { IconCheck, IconMic, IconRefresh, IconSparkles, IconX, Section, Spinner } from './ui';
 
 const defaultFilters = {
   gainDb: 10,

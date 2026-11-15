@@ -50,7 +50,7 @@ export function buildStructuredData(page: SeoPageDefinition): JsonLdNode {
         inLanguage: 'es',
         publisher: { '@id': `${SITE_URL}/#organization` },
       },
-      {
+      ...(page.kind === 'home' ? [{
         '@type': 'WebApplication',
         '@id': `${SITE_URL}/#application`,
         name: SITE_NAME,
@@ -66,8 +66,18 @@ export function buildStructuredData(page: SeoPageDefinition): JsonLdNode {
           'Respaldo y aplicación de cambios con confirmación',
         ],
         publisher: { '@id': `${SITE_URL}/#organization` },
-      },
-      faqData(page),
+      }, faqData(page)] : [{
+        '@type': 'Article',
+        '@id': `${absoluteUrl(page.path)}#article`,
+        mainEntityOfPage: absoluteUrl(page.path),
+        headline: page.heading,
+        description: page.description,
+        inLanguage: 'es',
+        datePublished: page.datePublished,
+        dateModified: page.dateModified,
+        author: { '@id': `${SITE_URL}/#organization` },
+        publisher: { '@id': `${SITE_URL}/#organization` },
+      }]),
     ],
   };
 }

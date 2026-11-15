@@ -1,7 +1,7 @@
 export const SITE_URL = 'https://machtobs.vercel.app';
 export const SITE_NAME = 'Machtobs';
 export const DEFAULT_SOCIAL_IMAGE = `${SITE_URL}/og-image.png`;
-export const CONTENT_LAST_MODIFIED = '2026-08-22';
+export const CONTENT_LAST_MODIFIED = '2026-11-13';
 
 export type SeoFaq = {
   question: string;
@@ -9,8 +9,8 @@ export type SeoFaq = {
 };
 
 export type SeoPageDefinition = {
-  path: '/';
-  kind: 'home';
+  path: '/' | '/como-configurar-obs';
+  kind: 'home' | 'guide';
   title: string;
   description: string;
   heading: string;
@@ -22,15 +22,15 @@ export type SeoPageDefinition = {
 const homePage: SeoPageDefinition = {
   path: '/',
   kind: 'home',
-  title: 'Configuración avanzada de OBS para directos | Machtobs',
-  description: 'Analiza hardware, red y ajustes de OBS. Machtobs compara recomendaciones, explica su impacto y aplica cambios confirmados mediante una conexión local segura.',
-  heading: 'Configuración avanzada para tus directos',
+  title: 'Configurar OBS fácil y paso a paso | Machtobs',
+  description: 'Configura OBS Studio sin perderte entre ajustes. Machtobs detecta tu equipo, recomienda un perfil, explica cada cambio y lo aplica solo con tu permiso.',
+  heading: 'Configura OBS fácil, incluso si es tu primera vez',
   datePublished: '2026-07-06',
   dateModified: CONTENT_LAST_MODIFIED,
   faqs: [
     {
       question: '¿Machtobs configura OBS automáticamente?',
-      answer: 'Sí. Después de conectar OBS mediante WebSocket, Machtobs compara la configuración actual con una recomendación calculada para el equipo, la conexión y la plataforma. Siempre muestra los cambios antes de aplicarlos.',
+      answer: 'Sí. Después de conectar OBS mediante WebSocket, Machtobs compara la configuración actual con una recomendación calculada para el equipo, la conexión y la plataforma. Muestra los cambios antes de aplicarlos y requiere tu confirmación.',
     },
     {
       question: '¿Puedo usar Machtobs si nunca he hecho stream?',
@@ -43,10 +43,21 @@ const homePage: SeoPageDefinition = {
   ],
 };
 
-export const SEO_PAGES: SeoPageDefinition[] = [homePage];
+const guidePage: SeoPageDefinition = {
+  path: '/como-configurar-obs',
+  kind: 'guide',
+  title: 'Cómo configurar OBS desde cero: guía fácil | Machtobs',
+  description: 'Aprende a configurar OBS Studio paso a paso: escenas, fuentes, audio, vídeo y prueba final. Descubre cuándo usar el asistente de OBS y el configurador Machtobs.',
+  heading: 'Cómo configurar OBS desde cero, paso a paso',
+  datePublished: CONTENT_LAST_MODIFIED,
+  dateModified: CONTENT_LAST_MODIFIED,
+  faqs: [],
+};
+
+export const SEO_PAGES: SeoPageDefinition[] = [homePage, guidePage];
 
 export function getSeoPage(path: string): SeoPageDefinition | undefined {
-  return path === '/' ? homePage : undefined;
+  return SEO_PAGES.find((page) => page.path === path);
 }
 
 export function absoluteUrl(path: string): string {

@@ -15,12 +15,6 @@ function connectionMargin(safeMbps: number, recommendedKbps?: number): string {
   return 'red al limite';
 }
 
-const stabilityLabels = {
-  stable: 'estable',
-  variable: 'variable',
-  unstable: 'inestable',
-} as const;
-
 function Metric({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="min-w-0 border-l border-paper/10 px-3 first:border-l-0">
@@ -45,7 +39,6 @@ export function NetworkDetectionSummary() {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const stability = uploadSpeed.stability ? stabilityLabels[uploadSpeed.stability] : 'no evaluada';
   const unstable = uploadSpeed.stability === 'unstable';
   const variable = uploadSpeed.stability === 'variable';
 

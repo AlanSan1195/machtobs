@@ -90,7 +90,9 @@ async function writePage(rendered, keepClient) {
   await writeFile(outputFile, html, 'utf8');
 }
 
-await writePage(renderSeoPage('/'), true);
+for (const route of ['/', '/como-configurar-obs']) {
+  await writePage(renderSeoPage(route), true);
+}
 
 const configuratorHtml = injectMarkup(
   template
@@ -115,4 +117,4 @@ await writeFile(path.join(distDirectory, '404.html'), removeClientScripts(notFou
 await writeFile(path.join(distDirectory, 'sitemap.xml'), buildSitemap(), 'utf8');
 await rm(ssrDirectory, { recursive: true, force: true });
 
-console.log('Prerendered the indexable landing, the configurator and a custom 404.');
+console.log('Prerendered the landing, OBS guide, configurator and custom 404.');

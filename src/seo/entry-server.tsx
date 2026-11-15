@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup, renderToString } from 'react-dom/server';
 import App from '../renderer/App';
 import { LandingPage } from '../renderer/LandingPage';
+import { ObsBeginnerGuide } from './ObsBeginnerGuide';
 import {
   DEFAULT_SOCIAL_IMAGE,
   getSeoPage,
@@ -21,7 +22,7 @@ export function renderSeoPage(path: string): RenderedSeoPage {
 
   const markup = renderToString(
     <React.StrictMode>
-      <LandingPage />
+      {page.kind === 'guide' ? <ObsBeginnerGuide /> : <LandingPage />}
     </React.StrictMode>,
   );
 

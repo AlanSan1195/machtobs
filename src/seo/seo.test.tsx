@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import App from '../renderer/App';
 import { LandingPage } from '../renderer/LandingPage';
+import { ObsBeginnerGuide } from './ObsBeginnerGuide';
 import {
   SEO_PAGES,
   SITE_URL,
@@ -35,8 +36,8 @@ describe('registro SEO', () => {
     }
   });
 
-  it('solo registra la landing como página indexable', () => {
-    expect(SEO_PAGES.map((page) => page.path)).toEqual(['/']);
+  it('registra la landing y una guía real para búsquedas informativas', () => {
+    expect(SEO_PAGES.map((page) => page.path)).toEqual(['/', '/como-configurar-obs']);
   });
 
   it('genera JSON-LD válido y específico para cada página', () => {
@@ -78,5 +79,13 @@ describe('HTML indexable', () => {
     expect(configurator).toContain('Abre OBS');
     expect(configurator).not.toContain('guía / 4 pasos');
     expect(configurator).not.toContain('OBS listo para tu equipo');
+  });
+
+  it('muestra pasos útiles y enlaza al configurador en la guía', () => {
+    const guide = renderToStaticMarkup(<ObsBeginnerGuide />);
+    expect(countTag(guide, 'h1')).toBe(1);
+    expect(guide).toContain('PASO 01');
+    expect(guide).toContain('href="/configurador"');
+    expect(guide).toContain('obsproject.com/kb/quick-start-guide/');
   });
 });

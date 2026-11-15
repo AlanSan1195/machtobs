@@ -1,28 +1,8 @@
 import React from 'react';
 import { HomeSeoContent } from '../seo/HomeSeoContent';
-import obsEyeSvg from './assets/obs-eye.svg';
 import { HeroObsEye } from './components/HeroObsEye';
 import { HeroParticleCanvas } from './components/HeroParticleCanvas';
 import { SiteFooter } from './components/SiteFooter';
-
-function BrandLink() {
-  return (
-    <a href="/" className="flex items-center gap-1" aria-label="Ir al inicio de Machtobs">
-      <span className="relative flex h-5 w-5 items-center justify-center sm:h-6 sm:w-6">
-        <span className="absolute inset-px rounded-full bg-primary" />
-        <img
-          src={obsEyeSvg}
-          alt=""
-          className="relative h-5 w-5 sm:h-6 sm:w-6"
-          style={{ filter: 'brightness(0) saturate(100%)' }}
-        />
-      </span>
-      <span className="font-display text-sm font-black uppercase tracking-tight text-paper">
-        Macht<span className="text-outline-thin">obs</span>
-      </span>
-    </a>
-  );
-}
 
 function SectionNumber({ value }: { value: number }) {
   return (
@@ -65,8 +45,9 @@ export function LandingPage() {
           <div>
             <h1 id="home-seo-title" className="mt-4 max-w-xl font-display text-[clamp(2.5rem,5.4vw,2rem)] font-black uppercase leading-[0.86] tracking-[-0.055em] text-paper">
             <span className="text-primary font-lg sm:font-9xl">/ </span>
-            ConfiguraciÓn Avanzada para tus directos
+            Configura OBS fácil, incluso si es tu primera vez
             </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-paper/70">Machtobs detecta tu equipo y tu conexión, te recomienda ajustes para transmitir o grabar y te explica cada cambio antes de aplicarlo.</p>
           </div>
           <div className="grid grid-cols-3 ">
           {[
@@ -98,6 +79,7 @@ export function LandingPage() {
                 <span className="font-display text-2xl  font-black uppercase tracking-[-0.035em] sm:text-3xl">Empezar</span>
                 <span aria-hidden="true" className="font-mono text-xl transition-transform group-hover:translate-x-1">→</span>
               </a>
+              <a href="/como-configurar-obs" className="mt-4 inline-flex min-h-12 items-center font-mono text-xs font-bold uppercase tracking-widest text-paper/75 underline decoration-primary underline-offset-8 hover:text-primary">¿Nunca has usado OBS? Lee la guía paso a paso →</a>
             </div>
           </div>
         </section>

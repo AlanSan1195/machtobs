@@ -8,7 +8,7 @@ type HomeFaq = {
 const HOME_FAQS: HomeFaq[] = [
   {
     question: '¿Machtobs configura OBS automáticamente?',
-    answer: 'Sí. Después de conectar OBS mediante WebSocket, Machtobs compara la configuración actual con una recomendación calculada para el equipo, la conexión y la plataforma. Siempre muestra los cambios antes de aplicarlos.',
+    answer: 'Sí. Después de conectar OBS mediante WebSocket, Machtobs compara la configuración actual con una recomendación calculada para el equipo, la conexión y la plataforma. Muestra los cambios antes de aplicarlos y requiere tu confirmación.',
   },
   {
     question: '¿Puedo usar Machtobs si nunca he hecho stream?',
@@ -27,18 +27,6 @@ const HOME_FAQS: HomeFaq[] = [
     answer: 'Sí. Puedes elegir streaming, grabación o ambos. La herramienta separa los ajustes de emisión y grabación para que el archivo local no quede limitado innecesariamente por la conexión a internet.',
   },
 ];
-
-function ArrowLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      className="group inline-flex min-h-12 items-center gap-3 border border-paper/20 px-4 py-3 font-mono text-[0.64rem] font-bold uppercase tracking-[0.14em] text-paper transition-colors hover:border-primary hover:text-primary"
-    >
-      {children}
-      <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span>
-    </a>
-  );
-}
 
 function SectionNumber({ value }: { value: number }) {
   return (
@@ -116,6 +104,17 @@ export function HomeSeoContent() {
   return (
     <section className="seo-deferred border-t border-paper/15" aria-labelledby="home-seo-title">
       <div className="mx-auto w-full max-w-[1440px] px-5 py-10 sm:px-8 ">
+        <section className="grid gap-8 border-b border-paper/15 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]" aria-labelledby="configurator-heading">
+          <div>
+            <p className="micro-label text-primary">/ empieza sin conocer cada ajuste</p>
+            <h2 id="configurator-heading" className="mt-4 max-w-xl font-display text-3xl font-black uppercase leading-none tracking-[-0.035em] text-paper sm:text-5xl">Un configurador de OBS para tu equipo</h2>
+          </div>
+          <div className="max-w-2xl space-y-4 text-base leading-7 text-paper/70">
+            <p>Abre OBS Studio, activa WebSocket y conecta Machtobs desde tu navegador. La herramienta revisa los ajustes disponibles y prepara una recomendación según tu hardware, conexión, plataforma y si quieres transmitir, grabar o ambas cosas.</p>
+            <p>Verás una comparación antes de cambiar nada. Puedes entender qué hacen la resolución, los FPS, el codificador y la tasa de bits, y confirmar los cambios con un respaldo previo.</p>
+            <a href="/como-configurar-obs" className="inline-flex min-h-12 items-center font-mono text-xs font-bold uppercase tracking-widest text-primary underline underline-offset-8">Aprender a configurar OBS paso a paso →</a>
+          </div>
+        </section>
       <div className="grid gap-8 border-b border-paper/15 pb-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center">
         <div>
             <p className="micro-label text-primary">/ conexión local</p>
