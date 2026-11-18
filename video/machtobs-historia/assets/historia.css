@@ -1,0 +1,58 @@
+/* Tokens y fuentes de la marca (src/renderer/styles/index.css). Un solo archivo para vertical y horizontal:
+   las escenas se dibujan en .act (960x860, igual en ambos) y los títulos en .say; solo cambia dónde va cada caja. */
+@font-face { font-family: 'Archivo Variable'; font-weight: 100 900; font-stretch: 62% 125%; src: url('fonts/archivo-latin-variable.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Sans Variable'; font-weight: 400 700; src: url('fonts/instrument-sans-latin-variable.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 700; src: url('fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2'); }
+
+:root { --ink: #090a0a; --paper: #f1efe8; --blue: #3a9bdc; --warn: #f2b84b; --line: rgba(241,239,232,.16); --muted: rgba(241,239,232,.68); }
+
+.stage { position: absolute; inset: 0; overflow: hidden; background: var(--ink); color: var(--paper); font-family: 'Instrument Sans Variable', sans-serif; -webkit-font-smoothing: antialiased; }
+[data-composition-id] { --ax: 60px; --ay: 470px; --sx: 54px; --sy: 196px; --sw: 972px; --ts: 112px; }
+[data-composition-id][data-width="1920"] { --ax: 900px; --ay: 110px; --sx: 96px; --sy: 236px; --sw: 760px; --ts: 90px; }
+.stage.paper { background: var(--paper); color: var(--ink); }
+.rules { position: absolute; inset: 0; background-image: linear-gradient(90deg, rgba(241,239,232,.028) 1px, transparent 1px); background-size: 180px 100%; }
+.paper .rules, .rules.dark { background-image: linear-gradient(90deg, rgba(9,10,10,.05) 1px, transparent 1px); }
+.full { position: absolute; inset: 0; }
+.abs { position: absolute; }
+.act { position: absolute; left: var(--ax); top: var(--ay); width: 960px; height: 860px; }
+.say { position: absolute; left: var(--sx); top: var(--sy); width: var(--sw); font-size: var(--ts); }
+.say > div { position: absolute; left: 0; top: 0; white-space: nowrap; }
+/* títulos de tres líneas o palabra larga: a 112px chocan con la barra de .act o se salen en vertical */
+.say > .tight { font-size: min(1em, 92px); }
+.d { font-family: 'Archivo Variable', 'Arial Black', sans-serif; font-stretch: 125%; font-weight: 900; letter-spacing: -.055em; line-height: .96; text-transform: uppercase; }
+.m { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .06em; font-size: 28px; }
+.b { color: var(--blue); }
+.out { -webkit-text-fill-color: transparent; -webkit-text-stroke: 3px currentColor; background-clip: text; }
+.cursor { position: absolute; left: 0; top: 0; width: 84px; height: 84px; z-index: 50; transform-origin: 18% 12%; }
+
+/* barra del producto, dentro de .act */
+.bar { position: absolute; left: 0; right: 0; top: 0; height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 8px; font-family: 'Archivo Variable'; font-stretch: 125%; font-weight: 900; font-size: 32px; letter-spacing: -.03em; }
+.brand .thin { color: transparent; -webkit-text-stroke: 1.2px var(--paper); }
+.eye { width: 42px; height: 42px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; flex: none; }
+.eye img { width: 42px; height: 42px; display: block; }
+.nav { display: flex; gap: 22px; }
+.nav span { padding-bottom: 4px; color: rgba(241,239,232,.4); }
+.nav .on { color: var(--blue); border-bottom: 4px solid var(--blue); }
+.nav .ok { color: var(--paper); }
+.stat { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+.stat i { width: 12px; height: 12px; background: rgba(241,239,232,.3); display: block; }
+.stat.live { color: var(--paper); }
+.stat.live i { background: var(--blue); }
+.cta { position: absolute; left: 0; top: 600px; width: 620px; height: 180px; background: var(--blue); color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 18px; }
+.tile { position: absolute; border: 2px solid rgba(241,239,232,.22); color: rgba(241,239,232,.62); display: flex; align-items: center; justify-content: center; text-align: center; }
+.row { position: absolute; left: 0; right: 0; border-bottom: 2px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.row b { font-family: 'Archivo Variable'; font-stretch: 125%; font-weight: 900; letter-spacing: -.04em; text-transform: uppercase; }
+
+/* ventanas de OBS: gris real de la app */
+.win { position: absolute; left: 0; top: 0; width: 440px; background: #17181e; color: #e6e6ea; border: 2px solid #3c404b; box-shadow: 10px 10px 0 rgba(9,10,10,.35); font-size: 30px; }
+.win b { display: block; background: #2a2d37; padding: 12px 18px; font-weight: 600; white-space: nowrap; }
+.win span { display: block; margin: 10px 18px; padding: 8px 14px; background: #0f1014; border: 1px solid #3c404b; white-space: nowrap; }
+.win span.q { border-color: var(--warn); color: var(--warn); }
+
+/* Nico */
+.nico { position: absolute; left: 0; top: 0; width: 400px; height: 460px; overflow: visible; }
+.nico svg { width: 400px; height: 460px; overflow: visible; display: block; }
+.say i { font-style: normal; display: inline-block; }
+.hl { background: var(--blue); color: var(--ink); padding: 0 .12em; margin-left: -.06em; }

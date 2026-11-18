@@ -1,0 +1,78 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #p-dlg { left: 0; top: 96px; width: 960px; height: 464px; background: var(--paper); color: var(--ink); padding: 34px 40px; }
+    #p-dlg .m { text-transform: none; letter-spacing: 0; font-size: 32px; line-height: 1.5; }
+    .btn { position: absolute; top: 352px; height: 84px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; }
+    #p-obs { left: 0; top: 96px; width: 960px; height: 464px; background: #17181e; color: #e6e6ea; border: 2px solid #3c404b; font-size: 30px; }
+    #p-obs .tb { background: #2a2d37; padding: 10px 18px; font-weight: 600; }
+    #p-obs .sd { position: absolute; left: 0; top: 60px; bottom: 0; width: 200px; border-right: 2px solid #3c404b; padding: 14px 0; }
+    #p-obs .sd span { display: block; padding: 10px 18px; }
+    #p-obs .sd .on { background: #284cb8; }
+    .or { position: absolute; left: 226px; right: 24px; height: 90px; }
+    .or small { display: block; font-size: 24px; color: #a9abb5; }
+    .or div { position: relative; height: 54px; margin-top: 4px; background: #0f1014; border: 1px solid #3c404b; overflow: hidden; }
+    .or div span { position: absolute; left: 16px; top: 8px; white-space: nowrap; }
+    #p-st { left: 0; top: 566px; text-transform: none; letter-spacing: 0; font-size: 34px; color: var(--blue); white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="aplica" data-width="1080" data-height="1920">
+    <div id="p-all" class="stage">
+      <div class="rules"></div>
+      <div class="say d" data-layout-allow-overlap>
+        <div id="p-t1"><i>Aplica</i><br/><i>con</i> <i>un</i> <i>clic</i></div>
+        <div id="p-t2" class="tight"><i>Tu</i> <i>OBS,</i><br/><i>configurado</i></div>
+      </div>
+      <div id="p-in" class="act">
+        <div class="bar"><div class="brand"><span class="eye"><img src="assets/obs-eye.svg" alt="" /></span>MACHT<span class="thin">OBS</span></div><div class="nav"><span class="m ok">✓</span><span class="m ok">✓</span><span class="m on">03</span><span class="m">04</span></div><div class="stat live m"><i></i>conectado</div></div>
+        <div id="p-dlg" class="abs">
+          <div class="d" style="font-size:46px;white-space:nowrap">Aplicar salida en OBS</div>
+          <div class="m" style="margin-top:22px">FPS 30 → <b>60</b><br/>Encoder x264 → <b>Apple VT H.264</b><br/>Bitrate 2500 → <b>6000 kbps</b></div>
+          <div style="font-size:30px;margin-top:14px;color:rgba(9,10,10,.7)">Se guardará un respaldo automático.</div>
+          <div class="btn" style="left:40px;width:300px;border:3px solid var(--ink)">Cancelar</div>
+          <div id="p-ok" class="btn" style="left:364px;width:556px;background:var(--blue)">Aplicar cambios</div>
+        </div>
+        <div id="p-obs" class="abs">
+          <div class="tb">Ajustes</div>
+          <div class="sd"><span>General</span><span>Emisión</span><span class="on">Salida</span><span>Audio</span><span>Vídeo</span></div>
+          <div class="or" style="top:70px"><small>Codificador de vídeo</small><div><span class="o">x264</span><span class="n">Apple VT H264</span></div></div>
+          <div class="or" style="top:166px"><small>Bitrate de vídeo</small><div><span class="o">2500 Kbps</span><span class="n">6000 Kbps</span></div></div>
+          <div class="or" style="top:262px"><small>Valores comunes de FPS</small><div><span class="o">30</span><span class="n">60</span></div></div>
+          <div class="or" style="top:358px"><small>Resolución de salida (Escalada)</small><div><span class="o">1280x720</span><span class="n">1920x1080</span></div></div>
+        </div>
+        <div id="p-st" class="abs m">✓ configuración aplicada</div>
+        <svg id="p-cur" class="cursor" viewBox="0 0 24 24"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const L = MO.land('aplica'), AX = L ? 900 : 60, AY = L ? 110 : 470;
+    gsap.set(['#p-obs', '#p-st', '#p-t2 i'], { opacity: 0 });
+    gsap.set('#p-cur', { x: 380, y: 690 });
+    // iris desde el clic en ./aplicar
+    tl.fromTo('#p-all', { clipPath: 'circle(0px at ' + (AX + 380) + 'px ' + (AY + 690) + 'px)' }, { clipPath: 'circle(2400px at ' + (AX + 380) + 'px ' + (AY + 690) + 'px)', duration: 0.24, ease: 'power2.in' }, 0);
+    tl.fromTo('#p-dlg', { scale: 1.06 }, { scale: 1, duration: 0.4, ease: 'expo.out' }, 0.1);
+    MO.words(tl, '#p-t1', 0.14);
+    MO.move(tl, '#p-cur', 0.5, 700, 500, 0.6);
+    MO.click(tl, '#p-cur', 1.29);
+    tl.to('#p-ok', { scale: 0.95, duration: 0.06 }, 1.29).to('#p-ok', { scale: 1, duration: 0.16, ease: 'back.out(3)' }, 1.35);
+    // el diálogo deja ver OBS: los valores cambian uno por pulso
+    MO.blurOut(tl, ['#p-dlg', '#p-t1'], 1.5, 0.14);
+    MO.blurIn(tl, '#p-obs', 1.58, 0.14);
+    MO.words(tl, '#p-t2', 1.74);
+    tl.to('#p-cur', { opacity: 0, duration: 0.1 }, 1.5);
+    [1.72, 2.15, 2.58, 3.0].forEach((t, i) => {
+      const r = '#p-obs .or:nth-of-type(' + (i + 3) + ') ';
+      gsap.set(r + '.n', { y: 54, color: '#f2b84b' });
+      tl.to(r + '.o', { y: -54, duration: 0.2, ease: 'power3.in' }, t - 0.1);
+      tl.to(r + '.n', { y: 0, duration: 0.26, ease: 'back.out(2)' }, t);
+      tl.to(r + 'div', { borderColor: '#f2b84b', duration: 0.05 }, t);
+    });
+    MO.pop(tl, '#p-st', 3.43, 0.26);
+    // salida en látigo hacia la izquierda: sigue el audio
+    MO.blurOut(tl, '#p-t2', 4.18);
+    tl.to('#p-in', { x: -1400, filter: 'blur(18px)', duration: 0.2, ease: 'power3.in' }, 4.2);
+    window.__timelines["aplica"] = tl;
+  </script>
+</template>

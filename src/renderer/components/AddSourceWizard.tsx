@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store';
 import { useAppAPI } from '../hooks/useAppAPI';
-import type { DeviceOption, ResolvedSourceKind, SceneItemSummary, SourceKindFriendly } from '../../shared/types';
+import type { CameraFrameStyle, DeviceOption, ResolvedSourceKind, SceneItemSummary, SourceKindFriendly } from '../../shared/types';
 import { IconClapperboard, IconMonitor, IconSliders, IconTv, IconVideo, Spinner } from './ui';
 
 type AddSourceWizardProps = {
@@ -38,7 +38,7 @@ const primaryButton =
   'inline-flex items-center justify-center gap-1.5 rounded-none bg-primary px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50';
 const secondaryButton =
   'inline-flex items-center justify-center gap-1.5 rounded-none border border-border px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary/40 hover:bg-white/[0.04]';
-const FRAME_COLORS = ['#3A9BDC', '#FFFFFF', '#7EE0C3', '#F2B84B', '#FF5C5C', '#B58CFF'];
+const FRAME_COLORS = ['#3A9BDC', '#FFFFFF', '#7EE0C3', '#F2B84B', '#FF5C5C', '#B58CFF', '#FF3EC8'];
 
 export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWizardProps) {
   const availableSourceKinds = useAppStore((state) => state.availableSourceKinds);
@@ -74,6 +74,7 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
   const [frameColor, setFrameColor] = useState('#3A9BDC');
   const [frameThickness, setFrameThickness] = useState(12);
   const [frameRounded, setFrameRounded] = useState(false);
+  const [frameStyle, setFrameStyle] = useState<CameraFrameStyle>('solid');
 
   const cameraSources = sceneSources.filter((source) => source.friendlyKind === 'camera');
 
@@ -316,6 +317,7 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
           color: frameColor,
           thickness: frameThickness,
           rounded: frameRounded,
+          style: frameStyle,
         },
       });
       if (result.success) {
@@ -359,6 +361,7 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
             color: frameColor,
             thickness: frameThickness,
             rounded: frameRounded,
+            style: frameStyle,
           },
         });
         if (!frameResult.success) {
@@ -577,13 +580,14 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
           <div className="grid gap-5 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div className="flex flex-col items-center justify-center border border-paper/10 bg-black/40 p-5">
               <div
-                className="camera-frame-preview aspect-square w-full max-w-[190px]"
+                className={`camera-frame-preview aspect-square w-full max-w-[190px] ${frameStyle === 'neon' ? 'camera-frame-neon' : ''}`}
                 style={{
                   borderRadius: frameRounded ? `${Math.max(18, frameThickness * 2)}px` : 0,
                   backgroundColor: frameColor,
                   padding: frameThickness,
+                  '--frame-color': frameColor,
                 } as React.CSSProperties}
-                aria-label={`Vista previa de marco sólido ${frameRounded ? 'rounded' : 'recto'}, color ${frameColor}, grosor ${frameThickness} pixeles`}
+                aria-label={`Vista previa de marco ${frameStyle === 'neon' ? 'neón animado' : 'sólido'} ${frameRounded ? 'rounded' : 'recto'}, color ${frameColor}, grosor ${frameThickness} pixeles`}
               >
                 <div
                   className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_50%_32%,rgba(241,239,232,0.2)_0_18%,transparent_19%),linear-gradient(145deg,rgba(58,155,220,0.2),rgba(9,10,10,0.96))]"
@@ -594,7 +598,7 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
                     1:1
                   </span>
                   <span className="absolute right-2 top-2 border border-paper/15 bg-black/70 px-1.5 py-0.5 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-paper/70">
-                    Solid
+                    {frameStyle === 'neon' ? 'Neon' : 'Solid'}
                   </span>
                 </div>
               </div>
@@ -604,6 +608,25 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
             </div>
 
             <div className="space-y-5">
+              <fieldset className="space-y-2">
+                <legend className="micro-label">estilo</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  {([['solid', 'Sólido'], ['neon', 'Neón animado']] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFrameStyle(value)}
+                      aria-pressed={frameStyle === value}
+                      className={`border px-3 py-2 text-sm font-semibold transition-colors ${
+                        frameStyle === value ? 'border-primary bg-primary/[0.08] text-primary' : 'border-border text-text-muted'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
               <fieldset className="space-y-2">
                 <legend className="micro-label">forma</legend>
                 <div className="grid grid-cols-2 gap-2">
@@ -631,7 +654,7 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
               </fieldset>
 
               <fieldset className="space-y-2">
-                <legend className="micro-label">color sólido</legend>
+                <legend className="micro-label">{frameStyle === 'neon' ? 'color neón' : 'color sólido'}</legend>
                 <div className="flex flex-wrap items-center gap-2">
                   {FRAME_COLORS.map((color) => (
                     <button
@@ -682,9 +705,11 @@ export function AddSourceWizard({ sceneName, onClose, onCreated }: AddSourceWiza
               </label>
 
               <p className="border-l-2 border-primary/50 pl-3 text-xs leading-relaxed text-text-muted">
-                {frameRounded
-                  ? 'El marco sólido conservará la preferencia Rounded y usará la variante compatible con tu OBS.'
-                  : 'El marco recto se importará como una fuente de color sólida y ligera.'}
+                {frameStyle === 'neon'
+                  ? 'El neón se importará como Browser Source animada detrás de tu cámara: brillo que pulsa y destellos blancos que recorren el borde.'
+                  : frameRounded
+                    ? 'El marco sólido se aplica recto en OBS; elige Neón animado para esquinas redondeadas.'
+                    : 'El marco recto se importará como una fuente de color sólida y ligera.'}
                 {' '}Podras volver a esta herramienta para cambiarlo.
               </p>
 

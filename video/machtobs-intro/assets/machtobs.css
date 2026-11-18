@@ -1,0 +1,53 @@
+/* Tokens, fuentes y componentes copiados de src/renderer/styles/index.css y tailwind.config.js */
+@font-face { font-family: 'Archivo Variable'; font-weight: 100 900; font-stretch: 62% 125%; src: url('fonts/archivo-latin-variable.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Sans Variable'; font-weight: 400 700; src: url('fonts/instrument-sans-latin-variable.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url('fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 700; src: url('fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2'); }
+
+:root { --ink: #090a0a; --paper: #f1efe8; --blue: #3a9bdc; --warn: #f2b84b; --line: rgba(241,239,232,.16); --muted: rgba(241,239,232,.68); }
+
+.stage { position: absolute; inset: 0; overflow: hidden; background: var(--ink); color: var(--paper); font-family: 'Instrument Sans Variable', sans-serif; -webkit-font-smoothing: antialiased; }
+.rules { position: absolute; inset: 0; background-image: linear-gradient(90deg, rgba(241,239,232,.028) 1px, transparent 1px); background-size: 180px 100%; }
+.abs { position: absolute; }
+.d { font-family: 'Archivo Variable', 'Arial Black', sans-serif; font-stretch: 125%; font-weight: 900; letter-spacing: -.055em; line-height: .9; text-transform: uppercase; }
+.m { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .08em; font-size: 28px; }
+.b { color: var(--blue); }
+.out { color: transparent; -webkit-text-stroke: 3px var(--paper); }
+.lead { font-size: 42px; line-height: 1.25; color: var(--muted); }
+
+/* barra del producto */
+.bar { position: absolute; left: 0; right: 0; top: 168px; height: 88px; display: flex; align-items: center; justify-content: space-between; padding: 0 54px; border-bottom: 2px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 8px; font-family: 'Archivo Variable'; font-stretch: 125%; font-weight: 900; font-size: 34px; letter-spacing: -.03em; }
+.brand .thin { color: transparent; -webkit-text-stroke: 1.2px var(--paper); }
+.eye { width: 44px; height: 44px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; }
+.eye img { width: 44px; height: 44px; display: block; }
+.nav { display: flex; gap: 24px; }
+.nav span { position: relative; padding-bottom: 6px; color: rgba(241,239,232,.4); font-size: 30px; }
+.nav .on { color: var(--blue); border-bottom: 4px solid var(--blue); }
+.nav .ok { color: var(--paper); }
+.stat { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+.stat i { width: 12px; height: 12px; background: rgba(241,239,232,.3); display: block; }
+.stat.live { color: var(--paper); }
+.stat.live i { background: var(--blue); }
+.meta { position: absolute; left: 0; right: 0; top: 256px; height: 62px; display: flex; align-items: center; justify-content: space-between; padding: 0 54px; border-bottom: 2px solid var(--line); color: var(--muted); }
+.meta { letter-spacing: 0; white-space: nowrap; }
+.meta b { color: var(--paper); font-weight: 400; }
+
+/* decoración bajo la zona segura */
+.ghost { position: absolute; right: 30px; top: 1345px; font-family: 'Archivo Variable'; font-stretch: 125%; font-weight: 900; font-size: 520px; line-height: 1; letter-spacing: -.05em; color: rgba(241,239,232,.055); }
+.rail { position: absolute; left: 54px; right: 54px; top: 1356px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.rail i { height: 8px; background: rgba(241,239,232,.14); display: block; }
+.rail i.on { background: var(--blue); }
+
+/* selectores */
+.tile { position: absolute; border: 2px solid rgba(241,239,232,.2); color: rgba(241,239,232,.6); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; }
+.tile svg, .ico { width: 56px; height: 56px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.cta { position: absolute; background: var(--blue); color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 18px; }
+.cursor { position: absolute; left: 0; top: 0; width: 84px; height: 84px; z-index: 50; transform-origin: 18% 12%; }
+
+/* OBS */
+.obs { background: #17181e; color: #e6e6ea; font-family: 'Instrument Sans Variable', sans-serif; }
+.crop { position: absolute; overflow: hidden; background: #0b0b0e; border-top: 2px solid rgba(255,255,255,.1); border-bottom: 2px solid rgba(255,255,255,.1); }
+.crop video { position: absolute; }

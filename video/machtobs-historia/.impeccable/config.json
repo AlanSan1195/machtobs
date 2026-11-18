@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "compositions/audio.html"
+        ],
+        "createdAt": "2026-11-17T19:04:10.804Z",
+        "reason": "Claude triage: no card has a one-sided accent border; the flagged shapes are the waveform playhead (#u-ph) and the dashed limiter line (#u-lim), literal audio UI, plus full-width row dividers"
+      }
+    ]
+  }
+}

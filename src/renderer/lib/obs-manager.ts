@@ -56,9 +56,11 @@ import {
   ENUM_UNSAFE_KINDS,
   FRIENDLY_LABELS,
   buildUniqueInputName,
+  buildNeonFrameUrl,
   cameraFrameName,
   friendlyKindFromInputKind,
   hexToObsColor,
+  neonFrameGlow,
   resolveAllSourceKinds,
   resolveSourceKind,
 } from './scene-helpers';
@@ -1928,10 +1930,9 @@ export class OBSManager {
     }
   }
 
-  // Crea o actualiza una fuente ligeramente mayor que la facecam. Los marcos
-  // rectos y solidos usan Color Source; rounded o animados usan Browser Source
-  // Crea o actualiza una fuente de color ligeramente mayor que la facecam.
-  // El marco queda editable y se coloca inmediatamente debajo de la camara.
+  // Crea o actualiza una fuente ligeramente mayor que la facecam, colocada
+  // justo debajo de la camara. Solido usa Color Source; neon usa Browser
+  // Source animada (con halo, por eso crece un margen extra).
   async setCameraFrame(input: SetCameraFrameInput): Promise<{
     success: boolean;
     message: string;
@@ -1971,8 +1972,6 @@ export class OBSManager {
       }
 
       const thickness = input.config.thickness;
-      const frameWidth = Math.round(cameraWidth + thickness * 2);
-      const frameHeight = Math.round(cameraHeight + thickness * 2);
       const desiredFrameName = cameraFrameName(input.cameraInputName);
       const sceneItems = await this.obs.call('GetSceneItemList', { sceneName: input.sceneName });
       const existingFrame = sceneItems.sceneItems
@@ -1990,7 +1989,16 @@ export class OBSManager {
       const availableKinds = (kindResponse.inputKinds ?? [])
         .filter((kind): kind is string => typeof kind === 'string');
       const colorKind = ['color_source_v3', 'color_source'].find((kind) => availableKinds.includes(kind));
-      const desiredKind = colorKind;
+      const browserKind = availableKinds.includes('browser_source') ? 'browser_source' : undefined;
+      let neon = input.config.style === 'neon';
+      if (neon && !browserKind) {
+        neon = false;
+        warnings.push('Tu OBS no incluye Browser Source; se aplicó un marco sólido en lugar del neón.');
+      }
+      const desiredKind = neon ? browserKind : colorKind;
+      const padding = thickness + (neon ? neonFrameGlow(thickness) : 0);
+      const frameWidth = Math.round(cameraWidth + padding * 2);
+      const frameHeight = Math.round(cameraHeight + padding * 2);
 
       if (!desiredKind) {
         return {
@@ -2000,18 +2008,29 @@ export class OBSManager {
         };
       }
 
-      const inputSettings: OBSJsonSettings = {
-        color: hexToObsColor(input.config.color),
-        width: frameWidth,
-        height: frameHeight,
-      };
+      const inputSettings: OBSJsonSettings = neon
+        ? {
+          url: buildNeonFrameUrl(input.config),
+          is_local_file: false,
+          width: frameWidth,
+          height: frameHeight,
+          fps: 30,
+          css: '',
+          shutdown: false,
+          restart_when_active: false,
+        }
+        : {
+          color: hexToObsColor(input.config.color),
+          width: frameWidth,
+          height: frameHeight,
+        };
 
-      if (input.config.rounded) {
-        warnings.push('OBS aplicó el marco sólido como recto porque Browser Source no está generando textura.');
+      if (input.config.rounded && !neon) {
+        warnings.push('El marco sólido se aplica recto; elige Neón para esquinas redondeadas.');
       }
 
-      // OBS no permite cambiar el kind de una fuente. Si existe un marco Browser
-      // transparente de una version anterior, lo reemplazamos por color nativo.
+      // OBS no permite cambiar el kind de una fuente: al pasar de solido a neon
+      // (o al reves) borramos el marco anterior y lo creamos de nuevo.
       if (frameSceneItemId !== undefined && existingFrameKind !== desiredKind) {
         await this.obs.call('RemoveInput', { inputName: frameInputName });
         frameSceneItemId = undefined;
@@ -2039,8 +2058,8 @@ export class OBSManager {
         sceneName: input.sceneName,
         sceneItemId: frameSceneItemId,
         sceneItemTransform: {
-          positionX: positionX - thickness,
-          positionY: positionY - thickness,
+          positionX: positionX - padding,
+          positionY: positionY - padding,
           boundsType: 'OBS_BOUNDS_STRETCH',
           boundsWidth: frameWidth,
           boundsHeight: frameHeight,
@@ -2071,7 +2090,7 @@ export class OBSManager {
 
       return {
         success: true,
-        message: 'Marco sólido aplicado',
+        message: neon ? 'Marco neón aplicado' : 'Marco sólido aplicado',
         frameInputName,
         frameSceneItemId,
         warnings,

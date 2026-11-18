@@ -6,7 +6,7 @@
 
 ## Propósito
 
-OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: prueba, decide y aplica sin explicar nada. Machtobs apunta a lo contrario — que entiendas tu configuración:
+OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: prueba, decide y aplica sin explicar nada. Machtobs apunta a lo contrario — que entiendas tu configuración, y te ayude en tus inicios. NO IMPORTA QUE NO ENTIENDAS OBS incluso aqui aprenderesa como  va esto de las configuraciones:
 
 - Explica **por qué** cada ajuste tiene sentido para tu equipo.
 - Muestra un **diff** entre tu configuración actual y la recomendada antes de tocar nada.
@@ -15,7 +15,7 @@ OBS ya trae un asistente de auto-configuración, pero funciona como caja negra: 
 
 ## Setup
 
-**Como usuario**: OBS Studio abierto en la misma computadora con el servidor WebSocket activado (`Herramientas → Ajustes del servidor WebSocket`) y un navegador Chrome, Edge o Firefox (Safari bloquea la conexión local con OBS).
+**Como usuario**: OBS Studio abierto en la misma computadora con el servidor WebSocket activado (`Herramientas → Ajustes del servidor WebSocket`) y un navegador Chrome, Edge o Firefox (Safari bloquea la conexión local con OBS) es neceario copiar tu contraseña de servidor obs para abrir la conxion con obs y el navegador y mantenga la comunicación. 
 
 **Como desarrollador**:
 

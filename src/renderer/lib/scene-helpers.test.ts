@@ -3,6 +3,7 @@ import {
   buildUniqueInputName,
   cameraFrameName,
   friendlyKindFromInputKind,
+  buildNeonFrameUrl,
   hexToObsColor,
   resolveAllSourceKinds,
   resolveSourceKind,
@@ -89,4 +90,16 @@ describe('camera frame helpers', () => {
     expect(hexToObsColor('#FFFFFF')).toBe(4_294_967_295);
   });
 
+});
+
+describe('buildNeonFrameUrl', () => {
+  it('genera una pagina animada con el color y deja margen para el halo', () => {
+    const url = buildNeonFrameUrl({ color: '#FF3EC8', thickness: 12, rounded: true });
+    expect(url.startsWith('data:text/html;charset=utf-8,')).toBe(true);
+    const html = decodeURIComponent(url.slice(url.indexOf(',') + 1));
+    expect(html).toContain('#FF3EC8');
+    expect(html).toContain('conic-gradient');
+    expect(html).toContain('inset:18px');
+    expect(html).toContain('border-radius:24px');
+  });
 });

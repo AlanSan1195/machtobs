@@ -960,6 +960,11 @@ export function validateSetCameraFrame(value: unknown): ValidationResult<SetCame
   if (typeof value.config.rounded !== 'boolean') {
     return { success: false, message: 'La forma rounded del marco debe ser un booleano.' };
   }
+  // Clientes anteriores no envian estilo: se mantiene el marco solido.
+  const style = value.config.style ?? 'solid';
+  if (style !== 'solid' && style !== 'neon') {
+    return { success: false, message: 'El estilo del marco debe ser solido o neon.' };
+  }
   return {
     success: true,
     value: {
@@ -970,6 +975,7 @@ export function validateSetCameraFrame(value: unknown): ValidationResult<SetCame
         color: value.config.color.toUpperCase(),
         thickness: value.config.thickness,
         rounded: value.config.rounded,
+        style,
       },
     },
   };

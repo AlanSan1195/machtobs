@@ -1,0 +1,31 @@
+<template>
+  <link rel="stylesheet" href="assets/machtobs.css" />
+  <style>#root { position: absolute; inset: 0; }</style>
+  <div data-hf-id="hf-c1xy" id="root" data-composition-id="conecta" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-tan6" class="stage"><div data-hf-id="hf-e2xp" class="rules"></div>
+    <div data-hf-id="hf-ufsv" class="bar"><div data-hf-id="hf-zb12" class="brand"><span data-hf-id="hf-92w8" class="eye"><img data-hf-id="hf-4vn6" src="assets/obs-eye.svg" alt="" /></span>MACHT<span data-hf-id="hf-khb6" class="thin">OBS</span></div><div data-hf-id="hf-e5hr" class="nav"><span data-hf-id="hf-bu4e" class="m on">01</span><span data-hf-id="hf-9ees" class="m ">02</span><span data-hf-id="hf-903r" class="m ">03</span><span data-hf-id="hf-a70u" class="m ">04</span></div><div data-hf-id="hf-12cs" class="stat m "><i data-hf-id="hf-wt6k"></i>sin conexión</div></div>
+    <div data-hf-id="hf-ygd6" class="meta m"><span data-hf-id="hf-y824">00—01 <b data-hf-id="hf-fkh9">/ conectar</b></span><span data-hf-id="hf-li8a">modo / <b data-hf-id="hf-gd43">—</b> &nbsp; destino / <b data-hf-id="hf-0uhv">—</b></span></div>
+    <div data-hf-id="hf-hxki" class="abs m b" style="left:54px;top:370px;font-weight:700">/ conexión local</div>
+    <div data-hf-id="hf-25uc" id="c-t" class="abs d" style="left:54px;top:430px;font-size:158px">Conecta<br data-hf-id="hf-x5px"/>OBS</div>
+    <div data-hf-id="hf-pffu" id="c-s" class="abs lead" style="left:54px;right:54px;top:740px">Abre OBS Studio y sigue los cuatro pasos.</div>
+    <div data-hf-id="hf-d0mw" id="c-card" class="abs" style="left:0;right:0;top:880px;height:420px;border-top:2px solid var(--line);border-bottom:2px solid var(--line)">
+      <div data-hf-id="hf-aolt" class="abs d" style="right:40px;bottom:10px;font-size:220px;color:rgba(241,239,232,.06);letter-spacing:-.04em">01</div>
+      <div data-hf-id="hf-e6hu" class="abs d" style="left:54px;top:50px;font-size:74px">Abre OBS</div>
+      <div data-hf-id="hf-72xj" class="abs lead" style="left:54px;right:54px;top:160px;font-size:48px;color:var(--muted)">Ve a <span data-hf-id="hf-bh6d" id="c-w" style="color:var(--blue);padding:2px 8px;display:inline-block">Herramientas</span> →<br data-hf-id="hf-rsrt"/>Ajustes del servidor WebSocket.</div>
+    </div>
+    <div data-hf-id="hf-h12p" class="rail" data-layout-ignore><i data-hf-id="hf-l5u7" class="on"></i><i data-hf-id="hf-gd9w" class=""></i><i data-hf-id="hf-x6bw" class=""></i><i data-hf-id="hf-vzet" class=""></i></div><div data-hf-id="hf-f4nf" class="ghost" data-layout-ignore>01</div>
+    <div data-hf-id="hf-zxt6" id="c-cover" class="abs" style="left:0;right:0;top:0;bottom:0;background:var(--blue)"></div>
+    <svg data-hf-id="hf-fmtw" id="c-cur" class="cursor" viewBox="0 0 24 24"><path data-hf-id="hf-yl27" d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo('#c-cover', { clipPath: 'inset(0 0 0% 0)' }, { clipPath: 'inset(0 0 100% 0)', duration: 0.42, ease: 'power3.inOut' }, 0);
+    MO.blurIn(tl, '#c-s', 0.28);
+    tl.fromTo('#c-card', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: 'expo.out' }, 0.32);
+    MO.enter(tl, '#c-cur', 0.9, 1120, 1500, 300, 1075, 0.55);
+    MO.click(tl, '#c-cur', 1.52);
+    tl.to('#c-w', { backgroundColor: '#3a9bdc', color: '#090a0a', duration: 0.06 }, 1.55);
+    window.__timelines["conecta"] = tl;
+  </script>
+</template>

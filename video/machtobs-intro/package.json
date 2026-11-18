@@ -1,0 +1,11 @@
+{
+  "name": "machtobs-intro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.8.218 preview",
+    "check": "npx --yes hyperframes@0.8.218 check",
+    "render": "npx --yes hyperframes@0.8.218 render",
+    "publish": "npx --yes hyperframes@0.8.218 publish"
+  }
+}

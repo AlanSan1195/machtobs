@@ -531,11 +531,15 @@ export interface SetCameraLayoutInput {
 }
 
 // Marco editable que se crea como una fuente independiente justo debajo de la
-// camara. El usuario puede elegir color, grosor y forma.
+// camara. El usuario puede elegir color, grosor, forma y estilo.
+// 'neon' usa Browser Source animada; 'solid' una Color Source nativa.
+export type CameraFrameStyle = 'solid' | 'neon';
+
 export interface CameraFrameConfig {
   color: string;
   thickness: number;
   rounded: boolean;
+  style: CameraFrameStyle;
 }
 
 export interface SetCameraFrameInput {

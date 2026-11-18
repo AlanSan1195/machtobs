@@ -1,0 +1,50 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #k-box { left: 660px; top: 560px; width: 300px; height: 300px; overflow: hidden; background: #e7e3d8; border: 4px solid var(--paper); }
+  </style>
+  <div id="root" data-composition-id="cam" data-width="1080" data-height="1920">
+    <div class="full">
+      <div class="act" data-layout-allow-overflow><div id="k-box" class="abs"><div id="k-n" class="nico" style="left:-14px;top:8px;transform-origin:0 0"></div></div></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    MO.nico('k-n', 'down');
+    gsap.set('#k-n', { scale: 0.82 });
+    // la facecam de Nico reacciona a cada paso (tiempos locales: película − 18.21)
+    MO.pop(tl, '#k-box', 0.1, 0.34);
+    MO.mood(tl, 'k-n', 0.9, 'curious');
+    MO.blink(tl, 'k-n', 2.0);
+    MO.mood(tl, 'k-n', 3.45, 'smile');
+    // red
+    MO.mood(tl, 'k-n', 4.7, 'curious');
+    MO.mood(tl, 'k-n', 6.3, 'wow');
+    MO.mood(tl, 'k-n', 7.4, 'smile');
+    // analiza
+    MO.blink(tl, 'k-n', 9.6);
+    MO.mood(tl, 'k-n', 10.6, 'curious');
+    MO.mood(tl, 'k-n', 12.2, 'wow');
+    // aplica
+    MO.blink(tl, 'k-n', 13.8);
+    MO.mood(tl, 'k-n', 15.6, 'smile');
+    MO.mood(tl, 'k-n', 17.7, 'grin');
+    // audio
+    MO.mood(tl, 'k-n', 19.0, 'curious');
+    MO.mood(tl, 'k-n', 19.65, 'wow');
+    MO.mood(tl, 'k-n', 21.0, 'smile');
+    MO.blink(tl, 'k-n', 22.4);
+    MO.mood(tl, 'k-n', 23.0, 'grin');
+    // escenas
+    MO.mood(tl, 'k-n', 24.8, 'look');
+    MO.mood(tl, 'k-n', 26.0, 'smile');
+    MO.mood(tl, 'k-n', 27.25, 'wow');
+    MO.mood(tl, 'k-n', 28.88, 'grin');
+    // se pone los audífonos: ahora sí
+    tl.fromTo('#k-n .nk-phones', { opacity: 1, y: -230 }, { opacity: 1, y: 0, duration: 0.4, ease: 'bounce.out', immediateRender: false }, 29.33);
+    tl.to('#k-n .nk-head', { scaleY: 0.9, duration: 0.08 }, 29.48).to('#k-n .nk-head', { scaleY: 1, duration: 0.4, ease: 'elastic.out(1, 0.4)' }, 29.56);
+    tl.to('#k-box', { scale: 0.9, duration: 0.2, ease: 'power2.in' }, 30.36);
+    window.__timelines["cam"] = tl;
+  </script>
+</template>

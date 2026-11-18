@@ -1,0 +1,1706 @@
+{
+  "ok": false,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 26,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/click.mp3 at 2.42-2.79s, assets/sfx/whoosh.mp3 at 2.55-3.12s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/click.mp3 at 10.8-11.17s, assets/sfx/whoosh-short.mp3 at 11.05-11.62s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/whoosh-short.mp3 at 11.05-11.62s, assets/sfx/pop.mp3 at 11.45-11.95s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 16.97-17.47s, assets/sfx/pop.mp3 at 17.27-17.77s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 17.27-17.77s, assets/sfx/pop.mp3 at 17.57-18.07s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 17.57-18.07s, assets/sfx/pop.mp3 at 17.87-18.37s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/click.mp3 at 19.72-20.09s, assets/sfx/whoosh-short.mp3 at 19.9-20.47s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/click.mp3 at 30.62-30.99s, assets/sfx/whoosh-short.mp3 at 30.78-31.35s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 32.84-33.34s, assets/sfx/pop.mp3 at 33-33.5s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 32.84-33.34s, assets/sfx/pop.mp3 at 33.16-33.66s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 32.84-33.34s, assets/sfx/pop.mp3 at 33.32-33.82s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 33-33.5s, assets/sfx/pop.mp3 at 33.16-33.66s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 33-33.5s, assets/sfx/pop.mp3 at 33.32-33.82s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 33.16-33.66s, assets/sfx/pop.mp3 at 33.32-33.82s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.62-34.82s, assets/sfx/key-press.mp3 at 34.71-34.91s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.62-34.82s, assets/sfx/key-press.mp3 at 34.8-35s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.71-34.91s, assets/sfx/key-press.mp3 at 34.8-35s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.71-34.91s, assets/sfx/key-press.mp3 at 34.89-35.09s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.8-35s, assets/sfx/key-press.mp3 at 34.89-35.09s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.8-35s, assets/sfx/key-press.mp3 at 34.98-35.18s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/key-press.mp3 at 34.89-35.09s, assets/sfx/key-press.mp3 at 34.98-35.18s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/pop.mp3 at 36.08-36.58s, assets/sfx/whoosh.mp3 at 36.42-36.99s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "duplicate_audio_track",
+        "severity": "warning",
+        "message": "Multiple audible <audio>/<video> elements on track 20 overlap (assets/sfx/whoosh.mp3 at 36.42-36.99s, assets/sfx/impact-bass-1.mp3 at 36.84-38.44s). This causes layered audio playback.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Use non-overlapping time windows or different track indices."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"o-v1\"> has data-start=\"1.3\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#o-v1",
+        "dataAttributes": {},
+        "sourceFile": "/Users/alan/Documents/Codex/OBSREC/video/machtobs-intro/compositions/obs.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"1.3\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"o-v2\"> has data-start=\"2.4\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#o-v2",
+        "dataAttributes": {},
+        "sourceFile": "/Users/alan/Documents/Codex/OBSREC/video/machtobs-intro/compositions/obs.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"2.4\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      },
+      {
+        "code": "nested_media_start_basis_ambiguous",
+        "severity": "warning",
+        "message": "<video id=\"o-v3\"> has data-start=\"3.5\" inside a sub-composition. Nested media timing is local to its composition by default; a nonzero value can be confused with a legacy root-global timestamp.",
+        "selector": "#o-v3",
+        "dataAttributes": {},
+        "sourceFile": "/Users/alan/Documents/Codex/OBSREC/video/machtobs-intro/compositions/obs.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Keep data-start=\"3.5\" if it is composition-local. If this is a legacy root-global timestamp, add data-hf-media-start-basis=\"global\"; otherwise convert it to local time by subtracting the host start."
+      }
+    ],
+    "filesScanned": 12
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": false,
+    "errorCount": 5,
+    "warningCount": 0,
+    "infoCount": 16,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 11.62,
+        "selector": "#e-t",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 54,
+          "top": 376,
+          "right": 871.06,
+          "bottom": 568,
+          "width": 817.06,
+          "height": 192
+        },
+        "containerSelector": "#e-w > div:nth-of-type(1)",
+        "text": "PEGA LA CONTRASEÑA",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/enlazar.html",
+        "bbox": {
+          "x": 54,
+          "y": 376,
+          "width": 817.06,
+          "height": 192
+        },
+        "firstSeen": 11.62,
+        "lastSeen": 12.961,
+        "occurrences": 7,
+        "heldMs": 1341.0000000000011,
+        "times": [
+          11.62,
+          11.844,
+          12.067,
+          12.291,
+          12.514,
+          12.737,
+          12.961
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 11.62,
+        "selector": "#e-h",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 54,
+          "top": 745,
+          "right": 875.22,
+          "bottom": 792,
+          "width": 821.22,
+          "height": 47
+        },
+        "containerSelector": "#e-w > div:nth-of-type(3)",
+        "text": "La contraseña permanece sólo en esta pestaña.",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/enlazar.html",
+        "bbox": {
+          "x": 54,
+          "y": 745,
+          "width": 821.22,
+          "height": 47
+        },
+        "firstSeen": 11.62,
+        "lastSeen": 12.961,
+        "occurrences": 7,
+        "heldMs": 1341.0000000000011,
+        "times": [
+          11.62,
+          11.844,
+          12.067,
+          12.291,
+          12.514,
+          12.737,
+          12.961
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 15.556,
+        "selector": "#m-stage > div:nth-of-type(7) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 94.75,
+          "top": 759.5,
+          "right": 323.23,
+          "bottom": 796.5,
+          "width": 228.48,
+          "height": 37
+        },
+        "containerSelector": "#m-on0 > span:nth-of-type(1)",
+        "text": "STREAM + REC",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 94.75,
+          "y": 759.5,
+          "width": 228.48,
+          "height": 37
+        },
+        "firstSeen": 14.525,
+        "lastSeen": 16.536,
+        "occurrences": 11,
+        "heldMs": 2011.000000000001,
+        "times": [
+          14.525,
+          14.749,
+          14.972,
+          15.196,
+          15.419,
+          15.556,
+          15.642,
+          15.866,
+          16.089,
+          16.313,
+          16.536
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 15.642,
+        "selector": "#m-stage > div:nth-of-type(11) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 234.88,
+          "top": 1099.5,
+          "right": 349.13,
+          "bottom": 1136.5,
+          "width": 114.25,
+          "height": 37
+        },
+        "containerSelector": "#p-on0 > span:nth-of-type(1)",
+        "text": "TWITCH",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 234.88,
+          "y": 1099.5,
+          "width": 114.25,
+          "height": 37
+        },
+        "firstSeen": 15.642,
+        "lastSeen": 16.536,
+        "occurrences": 5,
+        "heldMs": 894.0000000000019,
+        "times": [
+          15.642,
+          15.866,
+          16.089,
+          16.313,
+          16.536
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 20,
+        "selector": "#q-stage > div:nth-of-type(12) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 473.36,
+          "top": 973.5,
+          "right": 606.64,
+          "bottom": 1010.5,
+          "width": 133.28,
+          "height": 37
+        },
+        "containerSelector": "#q-on > span:nth-of-type(1)",
+        "text": "PS5 PRO",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/equipo.html",
+        "bbox": {
+          "x": 473.36,
+          "y": 973.5,
+          "width": 133.28,
+          "height": 37
+        },
+        "firstSeen": 18.994,
+        "lastSeen": 20.559,
+        "occurrences": 9,
+        "heldMs": 1565.0000000000014,
+        "times": [
+          18.994,
+          19.218,
+          19.441,
+          19.665,
+          19.888,
+          20,
+          20.112,
+          20.335,
+          20.559
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 15.556,
+        "selector": "#m-stage > div:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 54,
+          "top": 249,
+          "right": 168.25,
+          "bottom": 286,
+          "width": 114.25,
+          "height": 37
+        },
+        "containerSelector": "#m-stage > div:nth-of-type(3)",
+        "text": "00—02",
+        "fixHint": "Text is 114px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 54,
+          "y": 249,
+          "width": 114.25,
+          "height": 37
+        },
+        "firstSeen": 15.556,
+        "lastSeen": 15.556,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          15.556
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 15.556,
+        "selector": "#m-stage > div:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 54,
+          "top": 249,
+          "right": 187.3,
+          "bottom": 323,
+          "width": 133.3,
+          "height": 74
+        },
+        "containerSelector": "#m-stage > div:nth-of-type(3)",
+        "text": "/ ajustes",
+        "fixHint": "Text is 133px x 74px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px or shrink font-size from 28px to ~23px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 54,
+          "y": 249,
+          "width": 133.3,
+          "height": 74
+        },
+        "firstSeen": 15.556,
+        "lastSeen": 15.556,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          15.556
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 15.556,
+        "selector": "#m-stage > div:nth-of-type(3) > span:nth-of-type(2)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 329.11,
+          "top": 249,
+          "right": 919.36,
+          "bottom": 286,
+          "width": 590.25,
+          "height": 37
+        },
+        "containerSelector": "#m-stage > div:nth-of-type(3)",
+        "text": "modo / destino /",
+        "fixHint": "Text is 590px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 329.11,
+          "y": 249,
+          "width": 590.25,
+          "height": 37
+        },
+        "firstSeen": 15.556,
+        "lastSeen": 15.556,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          15.556
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 15.556,
+        "selector": "#m-a",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 462.39,
+          "top": 249,
+          "right": 690.88,
+          "bottom": 286,
+          "width": 228.49,
+          "height": 37
+        },
+        "containerSelector": "#m-stage > div:nth-of-type(3)",
+        "text": "stream + rec",
+        "fixHint": "Text is 228px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 462.39,
+          "y": 249,
+          "width": 228.49,
+          "height": 37
+        },
+        "firstSeen": 15.556,
+        "lastSeen": 15.556,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          15.556
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.556,
+        "selector": "#m-stage > div:nth-of-type(7) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 94.75,
+          "top": 759.5,
+          "right": 323.23,
+          "bottom": 796.5,
+          "width": 228.48,
+          "height": 37
+        },
+        "containerSelector": "#m-on0",
+        "text": "stream + rec",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/modo.html",
+        "bbox": {
+          "x": 94.75,
+          "y": 759.5,
+          "width": 228.48,
+          "height": 37
+        },
+        "firstSeen": 15.556,
+        "lastSeen": 15.556,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          15.556
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 20,
+        "selector": "#q-stage > div:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 54,
+          "top": 249,
+          "right": 168.25,
+          "bottom": 286,
+          "width": 114.25,
+          "height": 37
+        },
+        "containerSelector": "#q-stage > div:nth-of-type(3)",
+        "text": "00—02",
+        "fixHint": "Text is 114px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/equipo.html",
+        "bbox": {
+          "x": 54,
+          "y": 249,
+          "width": 114.25,
+          "height": 37
+        },
+        "firstSeen": 20,
+        "lastSeen": 20,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          20
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 20,
+        "selector": "#q-stage > div:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 54,
+          "top": 249,
+          "right": 187.3,
+          "bottom": 323,
+          "width": 133.3,
+          "height": 74
+        },
+        "containerSelector": "#q-stage > div:nth-of-type(3)",
+        "text": "/ ajustes",
+        "fixHint": "Text is 133px x 74px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px or shrink font-size from 28px to ~23px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/equipo.html",
+        "bbox": {
+          "x": 54,
+          "y": 249,
+          "width": 133.3,
+          "height": 74
+        },
+        "firstSeen": 20,
+        "lastSeen": 20,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          20
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 20,
+        "selector": "#q-stage > div:nth-of-type(3) > span:nth-of-type(2)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 329.11,
+          "top": 249,
+          "right": 919.36,
+          "bottom": 286,
+          "width": 590.25,
+          "height": 37
+        },
+        "containerSelector": "#q-stage > div:nth-of-type(3)",
+        "text": "modo / destino /",
+        "fixHint": "Text is 590px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/equipo.html",
+        "bbox": {
+          "x": 329.11,
+          "y": 249,
+          "width": 590.25,
+          "height": 37
+        },
+        "firstSeen": 20,
+        "lastSeen": 20,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          20
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 20,
+        "selector": "#q-stage > div:nth-of-type(3) > span:nth-of-type(2) > b:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 462.39,
+          "top": 249,
+          "right": 690.88,
+          "bottom": 286,
+          "width": 228.49,
+          "height": 37
+        },
+        "containerSelector": "#q-stage > div:nth-of-type(3)",
+        "text": "stream + rec",
+        "fixHint": "Text is 228px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/equipo.html",
+        "bbox": {
+          "x": 462.39,
+          "y": 249,
+          "width": 228.49,
+          "height": 37
+        },
+        "firstSeen": 20,
+        "lastSeen": 20,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          20
+        ]
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 20,
+        "selector": "#q-stage > div:nth-of-type(12) > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 473.36,
+          "top": 973.5,
+          "right": 606.64,
+          "bottom": 1010.5,
+          "width": 133.28,
+          "height": 37
+        },
+        "containerSelector": "#q-on",
+        "text": "PS5 Pro",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "compositions/equipo.html",
+        "bbox": {
+          "x": 473.36,
+          "y": 973.5,
+          "width": 133.28,
+          "height": 37
+        },
+        "firstSeen": 20,
+        "lastSeen": 20,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          20
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 28.889,
+        "selector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 54,
+          "top": 249,
+          "right": 168.25,
+          "bottom": 286,
+          "width": 114.25,
+          "height": 37
+        },
+        "containerSelector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3)",
+        "text": "00—03",
+        "fixHint": "Text is 114px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/resultado.html",
+        "bbox": {
+          "x": 54,
+          "y": 249,
+          "width": 114.25,
+          "height": 37
+        },
+        "firstSeen": 28.889,
+        "lastSeen": 28.889,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          28.889
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 28.889,
+        "selector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 54,
+          "top": 249,
+          "right": 225.38,
+          "bottom": 323,
+          "width": 171.38,
+          "height": 74
+        },
+        "containerSelector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3)",
+        "text": "/ detección",
+        "fixHint": "Text is 171px x 74px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px or shrink font-size from 28px to ~23px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/resultado.html",
+        "bbox": {
+          "x": 54,
+          "y": 249,
+          "width": 171.38,
+          "height": 74
+        },
+        "firstSeen": 28.889,
+        "lastSeen": 28.889,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          28.889
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 28.889,
+        "selector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(2)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 354.44,
+          "top": 249,
+          "right": 944.69,
+          "bottom": 286,
+          "width": 590.25,
+          "height": 37
+        },
+        "containerSelector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3)",
+        "text": "modo / destino /",
+        "fixHint": "Text is 590px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/resultado.html",
+        "bbox": {
+          "x": 354.44,
+          "y": 249,
+          "width": 590.25,
+          "height": 37
+        },
+        "firstSeen": 28.889,
+        "lastSeen": 28.889,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          28.889
+        ]
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 28.889,
+        "selector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(2) > b:nth-of-type(1)",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 487.72,
+          "top": 249,
+          "right": 716.2,
+          "bottom": 286,
+          "width": 228.48,
+          "height": 37
+        },
+        "containerSelector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3)",
+        "text": "stream + rec",
+        "fixHint": "Text is 228px x 37px inside 1080px x 62px and overflows by up to 7px; increase the container height to at least ~69px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 0,
+          "top": 256,
+          "right": 1080,
+          "bottom": 318,
+          "width": 1080,
+          "height": 62
+        },
+        "overflow": {
+          "top": 7
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/resultado.html",
+        "bbox": {
+          "x": 487.72,
+          "y": 249,
+          "width": 228.48,
+          "height": 37
+        },
+        "firstSeen": 28.889,
+        "lastSeen": 28.889,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          28.889
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 28.889,
+        "selector": "#r-cur",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1120,
+          "top": 1500,
+          "right": 1204,
+          "bottom": 1584,
+          "width": 84,
+          "height": 84
+        },
+        "containerSelector": "#resultado > div:nth-of-type(1) > div:nth-of-type(1)",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1080,
+          "bottom": 1920,
+          "width": 1080,
+          "height": 1920
+        },
+        "overflow": {
+          "right": 124
+        },
+        "dataAttributes": {},
+        "sourceFile": "compositions/resultado.html",
+        "bbox": {
+          "x": 1120,
+          "y": 1500,
+          "width": 84,
+          "height": 84
+        },
+        "firstSeen": 28.889,
+        "lastSeen": 28.889,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          28.889
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 32.849,
+        "selector": "#a-o0",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 338,
+          "top": 594.5,
+          "right": 425.75,
+          "bottom": 641.5,
+          "width": 87.75,
+          "height": 47
+        },
+        "containerSelector": "#a-n0",
+        "text": "x264",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/aplicar.html",
+        "bbox": {
+          "x": 338,
+          "y": 594.5,
+          "width": 87.75,
+          "height": 47
+        },
+        "firstSeen": 32.849,
+        "lastSeen": 32.849,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          32.849
+        ]
+      }
+    ],
+    "duration": 40,
+    "samples": [
+      2.222,
+      6.667,
+      11.111,
+      15.556,
+      20,
+      24.444,
+      28.889,
+      33.333,
+      37.778
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 21,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 2,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.11:1; WCAG AA requires 3:1.",
+        "text": "03",
+        "fg": "rgb(23,24,23)",
+        "bg": "rgb(9,10,10)",
+        "ratio": 1.11,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(93,94,93)",
+        "large": true,
+        "selector": "div > div:nth-of-type(4) > div > div > div:nth-of-type(4)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/enlazar.html",
+        "bbox": {
+          "x": 812.890625,
+          "y": 640,
+          "width": 227.109375,
+          "height": 135
+        },
+        "time": 11.111,
+        "times": [
+          11.111
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.64:1; WCAG AA requires 3:1.",
+        "text": "stream",
+        "fg": "rgb(241,239,232)",
+        "bg": "rgb(58,155,220)",
+        "ratio": 2.64,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(73,72,70)",
+        "large": true,
+        "selector": "div > div:nth-of-type(11) > div > div > div:nth-of-type(1) > span",
+        "dataAttributes": {},
+        "sourceFile": "compositions/cierre.html",
+        "bbox": {
+          "x": 54,
+          "y": 904.1875,
+          "width": 1008.4375,
+          "height": 204
+        },
+        "time": 37.778,
+        "times": [
+          37.778
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      2.222,
+      11.111,
+      20,
+      28.889,
+      37.778
+    ],
+    "checked": 82,
+    "passed": 80
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 13,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Abre OBS Studio y sigue los cuatro pasos.\" (8 words) is on screen 1.94 s (±0.01 s), under its 2.17 s floor: hold it about 0.5 s + 0.3 s a word (2.90 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Abre OBS Studio y sigue los cuatro pasos.",
+        "selector": "#c-s",
+        "dataAttributes": {},
+        "sourceFile": "compositions/conecta.html",
+        "bbox": {
+          "x": 54,
+          "y": 740,
+          "width": 792.25,
+          "height": 52
+        },
+        "time": 3.469,
+        "words": 8,
+        "seconds": 1.938,
+        "floorSeconds": 2.175
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Ve a →Ajustes del servidor WebSocket. Herramientas\" (7 words) is on screen 1.84 s (±0.01 s), under its 1.95 s floor: hold it about 0.5 s + 0.3 s a word (2.60 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Ve a →Ajustes del servidor WebSocket. Herramientas",
+        "selector": "#c-card > div:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/conecta.html",
+        "bbox": {
+          "x": 54,
+          "y": 1051.08,
+          "width": 709.06,
+          "height": 121
+        },
+        "time": 3.57,
+        "words": 7,
+        "seconds": 1.836,
+        "floorSeconds": 1.95
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"mostrar información de conexión\" (4 words) is on screen 1.17 s (±0.01 s), under its 1.27 s floor: hold it about 0.5 s + 0.3 s a word (1.70 s here) before it leaves or changes; see references/motion.md.",
+        "text": "mostrar información de conexión",
+        "selector": "#o-c3 > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/obs.html",
+        "bbox": {
+          "x": 54,
+          "y": 190,
+          "width": 590.25,
+          "height": 37
+        },
+        "time": 8.469,
+        "words": 4,
+        "seconds": 1.172,
+        "floorSeconds": 1.275
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Machtobs habla con el OBS de tu computadora.\" (8 words) is on screen 1.60 s (±0.01 s), under its 2.17 s floor: hold it about 0.5 s + 0.3 s a word (2.90 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Machtobs habla con el OBS de tu computadora.",
+        "selector": "#e-w > div:nth-of-type(5)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/enlazar.html",
+        "bbox": {
+          "x": 54,
+          "y": 1007.8,
+          "width": 673.98,
+          "height": 106.78999999999996
+        },
+        "time": 11.438,
+        "words": 8,
+        "seconds": 1.602,
+        "floorSeconds": 2.175
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Especificaciones contrastadas con 5 fuentes oficiales\" (6 words) is on screen 1.27 s (±0.01 s), under its 1.72 s floor: hold it about 0.5 s + 0.3 s a word (2.30 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Especificaciones contrastadas con 5 fuentes oficiales",
+        "selector": "#s-bt",
+        "dataAttributes": {},
+        "sourceFile": "compositions/busqueda.html",
+        "bbox": {
+          "x": 126,
+          "y": 1226.45,
+          "width": 768.05,
+          "height": 87.54999999999995
+        },
+        "time": 24.367,
+        "words": 6,
+        "seconds": 1.273,
+        "floorSeconds": 1.725
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"x264 (CPU) → Apple VT H.264\" (6 words) is on screen 1.34 s (±0.01 s), under its 1.72 s floor: hold it about 0.5 s + 0.3 s a word (2.30 s here) before it leaves or changes; see references/motion.md.",
+        "text": "x264 (CPU) → Apple VT H.264",
+        "selector": "#a-dlg > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/aplicar.html",
+        "bbox": {
+          "x": 127,
+          "y": 753.98,
+          "width": 565.14,
+          "height": 49
+        },
+        "time": 31.234,
+        "words": 6,
+        "seconds": 1.336,
+        "floorSeconds": 1.725
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Se guardará un respaldo automático.\" (5 words) is on screen 1.34 s (±0.01 s), under its 1.50 s floor: hold it about 0.5 s + 0.3 s a word (2.00 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Se guardará un respaldo automático.",
+        "selector": "#a-dlg > div:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/aplicar.html",
+        "bbox": {
+          "x": 101,
+          "y": 988.98,
+          "width": 653.17,
+          "height": 47
+        },
+        "time": 31.234,
+        "words": 5,
+        "seconds": 1.336,
+        "floorSeconds": 1.5
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"x264\" (1 word) is on screen 0.27 s (±0.01 s), under its 0.40 s floor: hold it about 0.5 s + 0.3 s a word (0.80 s here) before it leaves or changes; see references/motion.md.",
+        "text": "x264",
+        "selector": "#a-o0",
+        "dataAttributes": {},
+        "sourceFile": "compositions/aplicar.html",
+        "bbox": {
+          "x": 338,
+          "y": 594.5,
+          "width": 87.75,
+          "height": 47
+        },
+        "time": 32.602,
+        "words": 1,
+        "seconds": 0.266,
+        "floorSeconds": 0.4
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"Macht\" (1 word) is on screen 1.96 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "Macht",
+        "selector": "#f-w1",
+        "dataAttributes": {},
+        "sourceFile": "compositions/cierre.html",
+        "bbox": {
+          "x": 44,
+          "y": 422,
+          "width": 679.06,
+          "height": 164
+        },
+        "time": 38.039,
+        "words": 1,
+        "seconds": 1.965,
+        "floorSeconds": 2
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"bs\" (1 word) is on screen 1.80 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "bs",
+        "selector": "#f-w2",
+        "dataAttributes": {},
+        "sourceFile": "compositions/cierre.html",
+        "bbox": {
+          "x": 861.19,
+          "y": 422,
+          "width": 218.80999999999995,
+          "height": 164
+        },
+        "time": 38.203,
+        "words": 1,
+        "seconds": 1.801,
+        "floorSeconds": 2
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"No necesitassaber OBS. Solo seguirlos pasos.\" (6 words) is on screen 1.64 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "No necesitassaber OBS. Solo seguirlos pasos.",
+        "selector": "#f-s",
+        "dataAttributes": {},
+        "sourceFile": "compositions/cierre.html",
+        "bbox": {
+          "x": 54,
+          "y": 657,
+          "width": 696.25,
+          "height": 315.54999999999995
+        },
+        "time": 38.367,
+        "words": 6,
+        "seconds": 1.637,
+        "floorSeconds": 2
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"Empezar\" (1 word) is on screen 1.57 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "Empezar",
+        "selector": "#f-cta > span:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/cierre.html",
+        "bbox": {
+          "x": 239.89,
+          "y": 1342.65,
+          "width": 541.39,
+          "height": 95
+        },
+        "time": 38.438,
+        "words": 1,
+        "seconds": 1.566,
+        "floorSeconds": 2
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"machtobs.vercel.app\" (3 words) is on screen 1.30 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "machtobs.vercel.app",
+        "selector": "#f-u",
+        "dataAttributes": {},
+        "sourceFile": "compositions/cierre.html",
+        "bbox": {
+          "x": 304.39,
+          "y": 1240,
+          "width": 471.19999999999993,
+          "height": 53
+        },
+        "time": 38.703,
+        "words": 3,
+        "seconds": 1.301,
+        "floorSeconds": 2
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 320
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "audio_clip_silent",
+        "severity": "warning",
+        "message": "assets/sfx/riser.mp3 is silent for the whole part this clip plays (7.9-9.95 s of the file).",
+        "selector": "#sfx-riser",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 34.8,
+        "timeRange": [
+          34.8,
+          36.849999999999994
+        ],
+        "fixHint": "Check the file has sound there, or move data-media-start to where it does."
+      }
+    ]
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

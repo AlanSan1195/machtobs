@@ -1,0 +1,46 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    .sum { position: absolute; left: 0; display: flex; align-items: baseline; gap: 20px; white-space: nowrap; }
+    .sum b { font-family: 'Archivo Variable'; font-stretch: 125%; font-weight: 900; letter-spacing: -.04em; text-transform: uppercase; font-size: 50px; color: var(--blue); }
+  </style>
+  <div id="root" data-composition-id="elige" data-width="1080" data-height="1920">
+    <div class="stage">
+      <div class="rules"></div>
+      <div class="say d"><div id="e-t" class="tight"><i>Dile</i> <i>qué</i><br/><i>quieres</i><br/><i>hacer</i></div></div>
+      <div id="e-in" class="act">
+        <div class="bar"><div class="brand"><span class="eye"><img src="assets/obs-eye.svg" alt="" /></span>MACHT<span class="thin">OBS</span></div><div class="nav"><span class="m ok">✓</span><span class="m on">02</span><span class="m">03</span><span class="m">04</span></div><div class="stat live m"><i></i>conectado</div></div>
+        <div class="abs m" style="left:0;top:100px;color:var(--muted)">modo</div>
+        <div id="e-m1" class="tile m" style="left:0;top:142px;width:304px;height:150px">stream + rec</div>
+        <div class="tile m" style="left:328px;top:142px;width:304px;height:150px">solo stream</div>
+        <div class="tile m" style="left:656px;top:142px;width:304px;height:150px">solo<br/>grabación</div>
+        <div class="abs m" style="left:0;top:322px;color:var(--muted)">plataforma</div>
+        <div id="e-p1" class="tile m" style="left:0;top:364px;width:468px;height:150px">twitch</div>
+        <div class="tile m" style="left:492px;top:364px;width:468px;height:150px">youtube</div>
+        <div class="sum m" style="top:606px">modo / <b id="e-v1">stream + rec</b></div>
+        <div class="sum m" style="top:706px">destino / <b id="e-v2">twitch</b></div>
+        <svg id="e-cur" class="cursor" viewBox="0 0 24 24"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    gsap.set(['#e-v1', '#e-v2'], { opacity: 0 });
+    tl.fromTo('#e-in', { x: 1400, filter: 'blur(18px)' }, { x: 0, filter: 'blur(0px)', duration: 0.3, ease: 'power3.out' }, 0);
+    MO.words(tl, '#e-t', 0.06);
+    MO.enter(tl, '#e-cur', 0.02, 700, 900, 150, 220, 0.38);
+    MO.click(tl, '#e-cur', 0.43);
+    tl.to('#e-m1', { backgroundColor: '#3a9bdc', color: '#090a0a', borderColor: '#3a9bdc', duration: 0.08 }, 0.47);
+    MO.pop(tl, '#e-v1', 0.5, 0.24);
+    MO.move(tl, '#e-cur', 0.66, 230, 440, 0.55);
+    MO.click(tl, '#e-cur', 1.29);
+    tl.to('#e-p1', { backgroundColor: '#3a9bdc', color: '#090a0a', borderColor: '#3a9bdc', duration: 0.08 }, 1.33);
+    MO.pop(tl, '#e-v2', 1.36, 0.24);
+    tl.to('#e-cur', { opacity: 0, duration: 0.1 }, 1.7);
+    // salida en látigo hacia arriba
+    MO.blurOut(tl, '#e-t', 1.93);
+    tl.to('#e-in', { y: -1500, filter: 'blur(18px)', duration: 0.2, ease: 'power3.in' }, 1.95);
+    window.__timelines["elige"] = tl;
+  </script>
+</template>

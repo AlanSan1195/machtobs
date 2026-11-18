@@ -1,0 +1,65 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #r-ch { left: 0; top: 120px; width: 660px; height: 320px; border-bottom: 2px solid var(--line); }
+    #r-ch .bk { position: absolute; bottom: 0; width: 42px; background: rgba(241,239,232,.34); display: block; }
+    #r-ch .pk { background: var(--warn); }
+    .ln { position: absolute; left: 0; width: 660px; height: 0; }
+    .ln i { position: absolute; left: 0; top: -2px; width: 660px; height: 4px; display: block; background: var(--paper); }
+    .ln span { position: absolute; left: 684px; top: -20px; white-space: nowrap; font-size: 30px; }
+    #r-l2 i { top: -4px; height: 8px; background: var(--blue); }
+    #r-l2 span { color: var(--blue); font-weight: 700; }
+    #r-pk span { color: var(--warn); }
+    #r-note { left: 0; top: 486px; font-size: 58px; }
+  </style>
+  <div id="root" data-composition-id="red" data-width="1080" data-height="1920">
+    <div class="stage">
+      <div class="rules"></div>
+      <div class="say d"><div id="r-t"><i>Mide</i> <i>tu</i><br/><i>internet</i></div></div>
+      <div id="r-in" class="act">
+        <div class="bar"><div class="brand"><span class="eye"><img src="assets/obs-eye.svg" alt="" /></span>MACHT<span class="thin">OBS</span></div><div class="nav"><span class="m ok">✓</span><span class="m on">02</span><span class="m">03</span><span class="m">04</span></div><div class="stat live m"><i></i>conectado</div></div>
+        <div class="abs m" style="left:0;top:86px;color:var(--muted)">prueba de subida · mbps</div>
+        <div id="r-ch" class="abs" data-layout-allow-overlap>
+          <i class="bk" style="left:0.0px;height:189.3px"></i>
+          <i class="bk" style="left:55.0px;height:170.7px"></i>
+          <i class="bk pk" style="left:110.0px;height:288.0px"></i>
+          <i class="bk" style="left:165.0px;height:174.7px"></i>
+          <i class="bk" style="left:220.0px;height:158.7px"></i>
+          <i class="bk" style="left:275.0px;height:194.7px"></i>
+          <i class="bk" style="left:330.0px;height:165.3px"></i>
+          <i class="bk" style="left:385.0px;height:184.0px"></i>
+          <i class="bk" style="left:440.0px;height:172.0px"></i>
+          <i class="bk" style="left:495.0px;height:181.3px"></i>
+          <i class="bk" style="left:550.0px;height:162.7px"></i>
+          <i class="bk" style="left:605.0px;height:185.3px"></i>
+          <div id="r-pk" class="ln m" style="top:32.0px"><span>21.6 pico</span></div>
+          <div id="r-l1" class="ln m" style="top:141.3px"><i></i><span>13.4 sostenida</span></div>
+          <div id="r-l2" class="ln m" style="top:194.7px"><i></i><span>9.4 segura</span></div>
+        </div>
+        <div id="r-note" class="abs d"><i class="b">Sostenida,</i><br/><i>no</i> <i>el</i> <i>pico.</i></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    gsap.set('#r-ch .bk', { transformOrigin: '50% 100%' });
+    gsap.set(['#r-pk span', '#r-l1 span', '#r-l2 span', '#r-note i'], { opacity: 0 });
+    tl.fromTo('#r-in', { y: 1500, filter: 'blur(18px)' }, { y: 0, filter: 'blur(0px)', duration: 0.3, ease: 'power3.out' }, 0);
+    MO.words(tl, '#r-t', 0.06);
+    // las muestras de subida llegan una a una; el pico salta en amarillo
+    tl.fromTo('#r-ch .bk', { scaleY: 0 }, { scaleY: 1, duration: 0.22, stagger: 0.08, ease: 'back.out(1.6)' }, 0.35);
+    MO.pop(tl, '#r-pk span', 0.62, 0.24);
+    // se queda con la sostenida y recorta al 70 % (safeUploadMbps de la app)
+    tl.fromTo('#r-l1 i', { scaleX: 0, transformOrigin: '0% 50%' }, { scaleX: 1, duration: 0.36, ease: 'power3.inOut' }, 1.5);
+    MO.blurIn(tl, '#r-l1 span', 1.72, 0.16);
+    tl.to('#r-ch .bk', { opacity: 0.45, duration: 0.2 }, 2.0);
+    tl.fromTo('#r-l2 i', { scaleX: 0, transformOrigin: '0% 50%' }, { scaleX: 1, duration: 0.36, ease: 'power3.inOut' }, 2.0);
+    MO.pop(tl, '#r-l2 span', 2.2, 0.26);
+    MO.words(tl, '#r-note', 2.45, 0.1);
+    // salida en látigo hacia arriba, como elige
+    MO.blurOut(tl, '#r-t', 4.18);
+    tl.to('#r-in', { y: -1500, filter: 'blur(18px)', duration: 0.2, ease: 'power3.in' }, 4.2);
+    window.__timelines["red"] = tl;
+  </script>
+</template>

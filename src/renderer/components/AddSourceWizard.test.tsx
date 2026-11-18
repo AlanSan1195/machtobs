@@ -61,6 +61,7 @@ describe('AddSourceWizard marco de facecam', () => {
     expect(screen.getByText('Personaliza tu marco 1:1')).toBeTruthy();
 
     expect(screen.queryByText('Aura')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Neón animado' }));
     await user.click(screen.getByRole('button', { name: 'Rounded' }));
     await user.click(screen.getByRole('button', { name: 'Usar color #F2B84B' }));
     fireEvent.change(screen.getByRole('slider', { name: 'Grosor del marco' }), { target: { value: '24' } });
@@ -76,6 +77,7 @@ describe('AddSourceWizard marco de facecam', () => {
           color: '#F2B84B',
           thickness: 24,
           rounded: true,
+          style: 'neon',
         },
       });
     });
@@ -126,6 +128,7 @@ describe('AddSourceWizard marco de facecam', () => {
           color: '#7EE0C3',
           thickness: 12,
           rounded: false,
+          style: 'solid',
         },
       });
     });

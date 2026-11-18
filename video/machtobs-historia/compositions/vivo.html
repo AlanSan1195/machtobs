@@ -1,0 +1,75 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #v-world { transform-origin: 0 0; background: var(--blue); overflow: hidden; }
+    #v-live { left: 0; top: 0; background: var(--ink); color: var(--paper); font-size: 56px; padding: 16px 28px 14px; display: flex; align-items: center; gap: 18px; white-space: nowrap; }
+    #v-live i { width: 26px; height: 26px; border-radius: 50%; background: var(--blue); display: block; }
+    #v-cnt { right: 0; top: 18px; color: var(--ink); font-size: 34px; font-weight: 700; white-space: nowrap; }
+    #v-cnt span { position: absolute; right: 0; top: 0; }
+    .chat { position: absolute; font-family: 'Instrument Sans Variable', sans-serif; background: var(--paper); color: var(--ink); border: 4px solid var(--ink); padding: 12px 20px; font-size: 34px; white-space: nowrap; box-shadow: 8px 8px 0 var(--ink); }
+    .chat b { color: #1d6ea8; }
+    #v-burst { left: 480px; top: 300px; width: 0; height: 0; }
+    #v-burst i { position: absolute; left: -9px; top: -560px; width: 18px; height: 110px; background: var(--ink); display: block; }
+  </style>
+  <div id="root" data-composition-id="vivo" data-width="1080" data-height="1920">
+    <div id="v-world" class="full" style="color:var(--ink)">
+      <div class="rules dark"></div>
+      <div class="say d"><div id="v-t" class="tight"><i>Primer</i><br/><i>stream.</i><br/><i>Nivel</i> <i>pro.</i></div></div>
+      <div class="act" data-layout-allow-overflow data-layout-allow-overlap>
+        <div id="v-burst" class="abs"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div id="v-n" class="nico" style="left:130px;top:16px;transform-origin:0 0"></div>
+        <div class="abs" style="left:-2400px;right:-2400px;top:800px;height:2400px;background:var(--ink)"><div class="rules"></div></div>
+        <div id="v-live" class="abs d"><i></i>En vivo</div>
+        <div id="v-cnt" class="abs m"><span>1 viendo</span><span>4 viendo</span><span>9 viendo</span><span>15 viendo</span><span>22 viendo</span><span>31 viendo</span><span>44 viendo</span><span>58 viendo</span></div>
+        <div id="v-c1" class="chat" style="left:-20px;top:590px"><b>mara_gg</b> ¡se ve nítido!</div>
+        <div id="v-c2" class="chat" style="left:300px;top:680px"><b>pixelito</b> 60 FPS clavados</div>
+        <div id="v-c3" class="chat" style="left:20px;top:770px"><b>luna</b> ¿cómo lo configuraste?</div>
+        <div id="v-c4" class="chat" style="left:280px;top:770px"><b>nico</b> con machtobs, paso a paso</div>
+        <div id="v-c5" class="chat" style="left:-20px;top:770px"><b>luna</b> ¡pásame el link!</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const L = MO.land('vivo'), AX = L ? 900 : 60, AY = L ? 110 : 470, W = L ? 1920 : 1080, H = L ? 1080 : 1920;
+    MO.nico('v-n', 'grin', true);
+    gsap.set('#v-n', { scale: 1.75 });
+    gsap.set('#v-n .nk-armR', { rotation: -150 });
+    gsap.set(['#v-t i', '.chat', '#v-live', '#v-cnt span', '#v-burst'], { opacity: 0 });
+    gsap.set('#v-burst i', { rotation: (i) => i * 30, transformOrigin: '9px 560px' });
+    // la facecam se vuelve el mundo: misma escala y lugar que el Nico de la cámara, luego todo el cuadro
+    const s0 = 0.82 / 1.75, x0 = AX + 646 - (AX + 130) * s0, y0 = AY + 568 - (AY + 16) * s0;
+    const lx = (AX + 660 - x0) / s0, ly = (AY + 560 - y0) / s0, sz = 300 / s0;
+    tl.fromTo('#v-world', { x: x0, y: y0, scale: s0, backgroundColor: '#e7e3d8', clipPath: `inset(${ly}px ${W - lx - sz}px ${H - ly - sz}px ${lx}px)` },
+      { x: 0, y: 0, scale: 1, backgroundColor: '#3a9bdc', clipPath: 'inset(0px 0px 0px 0px)', duration: 0.5, ease: 'expo.out' }, 0);
+    tl.fromTo('#v-burst', { opacity: 1, scale: 0.45 }, { opacity: 0, scale: 1.2, duration: 0.6, ease: 'power2.out' }, 0.12);
+    tl.fromTo('#v-live', { opacity: 0, scale: 2.2, transformOrigin: '0% 50%' }, { opacity: 1, scale: 1, duration: 0.3, ease: 'expo.out' }, 0.3);
+    tl.to('#v-live i', { opacity: 0.25, duration: 0.2, repeat: 23, yoyo: true, ease: 'none' }, 0.7);
+    // Nico saluda a su chat
+    tl.to('#v-n', { y: -30, duration: 0.16, ease: 'power2.out' }, 0.1).to('#v-n', { y: 0, duration: 0.3, ease: 'bounce.out' }, 0.26);
+    tl.to('#v-n .nk-armR', { keyframes: { rotation: [-150, -122, -150, -122, -150, -122, -150] }, duration: 1.5, ease: 'sine.inOut' }, 0.5);
+    tl.to('#v-n .nk-armR', { rotation: 0, duration: 0.4, ease: 'back.out(1.5)' }, 2.1);
+    MO.blink(tl, 'v-n', 2.9);
+    MO.words(tl, '#v-t', 1.71, 0.1);
+    [0.5, 1.29, 2.14, 2.57, 3.0, 3.43, 4.3, 5.2].forEach((t, i) => {
+      tl.set('#v-cnt span:nth-child(' + (i + 1) + ')', { opacity: 1 }, t);
+      if (i) tl.set('#v-cnt span:nth-child(' + i + ')', { opacity: 0 }, t);
+    });
+    ['#v-c1', '#v-c2', '#v-c3'].forEach((s, i) => tl.fromTo(s, { opacity: 0, scale: 0.6, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'back.out(2.2)' }, 2.14 + i * 0.43));
+    MO.mood(tl, 'v-n', 3.3, 'wow');
+    MO.mood(tl, 'v-n', 4.1, 'grin');
+    // el chat sube como en un directo real: Nico responde y luna pide el link
+    tl.to('#v-c1', { opacity: 0, y: -60, duration: 0.2, ease: 'power2.in' }, 3.9);
+    tl.to(['#v-c2', '#v-c3'], { y: -90, duration: 0.24, ease: 'power3.out' }, 3.9);
+    tl.fromTo('#v-c4', { opacity: 0, scale: 0.6, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'back.out(2.2)' }, 3.9);
+    tl.to('#v-c2', { opacity: 0, y: -150, duration: 0.2, ease: 'power2.in' }, 4.8);
+    tl.to('#v-c3', { y: -180, duration: 0.24, ease: 'power3.out' }, 4.8);
+    tl.to('#v-c4', { y: -90, duration: 0.24, ease: 'power3.out' }, 4.8);
+    tl.fromTo('#v-c5', { opacity: 0, scale: 0.6, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: 'back.out(2.2)' }, 4.8);
+    MO.mood(tl, 'v-n', 5.0, 'wow');
+    MO.mood(tl, 'v-n', 5.6, 'grin');
+    MO.blink(tl, 'v-n', 6.3);
+    window.__timelines["vivo"] = tl;
+  </script>
+</template>

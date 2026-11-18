@@ -1,0 +1,138 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #q-desk { left: -2400px; right: -2400px; top: 800px; height: 2400px; background: var(--ink); border-top: 4px solid #2c2f36; }
+    #q-mon { left: -20px; top: 376px; width: 528px; height: 348px; background: var(--ink); }
+    #q-scr { left: 14px; top: 14px; width: 500px; height: 320px; background: #232830; overflow: hidden; }
+    #q-sign { left: 16px; top: 196px; padding: 14px 26px; border: 5px solid var(--ink); font-size: 50px; opacity: .28; }
+    #q-set { width: 560px; }
+    .prop { position: absolute; border: 3px solid rgba(241,239,232,.4); }
+  </style>
+  <div id="root" data-composition-id="cuarto" data-width="1080" data-height="1920">
+    <div id="q-stage" class="stage paper">
+      <div id="q-room" class="full">
+        <div id="q-wall" class="full" style="background:var(--paper)"><div class="rules dark"></div></div>
+        <div class="act" data-layout-allow-overflow>
+          <div id="q-sign" class="abs d">● En vivo</div>
+          <div id="q-desk" class="abs"><div class="rules"></div></div>
+          <div class="abs" style="left:214px;top:722px;width:60px;height:64px;background:var(--ink)"></div>
+          <div class="abs" style="left:150px;top:782px;width:190px;height:22px;background:var(--ink)"></div>
+          <div id="q-mon" class="abs">
+            <div id="q-scr" class="abs">
+              <div id="q-ico" class="abs" style="left:56px;top:70px;width:110px;height:110px;border-radius:50%;background:#fff"><img src="assets/obs-eye.svg" alt="" style="width:110px;height:110px;display:block" /></div>
+              <div class="abs m" data-layout-allow-occlusion style="left:56px;top:196px;width:110px;text-align:center;color:#e6e6ea">OBS</div>
+              <div class="abs" style="left:236px;top:84px;width:84px;height:84px;border:3px solid rgba(230,230,234,.3)"></div>
+              <div class="abs" style="left:366px;top:84px;width:84px;height:84px;border:3px solid rgba(230,230,234,.3)"></div>
+              <div id="q-obs" class="abs" style="left:0;top:0;width:500px;height:320px;background:#17181e;border:2px solid #3c404b;opacity:0"><div style="background:#2a2d37;color:#e6e6ea;padding:10px 16px;font-size:28px;font-weight:600">OBS Studio</div></div>
+              <div id="q-mini" class="abs" style="left:0;top:0;width:500px;height:320px;background:var(--paper);opacity:0"><div class="abs" style="left:50px;top:120px;width:400px;height:72px;border:5px solid var(--ink)"></div></div>
+            </div>
+          </div>
+          <div class="prop" style="left:548px;top:838px;width:300px;height:64px;background:repeating-linear-gradient(90deg, transparent 0 26px, rgba(241,239,232,.28) 26px 29px)"></div>
+          <div class="prop" style="left:330px;top:846px;width:54px;height:84px;border-radius:27px"></div>
+          <div class="prop" style="left:60px;top:850px;width:150px;height:150px;border-radius:50%"></div>
+          <div class="prop" style="left:96px;top:886px;width:78px;height:78px;border-radius:50%"></div>
+          <div id="q-n" class="nico" style="left:400px;top:128px;transform-origin:0 0"></div>
+          <svg id="q-cur" class="cursor" viewBox="0 0 24 24" style="width:44px;height:44px"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="say d" data-layout-allow-overlap>
+        <div id="q-t1">Hoy hago<br/>mi primer<br/><span class="hl">stream</span></div>
+        <div id="q-t2"><i>Solo</i> <i>falta</i><br/><i>configurar</i><br/><i>OBS</i></div>
+        <div id="q-t3"><i>¿Por</i> <i>dónde</i><br/><i>empiezo?</i></div>
+        <div id="q-t4" style="color:var(--paper)"><i>Tres</i><br/><i>tutoriales</i><br/><i>después…</i></div>
+      </div>
+      <div id="q-wins" class="act" data-layout-allow-overflow data-layout-allow-overlap data-layout-allow-occlusion>
+        <div id="q-set" class="win"><b>OBS Studio · Ajustes</b><span>General</span><span>Emisión</span><span>Salida</span><span>Audio</span><span>Vídeo</span><span>Avanzado</span></div>
+        <div id="q-w1" class="win"><b>Codificador de vídeo</b><span>x264</span><span class="q">NVENC H.264 ?</span><span>QuickSync H.264</span></div>
+        <div id="q-w2" class="win"><b>Control de frecuencia</b><span>CBR</span><span>VBR</span><span class="q">CQP ?</span></div>
+        <div id="q-w3" class="win"><b>Bitrate de vídeo</b><span class="q">2500 Kbps ?</span><span>6000 Kbps</span><span>8000 Kbps</span></div>
+        <div id="q-w4" class="win"><b>Fotogramas clave</b><span class="q">0 s = auto ?</span><span>2 s</span></div>
+        <div id="q-w5" class="win"><b>Preajuste de CPU</b><span>ultrafast</span><span class="q">veryfast ?</span><span>placebo</span></div>
+        <div id="q-w6" class="win"><b>Perfil</b><span>baseline</span><span>main</span><span class="q">high ?</span></div>
+        <div id="q-w7" class="win"><b>Resolución (escalada)</b><span>1280x720</span><span class="q">1920x1080 ?</span></div>
+        <div id="q-w8" class="win"><b>Filtro de escala</b><span>Bicúbico</span><span class="q">Lanczos ?</span></div>
+        <div id="q-w9" class="win"><b>Valores comunes de FPS</b><span>30</span><span class="q">60 ?</span></div>
+        <div id="q-w10" class="win"><b>B-frames</b><span class="q">2 ?</span></div>
+        <div id="q-w11" class="win"><b>Frecuencia de muestreo</b><span>44.1 kHz</span><span class="q">48 kHz ?</span></div>
+        <div id="q-w12" class="win"><b>Tutorial · parte 1 de 12</b><span class="q">2:47:13</span></div>
+        <div id="q-w13" class="win"><b>Bitrate de audio</b><span>128</span><span class="q">160 ?</span><span>320</span></div>
+        <div id="q-w14" class="win"><b>¿Guardar cambios?</b><span class="q">???</span></div>
+      </div>
+      <div id="q-flood" class="full" style="background:var(--paper);opacity:0"><div class="rules dark"></div></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const L = MO.land('cuarto'), N = 'q-n', n = '#q-n ';
+    const AX = L ? 900 : 60, AY = L ? 110 : 470, W = L ? 1920 : 1080, H = L ? 1080 : 1920;
+    MO.nico(N, 'grin');
+    gsap.set('#q-n', { scale: 1.5 });
+    gsap.set(n + '.nk-armL', { rotation: 150 });
+    gsap.set(n + '.nk-armR', { rotation: -150 });
+
+    // 0.0 gancho: Nico celebra con el título ya en pantalla
+    [0.08, 0.5].forEach((t) => {
+      tl.to('#q-n', { y: -26, scaleY: 1.58, duration: 0.14, ease: 'power2.out' }, t);
+      tl.to('#q-n', { y: 0, scaleY: 1.5, duration: 0.24, ease: 'bounce.out' }, t + 0.14);
+    });
+    tl.to(n + '.nk-armL', { rotation: 0, duration: 0.38, ease: 'back.out(1.6)' }, 0.92);
+    tl.to(n + '.nk-armR', { rotation: 0, duration: 0.44, ease: 'back.out(1.6)' }, 0.98);
+    MO.mood(tl, N, 0.95, 'happy');
+    MO.blink(tl, N, 1.5);
+    MO.mood(tl, N, 1.75, 'look');
+    MO.enter(tl, '#q-cur', 1.7, 400, 640, 100, 512, 0.9);
+    MO.click(tl, '#q-cur', 2.92);
+    tl.to('#q-ico', { scale: 0.86, duration: 0.07 }, 2.92).to('#q-ico', { scale: 1, duration: 0.16, ease: 'back.out(3)' }, 2.99);
+    tl.fromTo('#q-obs', { opacity: 1, scale: 0.2, transformOrigin: '22% 40%' }, { opacity: 1, scale: 1, duration: 0.36, ease: 'expo.out', immediateRender: false }, 3.06);
+    tl.to('#q-cur', { opacity: 0, duration: 0.1 }, 3.1);
+    MO.blurOut(tl, '#q-t1', 3.3);
+
+    // 3.47 tensión: OBS sale del monitor y los ajustes entierran a Nico
+    const pos = { set: [-30, 300, -30, 300],
+      w1: [10, 430, 10, 430], w2: [-40, 110, -40, 90], w3: [40, 720, 40, 700], w4: [500, -70, 500, -90], w5: [500, 700, 500, 700], w6: [-50, 570, -480, 600], w7: [250, 880, 260, 730],
+      w8: [540, -300, -880, 640], w9: [0, -280, -880, -90], w10: [180, 10, 180, -10], w11: [540, 560, 540, 560], w12: [-30, 1000, -470, 120], w13: [300, -160, -780, 300], w14: [460, 290, 460, 290] };
+    const rot = [0, -3, 2, -2, 3, -1, 2, -3, 1, -2, 3, -1, 2, -3, 1];
+    const at = [3.47, 5.18, 6.04, 6.9, 7.33, 7.76, 8.19, 8.61, 8.83, 9.04, 9.26, 9.47, 9.69, 9.9, 10.11];
+    Object.keys(pos).forEach((k, i) => {
+      const p = pos[k], s = '#q-' + k;
+      gsap.set(s, { x: p[L ? 2 : 0], y: p[L ? 3 : 1], rotation: rot[i], opacity: 0 });
+      tl.fromTo(s, { opacity: 0, scale: i ? 0.55 : 0.25 }, { opacity: 1, scale: 1, duration: i ? 0.24 : 0.4, ease: i ? 'back.out(2.4)' : 'expo.out', transformOrigin: i ? '50% 50%' : '30% 60%' }, at[i]);
+    });
+    gsap.set(['#q-t2 i', '#q-t3 i', '#q-t4 i'], { opacity: 0 });
+    MO.words(tl, '#q-t2', 3.6);
+    MO.blurOut(tl, '#q-t2', 5.6);
+    MO.mood(tl, N, 5.2, 'confused');
+    MO.words(tl, '#q-t3', 6.9);
+    MO.mood(tl, N, 6.92, 'worried');
+    MO.blurOut(tl, '#q-t3', 8.7);
+    MO.mood(tl, N, 8.62, 'panic');
+    tl.to(n + '.nk-armL', { rotation: 152, duration: 0.3, ease: 'back.out(1.8)' }, 8.64);
+    tl.to(n + '.nk-armR', { rotation: -152, duration: 0.34, ease: 'back.out(1.8)' }, 8.68);
+    MO.mood(tl, N, 9.7, 'dizzy');
+    tl.to(n + '.nk-head', { keyframes: { rotation: [0, 7, -7, 6, -5, 0] }, duration: 0.6, ease: 'none' }, 9.72);
+    tl.to('#q-wins', { keyframes: { x: [0, -16, 14, -11, 9, -6, 0], y: [0, 8, -10, 6, -4, 3, 0] }, duration: 0.4, ease: 'none' }, 9.92);
+
+    // 10.32 corte en el golpe: luces fuera, cabeza contra el escritorio
+    const C = 10.32;
+    tl.set('#q-wins', { opacity: 0 }, C);
+    tl.set('#q-wall', { backgroundColor: '#1d2026' }, C);
+    tl.set(['#q-obs', '#q-sign'], { opacity: 0 }, C);
+    tl.set('#q-mini', { opacity: 1 }, C);
+    MO.mood(tl, N, C - 0.08, 'down');
+    tl.fromTo(n + '.nk-head', { y: 110 }, { y: 168, duration: 0.07, ease: 'power2.in', immediateRender: false }, C);
+    tl.to(n + '.nk-armL', { rotation: 42, scaleY: 1.12, duration: 0.07 }, C);
+    tl.to(n + '.nk-armR', { rotation: -42, scaleY: 1.12, duration: 0.07 }, C);
+    tl.fromTo('#q-room', { y: 22 }, { y: 0, duration: 0.5, ease: 'elastic.out(1.2, 0.3)', immediateRender: false }, C + 0.07);
+    MO.words(tl, '#q-t4', C + 0.25, 0.12);
+    MO.blurOut(tl, '#q-t4', 11.5);
+    // una mano busca el teclado
+    tl.to(n + '.nk-armR', { rotation: -70, duration: 0.16, ease: 'power2.out' }, 11.05).to(n + '.nk-armR', { rotation: -40, duration: 0.07, ease: 'power2.in' }, 11.22)
+      .to(n + '.nk-armR', { rotation: -64, duration: 0.12, ease: 'power2.out' }, 11.3).to(n + '.nk-armR', { rotation: -40, duration: 0.07, ease: 'power2.in' }, 11.43);
+    // 11.5 la cámara entra en el monitor: la pantalla se vuelve el mundo
+    tl.to('#q-room', { scale: 2.6, transformOrigin: `${AX + 244}px ${AY + 550}px`, duration: 0.54, ease: 'power2.in' }, 11.5);
+    tl.to('#q-flood', { opacity: 1, duration: 0.1 }, 11.5);
+    tl.fromTo('#q-flood', { clipPath: `inset(${AY + 390}px ${W - AX - 494}px ${H - AY - 710}px ${AX - 6}px)` }, { clipPath: 'inset(0px 0px 0px 0px)', duration: 0.5, ease: 'power3.in' }, 11.52);
+    window.__timelines["cuarto"] = tl;
+  </script>
+</template>

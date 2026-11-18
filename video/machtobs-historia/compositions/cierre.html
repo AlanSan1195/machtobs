@@ -1,0 +1,51 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #f-ink { background: var(--ink); color: var(--paper); overflow: hidden; }
+    #f-w { left: 44px; top: 300px; font-size: 132px; letter-spacing: -.078em; display: flex; align-items: center; white-space: nowrap; line-height: .8; }
+    #f-eye { display: inline-grid; width: .82em; height: .82em; margin: 0 .06em 0 .11em; flex: none; border-radius: 50%; background: var(--paper); place-items: center; outline: 4px solid var(--blue); outline-offset: 6px; }
+    #f-eye img { width: .8em; height: .8em; display: block; }
+    #f-s { left: 54px; top: 500px; font-size: 80px; line-height: 1.02; }
+    #f-peek { left: 0; top: 720px; width: 1080px; height: 400px; overflow: hidden; }
+    #f-n { left: 470px; top: 60px; transform-origin: 0 0; }
+    #f-cta { left: 0; top: 1120px; width: 1080px; height: 150px; }
+    #f-u { left: 54px; right: 54px; top: 1280px; text-align: center; font-size: 40px; text-transform: none; letter-spacing: .02em; }
+    [data-width="1920"] #f-w { left: 86px; top: 150px; font-size: 170px; }
+    [data-width="1920"] #f-s { left: 96px; top: 400px; font-size: 84px; }
+    [data-width="1920"] #f-peek { left: 1120px; top: 0; width: 800px; height: 1080px; }
+    [data-width="1920"] #f-n { left: 20px; top: 229px; }
+    [data-width="1920"] #f-cta { left: 96px; top: 790px; width: 760px; height: 150px; }
+    [data-width="1920"] #f-u { left: 96px; right: auto; top: 962px; text-align: left; }
+  </style>
+  <div id="root" data-composition-id="cierre" data-width="1080" data-height="1920">
+    <div id="f-ink" class="full">
+      <div class="rules"></div>
+      <div id="f-w" class="abs d"><span id="f-w1">Macht</span><span id="f-eye"><img src="assets/obs-eye.svg" alt="" /></span><span id="f-w2" class="out">bs</span></div>
+      <div id="f-s" class="abs d">No necesitas<br/>saber OBS.<br/><span class="b">Solo seguir<br/>los pasos.</span></div>
+      <div id="f-peek" class="abs" data-layout-allow-overflow><div id="f-n" class="nico"></div></div>
+      <div id="f-cta" class="cta"><span class="d" style="font-size:84px">Empezar</span><span class="m" style="font-size:60px">→</span></div>
+      <div id="f-u" class="abs m">machtobs.vercel.app</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const L = MO.land('cierre');
+    MO.nico('f-n', 'grin', true);
+    gsap.set('#f-n', { scale: L ? 1.9 : 1.5 });
+    // la tinta sube y tapa el directo: queda la marca
+    tl.fromTo('#f-ink', { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.4, ease: 'power3.inOut' }, 0);
+    tl.fromTo('#f-w1', { opacity: 0, filter: 'blur(10px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.2, ease: 'power2.out' }, 0.32);
+    tl.fromTo('#f-eye', { rotation: -360, scale: 0.4 }, { rotation: 0, scale: 1, duration: 0.6, ease: 'expo.out' }, 0.32);
+    tl.fromTo('#f-w2', { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.25, ease: 'expo.out' }, 0.38);
+    MO.blurIn(tl, '#f-s', 0.5);
+    tl.fromTo('#f-cta', { x: -1300 }, { x: 0, duration: 0.45, ease: 'expo.out' }, 0.62);
+    MO.blurIn(tl, '#f-u', 0.8);
+    tl.fromTo('#f-n', { y: L ? 900 : 420 }, { y: 0, duration: 0.55, ease: 'back.out(1.5)' }, 0.86);
+    tl.fromTo('#f-n .nk-armR', { rotation: 0 }, { rotation: -150, duration: 0.3, ease: 'back.out(1.8)' }, 1.3);
+    tl.to('#f-n .nk-armR', { keyframes: { rotation: [-150, -124, -150, -124, -150] }, duration: 1.1, ease: 'sine.inOut' }, 1.6);
+    MO.blink(tl, 'f-n', 2.9);
+    MO.blink(tl, 'f-n', 4.1);
+    window.__timelines["cierre"] = tl;
+  </script>
+</template>

@@ -493,6 +493,53 @@ input[type='checkbox'] {
       padding 180ms ease,
       background-color 180ms ease;
   }
+
+  /* Misma idea que el Browser Source neon que se importa a OBS. */
+  .camera-frame-neon {
+    overflow: visible;
+    isolation: isolate;
+    animation: camera-frame-neon-pulse 2.6s ease-in-out infinite;
+  }
+  .camera-frame-neon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(
+      from var(--neon-angle, 0deg),
+      var(--frame-color) 0deg,
+      var(--frame-color) 130deg,
+      #fff 170deg,
+      var(--frame-color) 205deg,
+      var(--frame-color) 300deg,
+      rgb(255 255 255 / 0.75) 330deg,
+      var(--frame-color) 360deg
+    );
+    animation: camera-frame-neon-spin 3.2s linear infinite;
+  }
+}
+
+@property --neon-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes camera-frame-neon-spin {
+  to { --neon-angle: 360deg; }
+}
+
+@keyframes camera-frame-neon-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--frame-color), 0 0 22px var(--frame-color); }
+  50% { box-shadow: 0 0 4px var(--frame-color), 0 0 12px var(--frame-color); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera-frame-neon,
+  .camera-frame-neon::before {
+    animation: none;
+  }
 }
 
 dialog[open] {

@@ -721,9 +721,15 @@ describe('validateSetCameraFrame', () => {
       success: true,
       value: {
         ...validFrame,
-        config: { color: '#3A9BDC', thickness: 12, rounded: true },
+        config: { color: '#3A9BDC', thickness: 12, rounded: true, style: 'solid' },
       },
     });
+  });
+
+  it('acepta el estilo neon y rechaza estilos desconocidos', () => {
+    const neon = validateSetCameraFrame({ ...validFrame, config: { ...validFrame.config, style: 'neon' } });
+    expect(neon.success && neon.value.config.style).toBe('neon');
+    expect(validateSetCameraFrame({ ...validFrame, config: { ...validFrame.config, style: 'arcoiris' } }).success).toBe(false);
   });
 
   it('rechaza colores y grosores que OBS no puede aplicar', () => {

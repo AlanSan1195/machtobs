@@ -1,0 +1,30 @@
+<template>
+  <link rel="stylesheet" href="assets/machtobs.css" />
+  <style>#root { position: absolute; inset: 0; }</style>
+  <div data-hf-id="hf-srfg" id="root" data-composition-id="hook" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-tan6" class="stage"><div data-hf-id="hf-e2xp" class="rules"></div>
+    <div data-hf-id="hf-qi0t" id="h-b0" class="abs d " style="left:-30px;top:-20px;font-size:200px;white-space:nowrap;color:rgba(241,239,232,.2);">LIENZO LIENZO</div><div data-hf-id="hf-cmro" id="h-b1" class="abs d out" style="left:-30px;top:170px;font-size:200px;white-space:nowrap;">ENCODER ENCODER</div><div data-hf-id="hf-tzk7" id="h-b2" class="abs d " style="left:-30px;top:360px;font-size:200px;white-space:nowrap;color:rgba(241,239,232,.2);">BITRATE BITRATE</div><div data-hf-id="hf-shtf" id="h-b3" class="abs d out" style="left:-30px;top:1000px;font-size:200px;white-space:nowrap;">B-FRAMES B-FRAMES</div><div data-hf-id="hf-h87x" id="h-b4" class="abs d " style="left:-30px;top:1190px;font-size:200px;white-space:nowrap;color:rgba(241,239,232,.2);">KEYFRAMES KEYFRAMES</div><div data-hf-id="hf-2sjy" id="h-b5" class="abs d out" style="left:-30px;top:1380px;font-size:200px;white-space:nowrap;">AQ ESPACIAL AQ ESPACIAL</div><div data-hf-id="hf-uy0h" id="h-b6" class="abs d " style="left:-30px;top:1570px;font-size:200px;white-space:nowrap;color:rgba(241,239,232,.2);">CBR CBR</div><div data-hf-id="hf-h00s" id="h-b7" class="abs d out" style="left:-30px;top:1740px;font-size:200px;white-space:nowrap;">FPS FPS</div>
+    <div data-hf-id="hf-maj4" id="h-band" class="abs" style="left:0;right:0;top:590px;height:380px;background:var(--ink);border-top:2px solid var(--line);border-bottom:2px solid var(--line)"></div>
+    <div data-hf-id="hf-mj9v" id="h-t1" class="abs d" style="left:54px;right:54px;top:612px;font-size:112px;line-height:1">¿Nunca has<br data-hf-id="hf-x5px"/>abierto <span data-hf-id="hf-kdcu" class="b">OBS?</span></div>
+    <div data-hf-id="hf-z253" id="h-t2" class="abs d" style="left:54px;right:54px;top:640px;font-size:112px;line-height:1;opacity:0">Solo sigue<br data-hf-id="hf-rsrt"/><span data-hf-id="hf-mffj" class="b">los pasos</span></div>
+    <div data-hf-id="hf-3k0m" id="h-cta" class="cta" style="left:0;top:1010px;width:1080px;height:190px;transform-origin:50% 50%"><span data-hf-id="hf-il53" class="d" style="font-size:96px">Empezar</span><span data-hf-id="hf-15l7" class="m" style="font-size:64px">→</span></div>
+    <svg data-hf-id="hf-tctv" id="h-cur" class="cursor" viewBox="0 0 24 24"><path data-hf-id="hf-yl27" d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    ['#h-b0', '#h-b2', '#h-b4', '#h-b6'].forEach((s) => tl.fromTo(s, { x: 0 }, { x: -230, duration: 1.5, ease: 'none' }, 0));
+    ['#h-b1', '#h-b3', '#h-b5', '#h-b7'].forEach((s) => tl.fromTo(s, { x: -260 }, { x: -30, duration: 1.5, ease: 'none' }, 0));
+    MO.blurOut(tl, '#h-t1', 1.18);
+    tl.to(['#h-b0', '#h-b1', '#h-b2', '#h-b3', '#h-b4', '#h-b5', '#h-b6', '#h-b7'], { opacity: 0, filter: 'blur(14px)', duration: 0.28, ease: 'power3.in' }, 1.2);
+    tl.to('#h-t2', { opacity: 1, duration: 0.01 }, 1.32);
+    tl.fromTo('#h-t2', { filter: 'blur(10px)' }, { filter: 'blur(0px)', duration: 0.2, ease: 'power2.out', immediateRender: false }, 1.32);
+    tl.fromTo('#h-cta', { y: 1000 }, { y: 0, duration: 0.5, ease: 'expo.out' }, 1.55);
+    MO.enter(tl, '#h-cur', 1.75, 1120, 1500, 610, 1105, 0.6);
+    MO.click(tl, '#h-cur', 2.42);
+    tl.to('#h-cur', { opacity: 0, duration: 0.1 }, 2.6);
+    tl.to('#h-cta', { scaleY: 11, duration: 0.42, ease: 'power3.in' }, 2.5);
+    tl.to('#h-cta span', { opacity: 0, duration: 0.14 }, 2.5);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>

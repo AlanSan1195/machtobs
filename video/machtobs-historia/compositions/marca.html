@@ -1,0 +1,32 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #m-w { left: 0; right: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; letter-spacing: -.078em; color: var(--ink); top: 710px; font-size: 128px; }
+    #m-eye { display: inline-grid; width: .82em; height: .82em; margin: 0 .06em 0 .11em; flex: none; border-radius: 50%; background: var(--paper); place-items: center; }
+    #m-eye img { width: .8em; height: .8em; display: block; }
+    #m-l { left: 0; right: 0; top: 880px; text-align: center; font-size: 60px; color: var(--ink); }
+    [data-width="1920"] #m-w { top: 360px; font-size: 250px; }
+    [data-width="1920"] #m-l { top: 660px; font-size: 76px; }
+  </style>
+  <div id="root" data-composition-id="marca" data-width="1080" data-height="1920">
+    <div class="stage">
+      <div class="rules"></div>
+      <div id="m-blue" class="full" style="background:var(--blue)"></div>
+      <div id="m-w" class="abs d"><span id="m-w1">Macht</span><span id="m-eye"><img src="assets/obs-eye.svg" alt="" /></span><span id="m-w2" class="out">bs</span></div>
+      <div id="m-l" class="abs d"><i>OBS</i> <i>fácil</i> <i>y</i> <i>paso</i> <i>a</i> <i>paso</i></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const L = MO.land('marca'), AX = L ? 900 : 60, AY = L ? 110 : 470, W = L ? 1920 : 1080, H = L ? 1080 : 1920;
+    gsap.set('#m-l i', { fontStyle: 'normal', display: 'inline-block' });
+    tl.fromTo('#m-w', { scale: 1.7, filter: 'blur(18px)', opacity: 0 }, { scale: 1, filter: 'blur(0px)', opacity: 1, duration: 0.34, ease: 'expo.out' }, 0);
+    tl.fromTo('#m-eye', { rotation: -360 }, { rotation: 0, duration: 0.7, ease: 'expo.out' }, 0.02);
+    tl.fromTo('#m-l i', { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.14, stagger: 0.06, ease: 'power2.out' }, 0.3);
+    MO.blurOut(tl, ['#m-w', '#m-l'], 2.18);
+    // el azul se recoge hasta ser el botón ENLAZAR de la escena siguiente
+    tl.fromTo('#m-blue', { clipPath: 'inset(0px 0px 0px 0px)' }, { clipPath: `inset(${AY + 600}px ${W - AX - 620}px ${H - AY - 780}px ${AX}px)`, duration: 0.46, ease: 'power3.inOut' }, 2.26);
+    window.__timelines["marca"] = tl;
+  </script>
+</template>

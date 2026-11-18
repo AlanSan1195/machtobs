@@ -538,7 +538,7 @@ describe('OBSManager con marcos de camara', () => {
       sceneName: 'Gameplay',
       cameraSceneItemId: 8,
       cameraInputName: 'Camara web',
-      config: { color: '#3A9BDC', thickness: 12, rounded: false },
+      config: { color: '#3A9BDC', thickness: 12, rounded: false, style: 'solid' },
     });
 
     expect(result).toMatchObject({
@@ -608,7 +608,7 @@ describe('OBSManager con marcos de camara', () => {
       sceneName: 'Gameplay',
       cameraSceneItemId: 8,
       cameraInputName: 'Camara web',
-      config: { color: '#FFFFFF', thickness: 20, rounded: false },
+      config: { color: '#FFFFFF', thickness: 20, rounded: false, style: 'solid' },
     });
 
     expect(result.success).toBe(true);
@@ -622,6 +622,55 @@ describe('OBSManager con marcos de camara', () => {
       },
       overlay: true,
     });
+  });
+
+  it('crea un marco neon como Browser Source con margen para el halo', async () => {
+    obsMock.call.mockImplementation(async (request: string, data?: Record<string, unknown>) => {
+      if (request === 'GetSceneItemTransform') {
+        return { sceneItemTransform: { positionX: 1500, positionY: 700, boundsWidth: 324, boundsHeight: 324 } };
+      }
+      if (request === 'GetSceneItemList') {
+        return { sceneItems: [{ sceneItemId: 8, sourceName: 'Camara web' }] };
+      }
+      if (request === 'GetInputKindList') {
+        return { inputKinds: ['color_source_v3', 'browser_source'] };
+      }
+      if (request === 'GetInputList') {
+        return { inputs: [{ inputName: 'Camara web' }] };
+      }
+      if (request === 'CreateInput') {
+        return { sceneItemId: 12 };
+      }
+      if (request === 'GetSceneItemIndex') {
+        return { sceneItemIndex: data?.sceneItemId === 12 ? 3 : 2 };
+      }
+      return {};
+    });
+
+    const manager = new OBSManager();
+    await manager.connect();
+    const result = await manager.setCameraFrame({
+      sceneName: 'Gameplay',
+      cameraSceneItemId: 8,
+      cameraInputName: 'Camara web',
+      config: { color: '#FF3EC8', thickness: 12, rounded: true, style: 'neon' },
+    });
+
+    expect(result).toMatchObject({ success: true, message: 'Marco neón aplicado', warnings: [] });
+    // grosor 12 + halo 18 = 30 px de margen por lado.
+    expect(obsMock.call).toHaveBeenCalledWith('CreateInput', expect.objectContaining({
+      inputKind: 'browser_source',
+      inputSettings: expect.objectContaining({
+        url: expect.stringMatching(/^data:text\/html/),
+        width: 384,
+        height: 384,
+      }),
+    }));
+    expect(obsMock.call).toHaveBeenCalledWith('SetSceneItemTransform', expect.objectContaining({
+      sceneItemId: 12,
+      sceneItemTransform: expect.objectContaining({ positionX: 1470, positionY: 670, boundsWidth: 384 }),
+    }));
+    expect(obsMock.call).toHaveBeenCalledWith('SetSceneItemIndex', { sceneName: 'Gameplay', sceneItemId: 12, sceneItemIndex: 2 });
   });
 
   it('reemplaza una Browser Source transparente por un marco sólido nativo', async () => {
@@ -665,14 +714,14 @@ describe('OBSManager con marcos de camara', () => {
       sceneName: 'Gameplay',
       cameraSceneItemId: 8,
       cameraInputName: 'Camara web',
-      config: { color: '#B58CFF', thickness: 16, rounded: true },
+      config: { color: '#B58CFF', thickness: 16, rounded: true, style: 'solid' },
     });
 
     expect(result).toMatchObject({
       success: true,
       frameInputName: 'Marco · Camara web',
       frameSceneItemId: 13,
-      warnings: ['OBS aplicó el marco sólido como recto porque Browser Source no está generando textura.'],
+      warnings: ['El marco sólido se aplica recto; elige Neón para esquinas redondeadas.'],
     });
     expect(obsMock.call).toHaveBeenCalledWith('RemoveInput', { inputName: 'Marco · Camara web' });
     expect(obsMock.call).toHaveBeenCalledWith('CreateInput', {

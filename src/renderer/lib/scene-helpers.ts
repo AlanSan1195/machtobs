@@ -110,3 +110,28 @@ export function hexToObsColor(hex: string): number {
   const blue = Number.parseInt(normalized.slice(4, 6), 16);
   return red + green * 256 + blue * 65_536 + 255 * 16_777_216;
 }
+
+// Halo exterior del marco neon (px). El marco crece este margen alrededor del borde.
+export function neonFrameGlow(thickness: number): number {
+  return Math.round(Math.max(16, thickness * 1.5));
+}
+
+// Pagina para Browser Source: un rectangulo con conic-gradient que gira (color
+// + destellos blancos) y un halo que pulsa. Va detras de la camara, asi que
+// solo se ve el borde. El color ya viene validado como #RRGGBB.
+export function buildNeonFrameUrl(config: { color: string; thickness: number; rounded: boolean }): string {
+  const glow = neonFrameGlow(config.thickness);
+  const color = config.color;
+  const radius = config.rounded ? Math.max(18, config.thickness * 2) : 0;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}
+.f{position:absolute;inset:${glow}px;border-radius:${radius}px;overflow:hidden;background:${color};
+box-shadow:0 0 ${Math.round(glow / 2)}px ${color},0 0 ${glow}px ${color};animation:p 2.6s ease-in-out infinite}
+.f::before{content:'';position:absolute;left:50%;top:50%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;
+background:conic-gradient(${color} 0deg,${color} 130deg,#fff 170deg,${color} 205deg,${color} 300deg,rgba(255,255,255,.75) 330deg,${color} 360deg);
+animation:s 3.2s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@keyframes p{50%{box-shadow:0 0 ${Math.round(glow / 4)}px ${color},0 0 ${Math.round(glow * 0.6)}px ${color}}}
+</style></head><body><div class="f"></div></body></html>`;
+  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+}

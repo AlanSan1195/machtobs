@@ -1,0 +1,83 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    .pane { position: absolute; left: 0; top: 0; width: 960px; height: 560px; }
+    .pane .row { height: 104px; color: var(--muted); }
+    .pane .row b { font-size: 54px; color: var(--paper); }
+    #a-p2 .row span { text-transform: none; letter-spacing: 0; }
+    #a-p2 .row em { font-style: normal; color: var(--blue); font-size: 52px; margin-right: 18px; }
+    #a-p3 .row { height: 138px; }
+    #a-p3 .row b { font-size: 50px; white-space: nowrap; }
+    #a-p3 .row b s { color: rgba(241,239,232,.45); font-weight: 500; text-decoration-thickness: 4px; }
+    #a-p3 .row b u { color: var(--warn); text-decoration: none; }
+    #a-rail { left: 0; top: 660px; width: 620px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    #a-rail i { height: 14px; background: rgba(241,239,232,.16); display: block; }
+  </style>
+  <div id="root" data-composition-id="analiza" data-width="1080" data-height="1920">
+    <div id="a-all" class="stage">
+      <div class="rules"></div>
+      <div class="say d" data-layout-allow-overlap>
+        <div id="a-t1"><i>Detecta</i><br/><i>tu</i> <i>equipo</i></div>
+        <div id="a-t2" class="tight"><i>Consulta</i><br/><i>fuentes</i><br/><i>oficiales</i></div>
+        <div id="a-t3"><i>Y</i> <i>te</i> <i>dice</i><br/><i>qué</i> <i>cambiar</i></div>
+      </div>
+      <div id="a-in" class="act">
+        <div class="bar"><div class="brand"><span class="eye"><img src="assets/obs-eye.svg" alt="" /></span>MACHT<span class="thin">OBS</span></div><div style="position:relative"><div id="a-nv1" class="nav"><span class="m ok">✓</span><span class="m on">02</span><span class="m">03</span><span class="m">04</span></div><div id="a-nv2" class="nav abs" style="left:0;top:0"><span class="m ok">✓</span><span class="m ok">✓</span><span class="m on">03</span><span class="m">04</span></div></div><div class="stat live m"><i></i>conectado</div></div>
+        <div id="a-p1" class="pane">
+          <div class="row m" style="top:96px"><span>mac</span><b>Apple M4</b></div>
+          <div class="row m" style="top:200px"><span>micrófono</span><b>FIFINE</b></div>
+          <div class="row m" style="top:304px"><span>monitor</span><b>LG OLED C2</b></div>
+          <div class="row m" style="top:408px"><span>audífonos</span><b>ASTRO A50 X</b></div>
+        </div>
+        <div id="a-p2" class="pane">
+          <div class="row m" style="top:96px"><span><em>✓</em>apple.com</span><span>10 núcleos · H.264 · HEVC</span></div>
+          <div class="row m" style="top:200px"><span><em>✓</em>fifinemicrophone.com</span><span>ficha oficial</span></div>
+          <div class="row m" style="top:304px"><span><em>✓</em>lg.com</span><span>4K · 120 Hz · HDMI 2.1</span></div>
+          <div class="row m" style="top:408px"><span><em>✓</em>logitechg.com</span><span>HDMI 2.1 · 4K 120 Hz</span></div>
+        </div>
+        <div id="a-p3" class="pane">
+          <div class="row m" style="top:96px"><span>FPS</span><b><s>30</s> → <u>60</u></b></div>
+          <div class="row m" style="top:234px"><span>Encoder</span><b><s>x264</s> → <u>Apple VT H.264</u></b></div>
+          <div class="row m" style="top:372px"><span>Bitrate</span><b><s>2500</s> → <u>6000 kbps</u></b></div>
+        </div>
+        <div id="a-rail" class="abs"><i></i><i></i><i></i><i></i></div>
+        <div id="a-cta" class="cta"><span class="m" style="font-size:64px;text-transform:none;letter-spacing:0;font-weight:700">./aplicar</span></div>
+        <svg id="a-cur" class="cursor" viewBox="0 0 24 24"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    gsap.set(['#a-p2', '#a-p3', '#a-cta', '#a-nv2', '#a-t2 i', '#a-t3 i'], { opacity: 0 });
+    tl.fromTo('#a-in', { y: 1500, filter: 'blur(18px)' }, { y: 0, filter: 'blur(0px)', duration: 0.3, ease: 'power3.out' }, 0);
+    // 1 · equipo detectado, una fila por pulso
+    MO.words(tl, '#a-t1', 0.06);
+    [0.3, 0.6, 0.86, 1.12].forEach((t, i) => {
+      tl.fromTo('#a-p1 .row:nth-child(' + (i + 1) + ')', { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.24, ease: 'expo.out' }, t);
+      tl.to('#a-rail i:nth-child(' + (i + 1) + ')', { backgroundColor: '#3a9bdc', duration: 0.1 }, t + 0.05);
+    });
+    // 2 · fuentes oficiales, cada visto en su pulso
+    MO.blurOut(tl, ['#a-p1', '#a-t1'], 1.58, 0.13);
+    MO.blurIn(tl, '#a-p2', 1.71, 0.14);
+    MO.words(tl, '#a-t2', 1.73);
+    tl.to('#a-rail i', { backgroundColor: 'rgba(241,239,232,.16)', duration: 0.1 }, 1.6);
+    [1.9, 2.2, 2.5, 2.8].forEach((t, i) => {
+      MO.pop(tl, '#a-p2 .row:nth-child(' + (i + 1) + ') em', t, 0.22);
+      tl.to('#a-rail i:nth-child(' + (i + 1) + ')', { backgroundColor: '#3a9bdc', duration: 0.1 }, t);
+    });
+    // 3 · qué cambiar y por qué valor
+    MO.blurOut(tl, ['#a-p2', '#a-t2', '#a-rail'], 3.3, 0.13);
+    tl.set('#a-nv1', { opacity: 0 }, 3.43).set('#a-nv2', { opacity: 1 }, 3.43);
+    tl.set('#a-p3', { opacity: 1 }, 3.43);
+    MO.words(tl, '#a-t3', 3.45);
+    [3.45, 3.86, 4.29].forEach((t, i) => {
+      tl.fromTo('#a-p3 .row:nth-child(' + (i + 1) + ')', { opacity: 0 }, { opacity: 1, duration: 0.12 }, t);
+      tl.fromTo('#a-p3 .row:nth-child(' + (i + 1) + ') u', { opacity: 0, scale: 1.5, display: 'inline-block' }, { opacity: 1, scale: 1, duration: 0.26, ease: 'back.out(2.5)' }, t + 0.1);
+    });
+    tl.fromTo('#a-cta', { opacity: 1, x: -1100 }, { opacity: 1, x: 0, duration: 0.4, ease: 'expo.out', immediateRender: false }, 4.45);
+    MO.enter(tl, '#a-cur', 4.6, 900, 1000, 380, 690, 0.55);
+    MO.click(tl, '#a-cur', 5.5);
+    window.__timelines["analiza"] = tl;
+  </script>
+</template>

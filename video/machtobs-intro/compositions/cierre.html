@@ -1,0 +1,34 @@
+<template>
+  <link rel="stylesheet" href="assets/machtobs.css" />
+  <style>#root { position: absolute; inset: 0; }</style>
+  <div data-hf-id="hf-mly1" id="root" data-composition-id="cierre" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-wtx7" id="f-stage" class="stage" style="background:var(--blue)">
+    <div data-hf-id="hf-pngk" id="f-a" class="abs d" style="left:54px;right:40px;top:640px;font-size:146px;line-height:1;color:var(--ink);white-space:nowrap">Listo.<br data-hf-id="hf-x5px"/>A stream</div>
+    <div data-hf-id="hf-50zo" id="f-ink" class="abs" style="left:0;right:0;top:0;bottom:0;background:var(--ink);opacity:0"><div data-hf-id="hf-e2xp" class="rules"></div></div>
+    <div data-hf-id="hf-ovxs" id="f-lk" class="abs" style="left:0;right:0;top:0;bottom:0;opacity:0">
+      <div data-hf-id="hf-q4ry" class="abs d" style="left:44px;top:440px;font-size:126px;letter-spacing:-.078em;display:flex;align-items:center;white-space:nowrap;line-height:.8">
+        <span data-hf-id="hf-3q6k" id="f-w1">Macht</span>
+        <span data-hf-id="hf-y3kf" id="f-eye" style="display:inline-grid;width:104px;height:104px;margin:0 8px 0 14px;flex:none;border-radius:50%;background:var(--paper);place-items:center;outline:4px solid var(--blue);outline-offset:6px"><img data-hf-id="hf-pmsk" src="assets/obs-eye.svg" alt="" style="width:100px;height:100px;display:block" /></span>
+        <span data-hf-id="hf-6co2" id="f-w2" class="out">bs</span>
+      </div>
+      <div data-hf-id="hf-xm50" id="f-s" class="abs d" style="left:54px;right:54px;top:660px;font-size:76px;line-height:1.02">No necesitas<br data-hf-id="hf-rsrt"/>saber OBS.<br data-hf-id="hf-szow"/><span data-hf-id="hf-uwzb" class="b">Solo seguir<br data-hf-id="hf-sldv"/>los pasos.</span></div>
+      <div data-hf-id="hf-ov23" id="f-cta" class="cta" style="left:0;top:1040px;width:1080px;height:170px"><span data-hf-id="hf-nwnc" class="d" style="font-size:88px">Empezar</span><span data-hf-id="hf-zjav" class="m" style="font-size:60px">→</span></div>
+      <div data-hf-id="hf-vm8w" id="f-u" class="abs m" style="left:54px;right:54px;top:1240px;text-align:center;font-size:40px;text-transform:none;letter-spacing:.02em">machtobs.vercel.app</div>
+    </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    MO.blurIn(tl, '#f-a', 0.04, 0.16);
+    tl.to('#f-a', { opacity: 0, filter: 'blur(10px)', duration: 0.12, ease: 'power2.in' }, 1.1);
+    tl.to('#f-ink', { opacity: 1, duration: 0.2, ease: 'power2.inOut' }, 1.12);
+    tl.to('#f-lk', { opacity: 1, duration: 0.01 }, 1.2);
+    tl.fromTo('#f-w1', { opacity: 0, filter: 'blur(10px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.2, ease: 'power2.out' }, 1.2);
+    tl.fromTo('#f-eye', { rotation: -360, scale: 0.4 }, { rotation: 0, scale: 1, duration: 0.6, ease: 'expo.out' }, 1.2);
+    tl.fromTo('#f-w2', { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.25, ease: 'expo.out' }, 1.25);
+    MO.blurIn(tl, '#f-s', 1.3);
+    tl.fromTo('#f-cta', { y: 1000 }, { y: 0, duration: 0.45, ease: 'expo.out' }, 1.3);
+    MO.blurIn(tl, '#f-u', 1.42);
+    window.__timelines["cierre"] = tl;
+  </script>
+</template>

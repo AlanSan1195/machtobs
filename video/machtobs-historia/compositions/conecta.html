@@ -1,0 +1,41 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #c-f { left: 0; top: 150px; width: 960px; height: 120px; border: 3px solid rgba(58,155,220,.7); display: flex; align-items: center; gap: 14px; padding: 0 30px; }
+    #c-f i { width: 20px; height: 20px; border-radius: 50%; background: var(--paper); display: block; }
+  </style>
+  <div id="root" data-composition-id="conecta" data-width="1080" data-height="1920">
+    <div class="stage">
+      <div class="rules"></div>
+      <div class="say d"><div id="c-t"><i>Conecta</i><br/><i>tu</i> <i>OBS</i></div></div>
+      <div id="c-in" class="act">
+        <div class="bar"><div class="brand"><span class="eye"><img src="assets/obs-eye.svg" alt="" /></span>MACHT<span class="thin">OBS</span></div><div class="nav"><span class="m on">01</span><span class="m">02</span><span class="m">03</span><span class="m">04</span></div><div id="c-s0" class="stat m"><i></i>sin conexión</div><div id="c-s1" class="stat live m abs" style="right:0"><i></i>conectado</div></div>
+        <div id="c-l" class="abs m" style="left:0;top:104px;color:var(--muted)">contraseña del servidor websocket</div>
+        <div id="c-f" class="abs"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div id="c-h" class="abs m" style="left:0;top:296px;text-transform:none;color:var(--muted)">ws://localhost:4455</div>
+        <div id="c-ok" class="abs d" style="left:0;top:372px;font-size:92px">OBS <span class="b">conectado</span></div>
+        <div id="c-cta" class="cta"><span class="d" style="font-size:88px">Enlazar</span><span class="m" style="font-size:60px">→</span></div>
+        <svg id="c-cur" class="cursor" viewBox="0 0 24 24"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    gsap.set(['#c-s1', '#c-ok'], { opacity: 0 });
+    MO.words(tl, '#c-t', 0.04);
+    MO.blurIn(tl, ['.bar', '#c-l', '#c-f', '#c-h'], 0, 0.16);
+    tl.fromTo('#c-f i', { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.045 }, 0.14);
+    MO.enter(tl, '#c-cur', 0.22, 760, 1000, 430, 680, 0.55);
+    MO.click(tl, '#c-cur', 0.86);
+    tl.to('#c-cta', { scale: 0.96, duration: 0.06 }, 0.86).to('#c-cta', { scale: 1, duration: 0.2, ease: 'back.out(3)' }, 0.92);
+    tl.set('#c-s0', { opacity: 0 }, 0.9).set('#c-s1', { opacity: 1 }, 0.9);
+    tl.to('#c-f', { borderColor: '#3a9bdc', duration: 0.1 }, 0.9);
+    tl.fromTo('#c-ok', { opacity: 0, scale: 1.25, transformOrigin: '0% 50%', filter: 'blur(10px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.26, ease: 'expo.out' }, 0.92);
+    tl.to('#c-cur', { opacity: 0, duration: 0.1 }, 1.5);
+    // salida en látigo hacia la izquierda
+    MO.blurOut(tl, '#c-t', 1.92);
+    tl.to('#c-in', { x: -1400, filter: 'blur(18px)', duration: 0.2, ease: 'power3.in' }, 1.94);
+    window.__timelines["conecta"] = tl;
+  </script>
+</template>

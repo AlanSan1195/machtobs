@@ -1,0 +1,84 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    .lb { left: 0; top: 86px; color: var(--muted); }
+    #s-pv { left: 0; top: 96px; width: 800px; height: 450px; background: #232830; border: 2px solid #3c404b; overflow: hidden; }
+    #s-sky { left: 0; top: 0; width: 800px; height: 270px; background: linear-gradient(180deg, #2d4f73 0%, #5b86a8 100%); }
+    #s-hill { left: -60px; top: 230px; width: 920px; height: 260px; background: #2f5d3a; border-radius: 50% 50% 0 0; }
+    #s-hud { left: 24px; top: 22px; padding: 6px 12px; background: rgba(9,10,10,.6); color: var(--paper); font-size: 28px; }
+    #s-fc { left: 560px; top: 248px; width: 220px; height: 182px; background: #e7e3d8; border: 4px solid var(--paper); overflow: hidden; }
+    #s-fct { left: 560px; top: 200px; padding: 4px 10px; background: var(--ink); color: var(--paper); font-size: 28px; text-transform: none; letter-spacing: 0; z-index: 2; }
+    #s-ok { left: 0; top: 572px; color: var(--blue); text-transform: none; letter-spacing: 0; font-size: 30px; white-space: nowrap; }
+    #s-go { left: 0; top: 640px; width: 620px; height: 160px; background: #3c404b; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: 700; border: 2px solid #6b7080; }
+    .lay { position: absolute; left: 50%; top: 40px; width: 150px; height: 84px; margin-left: -75px; border: 3px solid currentColor; }
+    .lay i { position: absolute; right: 8px; bottom: 8px; width: 46px; height: 36px; background: currentColor; display: block; }
+    .tile.big { flex-direction: column; justify-content: flex-end; padding-bottom: 26px; }
+  </style>
+  <div id="root" data-composition-id="escenas" data-width="1080" data-height="1920">
+    <div class="stage">
+      <div class="rules"></div>
+      <div class="say d"><div id="s-t"><i>Arma</i> <i>tu</i><br/><i>escena</i></div></div>
+      <div id="s-in" class="act">
+        <div class="bar"><div class="brand"><span class="eye"><img src="assets/obs-eye.svg" alt="" /></span>MACHT<span class="thin">OBS</span></div><div class="nav"><span class="m ok">✓</span><span class="m ok">✓</span><span class="m ok">✓</span><span class="m on">04</span></div><div class="stat live m"><i></i>conectado</div></div>
+        <div id="s-g1" class="abs" style="left:0;top:0;width:960px;height:480px">
+          <div class="abs m lb">agregar fuente</div>
+          <div id="s-cam" class="tile m" style="left:0;top:142px;width:304px;height:150px">cámara web</div>
+          <div class="tile m" style="left:328px;top:142px;width:304px;height:150px">pantalla<br/>completa</div>
+          <div class="tile m" style="left:656px;top:142px;width:304px;height:150px">ventana</div>
+          <div class="tile m" style="left:0;top:316px;width:304px;height:150px">consola</div>
+          <div class="tile m" style="left:328px;top:316px;width:304px;height:150px">imagen / logo</div>
+        </div>
+        <div id="s-g2" class="abs" style="left:0;top:0;width:960px;height:480px">
+          <div class="abs m lb">¿cómo la quieres?</div>
+          <div id="s-face" class="tile m big" style="left:0;top:142px;width:468px;height:220px"><span class="lay"><i></i></span>facecam</div>
+          <div class="tile m big" style="left:492px;top:142px;width:468px;height:220px"><span class="lay" style="background:currentColor"></span>pantalla completa</div>
+        </div>
+        <div id="s-pv" class="abs">
+          <div id="s-sky" class="abs"></div>
+          <div id="s-hill" class="abs"></div>
+          <div id="s-hud" class="abs m">pantalla</div>
+          <div id="s-fct" class="abs m">camStream</div>
+          <div id="s-fc" class="abs"><div id="s-n" class="nico" style="left:24px;top:14px;transform-origin:0 0"></div></div>
+        </div>
+        <div id="s-ok" class="abs m">✓ escena lista</div>
+        <div id="s-go" class="abs">Iniciar transmisión</div>
+        <svg id="s-cur" class="cursor" viewBox="0 0 24 24"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    MO.nico('s-n', 'smile');
+    gsap.set('#s-n', { scale: 0.43 });
+    gsap.set(['#s-g2', '#s-pv', '#s-fc', '#s-fct', '#s-ok', '#s-go'], { opacity: 0 });
+    tl.fromTo('#s-in', { x: 1400, filter: 'blur(18px)' }, { x: 0, filter: 'blur(0px)', duration: 0.3, ease: 'power3.out' }, 0);
+    MO.words(tl, '#s-t', 0.06);
+    // 1 · qué agregar: la cámara web (AddSourceWizard)
+    MO.enter(tl, '#s-cur', 0.1, 700, 900, 150, 220, 0.5);
+    MO.click(tl, '#s-cur', 0.9);
+    tl.to('#s-cam', { backgroundColor: '#3a9bdc', color: '#090a0a', borderColor: '#3a9bdc', duration: 0.08 }, 0.94);
+    // 2 · cómo: facecam
+    MO.blurOut(tl, '#s-g1', 1.25, 0.13);
+    MO.blurIn(tl, '#s-g2', 1.38, 0.14);
+    MO.move(tl, '#s-cur', 1.45, 230, 300, 0.55);
+    MO.click(tl, '#s-cur', 2.15);
+    tl.to('#s-face', { backgroundColor: '#3a9bdc', color: '#090a0a', borderColor: '#3a9bdc', duration: 0.08 }, 2.19);
+    // 3 · la escena armada, con Nico en su esquina
+    tl.to('#s-cur', { opacity: 0, duration: 0.1 }, 2.45);
+    MO.blurOut(tl, '#s-g2', 2.5, 0.13);
+    tl.fromTo('#s-pv', { opacity: 0, scale: 0.94, filter: 'blur(10px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out' }, 2.62);
+    MO.pop(tl, '#s-fc', 3.0, 0.3);
+    MO.blurIn(tl, '#s-fct', 3.2, 0.16);
+    MO.mood(tl, 's-n', 3.4, 'grin');
+    MO.pop(tl, '#s-ok', 3.6, 0.26);
+    MO.blink(tl, 's-n', 4.4);
+    // el botón de OBS que lo empieza todo
+    tl.fromTo('#s-go', { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.34, ease: 'expo.out' }, 5.08);
+    tl.set('#s-cur', { x: 1000, y: 1000 }, 5.02).to('#s-cur', { opacity: 1, duration: 0.05 }, 5.07);
+    MO.move(tl, '#s-cur', 5.12, 400, 720, 0.6);
+    MO.click(tl, '#s-cur', 6.22);
+    tl.to('#s-go', { backgroundColor: '#3a9bdc', borderColor: '#3a9bdc', color: '#090a0a', scale: 0.96, duration: 0.07 }, 6.24);
+    window.__timelines["escenas"] = tl;
+  </script>
+</template>

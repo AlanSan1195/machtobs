@@ -1,0 +1,59 @@
+<template>
+  <link rel="stylesheet" href="assets/historia.css" />
+  <style>
+    #root { position: absolute; inset: 0; }
+    #b-bar { left: 0; top: 30px; width: 960px; height: 124px; border: 6px solid var(--ink); display: flex; align-items: center; gap: 24px; padding: 0 30px; font-size: 56px; font-weight: 600; background: #fff; }
+    #b-q { white-space: pre; }
+    #b-q i { font-style: normal; }
+    #b-res { left: 0; top: 200px; width: 960px; height: 336px; border-left: 14px solid var(--blue); padding: 6px 0 0 34px; }
+    .sk { position: absolute; left: 0; height: 34px; background: rgba(9,10,10,.12); }
+  </style>
+  <div id="root" data-composition-id="busca" data-width="1080" data-height="1920">
+    <div class="stage paper">
+      <div class="rules dark"></div>
+      <div class="say d"><div id="b-t"><i>¿Y</i> <i>si</i> <i>hay</i><br/><i>algo</i> <i>más</i><br/><i>fácil?</i></div></div>
+      <div id="b-in" class="act">
+        <div id="b-bar" class="abs">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#090a0a" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+          <span id="b-q">configurar obs fácil</span>
+        </div>
+        <div id="b-res" class="abs">
+          <div class="m" style="text-transform:none;letter-spacing:0;font-size:32px">machtobs.vercel.app</div>
+          <div class="d" style="font-size:62px;margin-top:16px;text-decoration:underline;text-decoration-color:var(--blue);text-decoration-thickness:8px;text-underline-offset:10px">Configurar OBS fácil<br/>y paso a paso</div>
+          <div style="font-size:34px;line-height:1.25;margin-top:26px;color:rgba(9,10,10,.72)">Machtobs detecta tu equipo, recomienda un perfil, explica cada cambio y lo aplica solo con tu permiso.</div>
+        </div>
+        <div id="b-sk"><div class="sk" style="top:590px;width:560px"></div><div class="sk" style="top:644px;width:820px"></div><div class="sk" style="top:716px;width:480px"></div><div class="sk" style="top:770px;width:700px"></div></div>
+        <div id="b-n" class="nico" style="left:280px;top:480px;transform-origin:0 0"></div>
+        <div class="abs" style="left:-2400px;right:-2400px;top:800px;height:2400px;background:var(--ink)"><div class="rules"></div></div>
+        <svg id="b-cur" class="cursor" viewBox="0 0 24 24"><path d="M4 2.5 4 19.5 8.6 15.4 11.6 22 14.6 20.7 11.6 14.2 17.8 14.2Z" fill="#fff" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </div>
+      <div id="b-iris" class="full" style="background:var(--blue)"></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const L = MO.land('busca'), AX = L ? 900 : 60, AY = L ? 110 : 470;
+    const q = document.getElementById('b-q');
+    q.innerHTML = [...q.textContent].map((c) => '<i>' + c + '</i>').join('');
+    MO.nico('b-n', 'wow');
+    gsap.set('#b-n', { scale: 1.5, y: 460 });
+    gsap.set(['#b-res', '#b-sk'], { opacity: 0 });
+    gsap.set('#b-iris', { clipPath: `circle(0px at ${AX + 300}px ${AY + 330}px)` });
+    MO.blurIn(tl, '#b-bar', 0, 0.14);
+    MO.words(tl, '#b-t', 0.08);
+    tl.fromTo('#b-q i', { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.05 }, 0.12);
+    tl.to('#b-bar', { borderColor: '#3a9bdc', duration: 0.06 }, 1.2);
+    tl.fromTo('#b-res', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3, ease: 'expo.out' }, 1.3);
+    tl.fromTo('#b-sk', { opacity: 0 }, { opacity: 1, duration: 0.3 }, 1.4);
+    // Nico se asoma: lo encontró
+    tl.to('#b-n', { y: 0, duration: 0.5, ease: 'back.out(1.7)' }, 1.5);
+    MO.blink(tl, 'b-n', 2.3);
+    MO.enter(tl, '#b-cur', 2.0, 1100, 760, 300, 330, 0.75);
+    MO.mood(tl, 'b-n', 2.8, 'grin');
+    MO.click(tl, '#b-cur', 3.23);
+    MO.blurOut(tl, '#b-t', 3.1);
+    // iris desde el clic hacia el azul de la marca
+    tl.to('#b-iris', { clipPath: `circle(2400px at ${AX + 300}px ${AY + 330}px)`, duration: 0.2, ease: 'power2.in' }, 3.25);
+    window.__timelines["busca"] = tl;
+  </script>
+</template>
